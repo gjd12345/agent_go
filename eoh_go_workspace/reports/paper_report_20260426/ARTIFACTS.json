@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-04-26T02:04:43",
+  "source": "C:\\Users\\24294\\.trae\\Archive_2\\Archive_0422\\eoh_go_workspace\\reports\\tables\\eoh_grid_cleaned_summary_rc101_105\\clean_summary.json",
+  "outputs": [
+    "guarded_eoh_report.tex",
+    "figures/status_heatmap.svg",
+    "figures/outcome_counts.svg",
+    "figures/status_heatmap_table.tex",
+    "tables/top_improvements.tex",
+    "tables/summary_by_density.tex",
+    "tables/outcome_counts.tex",
+    "tables/repeat_validation.tex"
+  ]
+}

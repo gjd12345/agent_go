@@ -1,0 +1,77 @@
+{
+  "generated_at": "2026-04-26T00:47:07",
+  "entries": [
+    {
+      "name": "eoh_arrival_grid_flash_dynamic_filtered_rc102",
+      "type": "dir",
+      "category": "current_raw_eoh",
+      "files": 52,
+      "bytes": 1385516,
+      "last_write_iso": "2026-04-25T20:42:24",
+      "results_json": 1,
+      "partial_json": 1,
+      "markdown": 1,
+      "path": "eoh_go_workspace\\reports\\tables\\eoh_arrival_grid_flash_dynamic_filtered_rc102"
+    },
+    {
+      "name": "eoh_arrival_grid_flash_dynamic_filtered_rc103_105",
+      "type": "dir",
+      "category": "current_raw_eoh",
+      "files": 150,
+      "bytes": 4049496,
+      "last_write_iso": "2026-04-25T21:38:11",
+      "results_json": 1,
+      "partial_json": 1,
+      "markdown": 1,
+      "path": "eoh_go_workspace\\reports\\tables\\eoh_arrival_grid_flash_dynamic_filtered_rc103_105"
+    },
+    {
+      "name": "eoh_arrival_grid_flash_dynamic_full",
+      "type": "dir",
+      "category": "current_raw_eoh_rc101",
+      "files": 71,
+      "bytes": 1090376,
+      "last_write_iso": "2026-04-25T19:51:05",
+      "results_json": 1,
+      "partial_json": 4,
+      "markdown": 1,
+      "path": "eoh_go_workspace\\reports\\tables\\eoh_arrival_grid_flash_dynamic_full"
+    },
+    {
+      "name": "eoh_grid_cleaned_summary_rc101_105",
+      "type": "dir",
+      "category": "cleaned_summary",
+      "files": 5,
+      "bytes": 151684,
+      "last_write_iso": "2026-04-26T00:37:17",
+      "results_json": 0,
+      "partial_json": 0,
+      "markdown": 1,
+      "path": "eoh_go_workspace\\reports\\tables\\eoh_grid_cleaned_summary_rc101_105"
+    },
+    {
+      "name": "eoh_selected_repeats",
+      "type": "dir",
+      "category": "repeat_raw_eoh",
+      "files": 111,
+      "bytes": 1337579,
+      "last_write_iso": "2026-04-26T01:54:24",
+      "results_json": 95,
+      "partial_json": 16,
+      "markdown": 16,
+      "path": "eoh_go_workspace\\reports\\tables\\eoh_selected_repeats"
+    },
+    {
+      "name": "eoh_selected_repeats_summary_20260426",
+      "type": "dir",
+      "category": "repeat_summary",
+      "files": 4,
+      "bytes": 19373,
+      "last_write_iso": "2026-04-26T01:58:50",
+      "results_json": 1,
+      "partial_json": 0,
+      "markdown": 1,
+      "path": "eoh_go_workspace\\reports\\tables\\eoh_selected_repeats_summary_20260426"
+    }
+  ]
+}
