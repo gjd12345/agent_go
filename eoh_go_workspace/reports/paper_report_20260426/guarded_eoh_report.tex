@@ -1,0 +1,84 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\definecolor{improvedGreen}{HTML}{BFE6BF}
+\definecolor{tieGray}{HTML}{D9D9D9}
+\definecolor{worseRed}{HTML}{F2B8B8}
+\definecolor{excludedBlue}{HTML}{C9D8F0}
+\definecolor{excludedBrown}{HTML}{E0C4A2}
+\definecolor{excludedPurple}{HTML}{D8B8EA}
+\definecolor{excludedBlack}{HTML}{4B4B4B}
+\title{Guarded Evolution of Go Insertion Heuristics for Real-Time Dynamic Dispatch}
+\author{Automated draft from the EOH-Go experimental workspace}
+\date{2026-04-26}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report summarizes the current phase of the EOH-Go study, positioned as a follow-up to the real-time routing system studied in the reference paper on closed-campus pickup-and-delivery services. That paper defines response time as the interval between a newly revealed request state and the generation of a corresponding route, and evaluates algorithms jointly by response time (Res.) and objective value \(J\). Following this evaluation style, we ask whether a large-language-model-driven Evolution of Heuristics (EOH) loop can evolve executable Go insertion heuristics for dynamic dispatch. The experiment spans 75 density--arrival-scale cells from RC101--RC105. The main empirical finding is conditional: guarded EOH improves over the SA baseline in 16 cells, ties in 11 cells, and worsens in 16 cells, while 32 cells must be excluded due to missing or suspicious evaluations. These results support a guarded code-evolution workflow rather than an unfiltered claim that EOH universally dominates SA.
+\end{abstract}
+
+\section{Connection to the Reference Real-Time Routing Paper}
+The reference paper studies a closed-campus dynamic pickup-and-delivery setting with mixed delivery services, time-window constraints, and a real-time routing solver (RTRS). Its experimental logic is important for this work in three ways. First, it treats response time as an operational metric rather than a secondary implementation detail. Second, it reports both response time and route quality \(J\), usually in tables where the best and second-best values are identified. Third, it explicitly varies dynamic request proportions and hyperparameters to show that algorithmic behavior depends on the dynamic scenario.
+
+This report keeps that framing but changes the research question. Rather than manually designing a new RTRS variant, we study whether LLM-guided EOH can automatically synthesize the Go insertion heuristic used when new requests arrive. Thus, the baseline real-time routing code remains the environment and evaluator, while EOH becomes a code-level heuristic design mechanism.
+
+\section{Problem Setting}
+The target function is the Go method \texttt{InsertShips}, which updates a dispatch solution when dynamic requests arrive. The baseline is the existing SA executable. The EOH loop mutates Go code, compiles it, evaluates it under dynamic Solomon-style sources, and selects candidates. We vary two experimental factors: request density \(d\in\{d25,d50,d75\}\) and arrival scale \(t\in\{1.0,0.9,0.8,0.7,0.6\}\). Here, \(d\) follows the reference paper's dynamic-density idea, while \(t\) controls the arrival rhythm. As in the reference paper, the reported metrics are Res. and \(J\): Res. is the first feasible response time measured by the simulator, and \(J\) is the final route cost.
+
+\section{Method: Guarded EOH}
+The implemented workflow is:
+\[
+\text{SA seed} \rightarrow \text{LLM mutation} \rightarrow \text{Go compile} \rightarrow \text{dynamic simulation} \rightarrow \text{guard/filter} \rightarrow \text{cleaned report}.
+\]
+The guard is necessary because raw LLM code can exploit evaluator loopholes. We exclude candidates with missing SA or EOH values, negative EOH costs, and suspiciously low EOH costs below \(0.3\times\) the SA cost. The report keeps raw results for traceability, but the main comparisons use filtered results. This is a methodological difference from a hand-coded solver comparison: an automatic code-evolution loop must validate that a low \(J\) is caused by a better dispatch heuristic rather than by missing requests, early loop termination, invalid state, or parser artifacts.
+
+\section{Experimental Data and Cleaning Protocol}
+The active dataset contains 75 cells. After filtering, 43 cells remain as valid SA--EOH comparisons, while 32 cells are excluded. Table~\ref{tab:outcome-counts} gives the overall distribution.
+
+\input{tables/outcome_counts.tex}
+
+\section{Main Results}
+Table~\ref{tab:top-improvements} lists the strongest valid improvements. The best cells are concentrated in medium-density and selected high-density settings, rather than uniformly across the grid.
+
+\input{tables/top_improvements.tex}
+
+\input{tables/summary_by_density.tex}
+
+\input{figures/status_heatmap_table.tex}
+
+\section{Observations}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Conditional superiority.} EOH is useful in local regions of the density--arrival-scale grid. It is not a universal replacement for SA.
+  \item \textbf{Density sensitivity.} Several improvements occur at \(d50\), suggesting that balanced-density cases provide enough structure for LLM-generated insertion heuristics to improve the baseline.
+  \item \textbf{Guard necessity.} Excluded cells are not noise to hide; they are evidence that code-level heuristic evolution requires an evaluator guard. Negative or suspiciously low costs must not enter the main table.
+  \item \textbf{Runtime trade-off.} Many improved cells reduce \(J\) at the cost of slower response time. This supports reporting both Res and \(J\), rather than a single objective.
+  \item \textbf{Alignment with the reference paper.} Like the RTRS study, the results should be read as guidance for dynamic-scenario-dependent algorithm selection. Our current evidence is strongest for the claim that EOH can discover useful insertion heuristics in selected dynamic regimes, not that it always replaces the baseline.
+\end{enumerate}
+
+\section{Repeat Validation Plan}
+We repeated eight high-value improved cells twice with the same model and guard/filter pipeline. Table~\ref{tab:repeat-validation} shows that the initial improvements do not all replicate: several RC102/RC104 cells become ties or worse in the repeat runs. The strongest repeated evidence is concentrated in RC105 \(d50,t=0.9\) and RC105 \(d75,t=0.9/0.6\), where at least one repeat remains improved and the mean \(\Delta J\) stays negative for the two high-density cells. This supports a cautious conclusion: EOH can discover useful insertion heuristics, but stochastic code generation requires repeat validation before a cell is treated as stable.
+
+\input{tables/repeat_validation.tex}
+
+\section{Related Work}
+The immediate application context follows the reference paper's real-time dynamic pickup-and-delivery formulation and its dual emphasis on response time and route quality~\cite{campus}. This study is based on EOH~\cite{eoh}, and is methodologically close to LLM-assisted algorithm design frameworks such as LLM4AD~\cite{llm4ad}, FunSearch~\cite{funsearch}, and reflective evolutionary approaches such as ReEvo~\cite{reevo}. Our focus is narrower: executable Go heuristics for dynamic dispatch with guard-based evaluation.
+
+\section{Conclusion}
+The current evidence supports writing a focused paper on guarded EOH for dynamic Go dispatch. The contribution is not a new universal routing solver; it is an empirical and methodological demonstration that LLM-generated Go heuristics can improve selected dynamic dispatch regimes when paired with compilation, simulation, guard filtering, and cleaned reporting.
+
+\begin{thebibliography}{9}
+\bibitem{campus} Reference manuscript: \textit{Application of Real-Time Routing and Concurrent Computing in Closed Commercial Park Delivery Services}. Local file: \texttt{second\_paper\_cn.pdf}.
+\bibitem{eoh} Fei Liu et al. \textit{Evolution of Heuristics: Towards Efficient Automatic Algorithm Design Using Large Language Model}. ICML 2024. \url{https://arxiv.org/abs/2401.02051}.
+\bibitem{llm4ad} LLM4AD project. \url{https://arxiv.org/abs/2412.17287}.
+\bibitem{funsearch} Bernardino Romera-Paredes et al. \textit{Mathematical discoveries from program search with large language models}. Nature, 2023. \url{https://www.nature.com/articles/s41586-023-06924-6}.
+\bibitem{reevo} ReEvo: Reflective Evolution. \url{https://arxiv.org/abs/2402.01145}.
+\end{thebibliography}
+
+\end{document}

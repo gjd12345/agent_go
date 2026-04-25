@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering
+\caption{Repeat validation on selected high-value improved cells. Each cell was rerun twice with the same model and guard/filter pipeline.}
+\label{tab:repeat-validation}
+\small
+\begin{tabular}{llrrrrrr}
+\toprule
+Inst. & Cell & Runs & Improved & Tie & Worse & Excl. & Mean $\Delta J$ \\
+\midrule
+RC102 & d50, t=0.7 & 2 & 0 & 1 & 1 & 0 & 358.54 \\
+RC102 & d75, t=1.0 & 2 & 0 & 1 & 0 & 1 & 0.00 \\
+RC104 & d50, t=0.6 & 2 & 0 & 0 & 2 & 0 & 138.02 \\
+RC104 & d50, t=0.8 & 2 & 0 & 1 & 1 & 0 & 10.70 \\
+RC104 & d75, t=0.8 & 2 & 0 & 2 & 0 & 0 & 0.00 \\
+RC105 & d50, t=0.9 & 2 & 1 & 1 & 0 & 0 & -17.57 \\
+RC105 & d75, t=0.6 & 2 & 1 & 1 & 0 & 0 & -42.00 \\
+RC105 & d75, t=0.9 & 2 & 1 & 1 & 0 & 0 & -13.00 \\
+\bottomrule
+\end{tabular}
+\end{table}

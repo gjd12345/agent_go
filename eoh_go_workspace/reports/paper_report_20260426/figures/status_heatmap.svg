@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="578" height="906" viewBox="0 0 578 906">
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#202020}.small{font-size:12px}.label{font-size:13px;font-weight:600}.title{font-size:18px;font-weight:700}.cell{stroke:#ffffff;stroke-width:2}</style>
+<text x="20" y="32" class="title">Guarded EOH outcomes over density and arrival scale</text>
+<text x="20" y="52" class="small">I=improved, T=tie, W=worse, X*=excluded by guard or missing evaluation</text>
+<rect x="403" y="58" width="16" height="16" fill="#58a55c"/>
+<text x="427" y="71" class="small">I: improved</text>
+<rect x="403" y="82" width="16" height="16" fill="#b8b8b8"/>
+<text x="427" y="95" class="small">T: tie</text>
+<rect x="403" y="106" width="16" height="16" fill="#d95f5f"/>
+<text x="427" y="119" class="small">W: worse</text>
+<rect x="403" y="130" width="16" height="16" fill="#8ea7d8"/>
+<text x="427" y="143" class="small">Xsa: excluded_no_sa</text>
+<rect x="403" y="154" width="16" height="16" fill="#c69c6d"/>
+<text x="427" y="167" class="small">Xe: excluded_no_eoh</text>
+<rect x="403" y="178" width="16" height="16" fill="#a574c7"/>
+<text x="427" y="191" class="small">Xs: excluded_suspicious_low</text>
+<rect x="403" y="202" width="16" height="16" fill="#4b4b4b"/>
+<text x="427" y="215" class="small">Xn: excluded_negative_eoh</text>
+<text x="20" y="87" class="label">RC101</text>
+<text x="107.0" y="87" text-anchor="middle" class="small">t=1.0</text>
+<text x="165.0" y="87" text-anchor="middle" class="small">t=0.9</text>
+<text x="223.0" y="87" text-anchor="middle" class="small">t=0.8</text>
+<text x="281.0" y="87" text-anchor="middle" class="small">t=0.7</text>
+<text x="339.0" y="87" text-anchor="middle" class="small">t=0.6</text>
+<text x="34" y="118" class="small">d25</text>
+<rect class="cell" x="78" y="98" width="58" height="30" fill="#58a55c"/>
+<text x="107.0" y="118" text-anchor="middle" class="small">I</text>
+<rect class="cell" x="136" y="98" width="58" height="30" fill="#a574c7"/>
+<text x="165.0" y="118" text-anchor="middle" class="small">Xs</text>
+<rect class="cell" x="194" y="98" width="58" height="30" fill="#a574c7"/>
+<text x="223.0" y="118" text-anchor="middle" class="small">Xs</text>
+<rect class="cell" x="252" y="98" width="58" height="30" fill="#a574c7"/>
+<text x="281.0" y="118" text-anchor="middle" class="small">Xs</text>
+<rect class="cell" x="310" y="98" width="58" height="30" fill="#58a55c"/>
+<text x="339.0" y="118" text-anchor="middle" class="small">I</text>
+<text x="34" y="148" class="small">d50</text>
+<rect class="cell" x="78" y="128" width="58" height="30" fill="#58a55c"/>
+<text x="107.0" y="148" text-anchor="middle" class="small">I</text>
+<rect class="cell" x="136" y="128" width="58" height="30" fill="#58a55c"/>
+<text x="165.0" y="148" text-anchor="middle" class="small">I</text>
+<rect class="cell" x="194" y="128" width="58" height="30" fill="#a574c7"/>
+<text x="223.0" y="148" text-anchor="middle" class="small">Xs</text>
+<rect class="cell" x="252" y="128" width="58" height="30" fill="#a574c7"/>
+<text x="281.0" y="148" text-anchor="middle" class="small">Xs</text>
+<rect class="cell" x="310" y="128" width="58" height="30" fill="#a574c7"/>
+<text x="339.0" y="148" text-anchor="middle" class="small">Xs</text>
+<text x="34" y="178" class="small">d75</text>
+<rect class="cell" x="78" y="158" width="58" height="30" fill="#b8b8b8"/>
+<text x="107.0" y="178" text-anchor="middle" class="small">T</text>
+<rect class="cell" x="136" y="158" width="58" height="30" fill="#58a55c"/>
+<text x="165.0" y="178" text-anchor="middle" class="small">I</text>
+<rect class="cell" x="194" y="158" width="58" height="30" fill="#a574c7"/>
+<text x="223.0" y="178" text-anchor="middle" class="small">Xs</text>
+<rect class="cell" x="252" y="158" width="58" height="30" fill="#a574c7"/>
+<text x="281.0" y="178" text-anchor="middle" class="small">Xs</text>
+<rect class="cell" x="310" y="158" width="58" height="30" fill="#a574c7"/>
+<text x="339.0" y="178" text-anchor="middle" class="small">Xs</text>
+<text x="20" y="245" class="label">RC102</text>
+<text x="107.0" y="245" text-anchor="middle" class="small">t=1.0</text>
+<text x="165.0" y="245" text-anchor="middle" class="small">t=0.9</text>
+<text x="223.0" y="245" text-anchor="middle" class="small">t=0.8</text>
+<text x="281.0" y="245" text-anchor="middle" class="small">t=0.7</text>
+<text x="339.0" y="245" text-anchor="middle" class="small">t=0.6</text>
+<text x="34" y="276" class="small">d25</text>
+<rect class="cell" x="78" y="256" width="58" height="30" fill="#b8b8b8"/>
+<text x="107.0" y="276" text-anchor="middle" class="small">T</text>
+<rect class="cell" x="136" y="256" width="58" height="30" fill="#c69c6d"/>
+<text x="165.0" y="276" text-anchor="middle" class="small">Xe</text>
+<rect class="cell" x="194" y="256" width="58" height="30" fill="#d95f5f"/>
+<text x="223.0" y="276" text-anchor="middle" class="small">W</text>
+<rect class="cell" x="252" y="256" width="58" height="30" fill="#b8b8b8"/>
+<text x="281.0" y="276" text-anchor="middle" class="small">T</text>
+<rect class="cell" x="310" y="256" width="58" height="30" fill="#c69c6d"/>
+<text x="339.0" y="276" text-anchor="middle" class="small">Xe</text>
+<text x="34" y="306" class="small">d50</text>
+<rect class="cell" x="78" y="286" width="58" height="30" fill="#d95f5f"/>
+<text x="107.0" y="306" text-anchor="middle" class="small">W</text>
+<rect class="cell" x="136" y="286" width="58" height="30" fill="#58a55c"/>
+<text x="165.0" y="306" text-anchor="middle" class="small">I</text>
+<rect class="cell" x="194" y="286" width="58" height="30" fill="#d95f5f"/>
+<text x="223.0" y="306" text-anchor="middle" class="small">W</text>
+<rect class="cell" x="252" y="286" width="58" height="30" fill="#58a55c"/>
+<text x="281.0" y="306" text-anchor="middle" class="small">I</text>
+<rect class="cell" x="310" y="286" width="58" height="30" fill="#d95f5f"/>
+<text x="339.0" y="306" text-anchor="middle" class="small">W</text>
+<text x="34" y="336" class="small">d75</text>
+<rect class="cell" x="78" y="316" width="58" height="30" fill="#58a55c"/>
+<text x="107.0" y="336" text-anchor="middle" class="small">I</text>
+<rect class="cell" x="136" y="316" width="58" height="30" fill="#c69c6d"/>
+<text x="165.0" y="336" text-anchor="middle" class="small">Xe</text>
+<rect class="cell" x="194" y="316" width="58" height="30" fill="#c69c6d"/>
+<text x="223.0" y="336" text-anchor="middle" class="small">Xe</text>
+<rect class="cell" x="252" y="316" width="58" height="30" fill="#b8b8b8"/>
+<text x="281.0" y="336" text-anchor="middle" class="small">T</text>
+<rect class="cell" x="310" y="316" width="58" height="30" fill="#c69c6d"/>
+<text x="339.0" y="336" text-anchor="middle" class="small">Xe</text>
+<text x="20" y="403" class="label">RC103</text>
+<text x="107.0" y="403" text-anchor="middle" class="small">t=1.0</text>
+<text x="165.0" y="403" text-anchor="middle" class="small">t=0.9</text>
+<text x="223.0" y="403" text-anchor="middle" class="small">t=0.8</text>
+<text x="281.0" y="403" text-anchor="middle" class="small">t=0.7</text>
+<text x="339.0" y="403" text-anchor="middle" class="small">t=0.6</text>
+<text x="34" y="434" class="small">d25</text>
+<rect class="cell" x="78" y="414" width="58" height="30" fill="#8ea7d8"/>
+<text x="107.0" y="434" text-anchor="middle" class="small">Xsa</text>
+<rect class="cell" x="136" y="414" width="58" height="30" fill="#8ea7d8"/>
+<text x="165.0" y="434" text-anchor="middle" class="small">Xsa</text>
+<rect class="cell" x="194" y="414" width="58" height="30" fill="#8ea7d8"/>
+<text x="223.0" y="434" text-anchor="middle" class="small">Xsa</text>
+<rect class="cell" x="252" y="414" width="58" height="30" fill="#8ea7d8"/>
+<text x="281.0" y="434" text-anchor="middle" class="small">Xsa</text>
+<rect class="cell" x="310" y="414" width="58" height="30" fill="#8ea7d8"/>
+<text x="339.0" y="434" text-anchor="middle" class="small">Xsa</text>
+<text x="34" y="464" class="small">d50</text>
+<rect class="cell" x="78" y="444" width="58" height="30" fill="#8ea7d8"/>
+<text x="107.0" y="464" text-anchor="middle" class="small">Xsa</text>
+<rect class="cell" x="136" y="444" width="58" height="30" fill="#8ea7d8"/>
+<text x="165.0" y="464" text-anchor="middle" class="small">Xsa</text>
+<rect class="cell" x="194" y="444" width="58" height="30" fill="#8ea7d8"/>
+<text x="223.0" y="464" text-anchor="middle" class="small">Xsa</text>
+<rect class="cell" x="252" y="444" width="58" height="30" fill="#8ea7d8"/>
+<text x="281.0" y="464" text-anchor="middle" class="small">Xsa</text>
+<rect class="cell" x="310" y="444" width="58" height="30" fill="#8ea7d8"/>
+<text x="339.0" y="464" text-anchor="middle" class="small">Xsa</text>
+<text x="34" y="494" class="small">d75</text>
+<rect class="cell" x="78" y="474" width="58" height="30" fill="#d95f5f"/>
+<text x="107.0" y="494" text-anchor="middle" class="small">W</text>
+<rect class="cell" x="136" y="474" width="58" height="30" fill="#4b4b4b"/>
+<text x="165.0" y="494" text-anchor="middle" class="small">Xn</text>
+<rect class="cell" x="194" y="474" width="58" height="30" fill="#b8b8b8"/>
+<text x="223.0" y="494" text-anchor="middle" class="small">T</text>
+<rect class="cell" x="252" y="474" width="58" height="30" fill="#4b4b4b"/>
+<text x="281.0" y="494" text-anchor="middle" class="small">Xn</text>
+<rect class="cell" x="310" y="474" width="58" height="30" fill="#d95f5f"/>
+<text x="339.0" y="494" text-anchor="middle" class="small">W</text>
+<text x="20" y="561" class="label">RC104</text>
+<text x="107.0" y="561" text-anchor="middle" class="small">t=1.0</text>
+<text x="165.0" y="561" text-anchor="middle" class="small">t=0.9</text>
+<text x="223.0" y="561" text-anchor="middle" class="small">t=0.8</text>
+<text x="281.0" y="561" text-anchor="middle" class="small">t=0.7</text>
+<text x="339.0" y="561" text-anchor="middle" class="small">t=0.6</text>
+<text x="34" y="592" class="small">d25</text>
+<rect class="cell" x="78" y="572" width="58" height="30" fill="#d95f5f"/>
+<text x="107.0" y="592" text-anchor="middle" class="small">W</text>
+<rect class="cell" x="136" y="572" width="58" height="30" fill="#d95f5f"/>
+<text x="165.0" y="592" text-anchor="middle" class="small">W</text>
+<rect class="cell" x="194" y="572" width="58" height="30" fill="#b8b8b8"/>
+<text x="223.0" y="592" text-anchor="middle" class="small">T</text>
+<rect class="cell" x="252" y="572" width="58" height="30" fill="#b8b8b8"/>
+<text x="281.0" y="592" text-anchor="middle" class="small">T</text>
+<rect class="cell" x="310" y="572" width="58" height="30" fill="#b8b8b8"/>
+<text x="339.0" y="592" text-anchor="middle" class="small">T</text>
+<text x="34" y="622" class="small">d50</text>
+<rect class="cell" x="78" y="602" width="58" height="30" fill="#c69c6d"/>
+<text x="107.0" y="622" text-anchor="middle" class="small">Xe</text>
+<rect class="cell" x="136" y="602" width="58" height="30" fill="#c69c6d"/>
+<text x="165.0" y="622" text-anchor="middle" class="small">Xe</text>
+<rect class="cell" x="194" y="602" width="58" height="30" fill="#58a55c"/>
+<text x="223.0" y="622" text-anchor="middle" class="small">I</text>
+<rect class="cell" x="252" y="602" width="58" height="30" fill="#d95f5f"/>
+<text x="281.0" y="622" text-anchor="middle" class="small">W</text>
+<rect class="cell" x="310" y="602" width="58" height="30" fill="#58a55c"/>
+<text x="339.0" y="622" text-anchor="middle" class="small">I</text>
+<text x="34" y="652" class="small">d75</text>
+<rect class="cell" x="78" y="632" width="58" height="30" fill="#d95f5f"/>
+<text x="107.0" y="652" text-anchor="middle" class="small">W</text>
+<rect class="cell" x="136" y="632" width="58" height="30" fill="#b8b8b8"/>
+<text x="165.0" y="652" text-anchor="middle" class="small">T</text>
+<rect class="cell" x="194" y="632" width="58" height="30" fill="#58a55c"/>
+<text x="223.0" y="652" text-anchor="middle" class="small">I</text>
+<rect class="cell" x="252" y="632" width="58" height="30" fill="#58a55c"/>
+<text x="281.0" y="652" text-anchor="middle" class="small">I</text>
+<rect class="cell" x="310" y="632" width="58" height="30" fill="#58a55c"/>
+<text x="339.0" y="652" text-anchor="middle" class="small">I</text>
+<text x="20" y="719" class="label">RC105</text>
+<text x="107.0" y="719" text-anchor="middle" class="small">t=1.0</text>
+<text x="165.0" y="719" text-anchor="middle" class="small">t=0.9</text>
+<text x="223.0" y="719" text-anchor="middle" class="small">t=0.8</text>
+<text x="281.0" y="719" text-anchor="middle" class="small">t=0.7</text>
+<text x="339.0" y="719" text-anchor="middle" class="small">t=0.6</text>
+<text x="34" y="750" class="small">d25</text>
+<rect class="cell" x="78" y="730" width="58" height="30" fill="#d95f5f"/>
+<text x="107.0" y="750" text-anchor="middle" class="small">W</text>
+<rect class="cell" x="136" y="730" width="58" height="30" fill="#d95f5f"/>
+<text x="165.0" y="750" text-anchor="middle" class="small">W</text>
+<rect class="cell" x="194" y="730" width="58" height="30" fill="#b8b8b8"/>
+<text x="223.0" y="750" text-anchor="middle" class="small">T</text>
+<rect class="cell" x="252" y="730" width="58" height="30" fill="#b8b8b8"/>
+<text x="281.0" y="750" text-anchor="middle" class="small">T</text>
+<rect class="cell" x="310" y="730" width="58" height="30" fill="#d95f5f"/>
+<text x="339.0" y="750" text-anchor="middle" class="small">W</text>
+<text x="34" y="780" class="small">d50</text>
+<rect class="cell" x="78" y="760" width="58" height="30" fill="#d95f5f"/>
+<text x="107.0" y="780" text-anchor="middle" class="small">W</text>
+<rect class="cell" x="136" y="760" width="58" height="30" fill="#58a55c"/>
+<text x="165.0" y="780" text-anchor="middle" class="small">I</text>
+<rect class="cell" x="194" y="760" width="58" height="30" fill="#c69c6d"/>
+<text x="223.0" y="780" text-anchor="middle" class="small">Xe</text>
+<rect class="cell" x="252" y="760" width="58" height="30" fill="#c69c6d"/>
+<text x="281.0" y="780" text-anchor="middle" class="small">Xe</text>
+<rect class="cell" x="310" y="760" width="58" height="30" fill="#c69c6d"/>
+<text x="339.0" y="780" text-anchor="middle" class="small">Xe</text>
+<text x="34" y="810" class="small">d75</text>
+<rect class="cell" x="78" y="790" width="58" height="30" fill="#d95f5f"/>
+<text x="107.0" y="810" text-anchor="middle" class="small">W</text>
+<rect class="cell" x="136" y="790" width="58" height="30" fill="#58a55c"/>
+<text x="165.0" y="810" text-anchor="middle" class="small">I</text>
+<rect class="cell" x="194" y="790" width="58" height="30" fill="#d95f5f"/>
+<text x="223.0" y="810" text-anchor="middle" class="small">W</text>
+<rect class="cell" x="252" y="790" width="58" height="30" fill="#a574c7"/>
+<text x="281.0" y="810" text-anchor="middle" class="small">Xs</text>
+<rect class="cell" x="310" y="790" width="58" height="30" fill="#58a55c"/>
+<text x="339.0" y="810" text-anchor="middle" class="small">I</text>
+</svg>

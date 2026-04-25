@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="360" viewBox="0 0 820 360">
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#202020}.small{font-size:12px}.label{font-size:13px;font-weight:600}.title{font-size:18px;font-weight:700}.cell{stroke:#ffffff;stroke-width:2}</style>
+<text x="20" y="34" class="title">Outcome counts after guard/filter cleaning</text>
+<line x1="70" y1="290" x2="790" y2="290" stroke="#222"/>
+<rect x="70" y="60.0" width="70" height="230.0" fill="#58a55c"/>
+<text x="105.0" y="52.0" text-anchor="middle" class="label">16</text>
+<text x="105.0" y="310" text-anchor="middle" class="small">I</text>
+<rect x="168" y="131.875" width="70" height="158.125" fill="#b8b8b8"/>
+<text x="203.0" y="123.875" text-anchor="middle" class="label">11</text>
+<text x="203.0" y="310" text-anchor="middle" class="small">T</text>
+<rect x="266" y="60.0" width="70" height="230.0" fill="#d95f5f"/>
+<text x="301.0" y="52.0" text-anchor="middle" class="label">16</text>
+<text x="301.0" y="310" text-anchor="middle" class="small">W</text>
+<rect x="364" y="146.25" width="70" height="143.75" fill="#8ea7d8"/>
+<text x="399.0" y="138.25" text-anchor="middle" class="label">10</text>
+<text x="399.0" y="310" text-anchor="middle" class="small">Xsa</text>
+<rect x="462" y="146.25" width="70" height="143.75" fill="#c69c6d"/>
+<text x="497.0" y="138.25" text-anchor="middle" class="label">10</text>
+<text x="497.0" y="310" text-anchor="middle" class="small">Xe</text>
+<rect x="560" y="146.25" width="70" height="143.75" fill="#a574c7"/>
+<text x="595.0" y="138.25" text-anchor="middle" class="label">10</text>
+<text x="595.0" y="310" text-anchor="middle" class="small">Xs</text>
+<rect x="658" y="261.25" width="70" height="28.75" fill="#4b4b4b"/>
+<text x="693.0" y="253.25" text-anchor="middle" class="label">2</text>
+<text x="693.0" y="310" text-anchor="middle" class="small">Xn</text>
+</svg>
