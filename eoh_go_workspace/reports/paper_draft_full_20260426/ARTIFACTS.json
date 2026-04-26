@@ -1,0 +1,23 @@
+{
+  "tex": "C:\\Users\\24294\\.trae\\Archive_2\\Archive_0422\\_github_agent_go_minimal\\eoh_go_workspace\\reports\\paper_draft_full_20260426\\guarded_eoh_go_full_draft_cn.tex",
+  "markdown": "C:\\Users\\24294\\.trae\\Archive_2\\Archive_0422\\_github_agent_go_minimal\\eoh_go_workspace\\reports\\paper_draft_full_20260426\\paper_body_summary_cn.md",
+  "figures": [
+    "table3_valid_sa_eoh_comparison.png",
+    "table4_repeat_validation.png",
+    "01_outcome_counts.png",
+    "02_outcome_by_density.png",
+    "03_mean_delta_by_density.png",
+    "04_delta_j_heatmap_all_valid.png",
+    "06_sa_vs_eoh_j_scatter.png",
+    "07_sa_vs_eoh_res_scatter.png",
+    "08_sorted_delta_j_all_valid.png",
+    "09_quality_time_tradeoff.png",
+    "10_valid_candidates_by_outcome.png",
+    "11_repeat_validation_delta_j.png",
+    "05_delta_j_heatmap_rc101.png",
+    "05_delta_j_heatmap_rc102.png",
+    "05_delta_j_heatmap_rc103.png",
+    "05_delta_j_heatmap_rc104.png",
+    "05_delta_j_heatmap_rc105.png"
+  ]
+}

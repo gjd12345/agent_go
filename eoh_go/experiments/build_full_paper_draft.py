@@ -1,0 +1,316 @@
+from __future__ import annotations
+
+import csv
+import json
+import shutil
+from collections import Counter
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT_DIR = ROOT / "eoh_go_workspace" / "reports" / "paper_draft_full_20260426"
+FIG_DIR = OUT_DIR / "figures"
+TABLE_FIG_DIR = ROOT / "eoh_go_workspace" / "reports" / "figures" / "paper_style_tables_20260426"
+CHART_DIR = ROOT / "eoh_go_workspace" / "reports" / "figures" / "valid_comparison_charts_20260426"
+VALID_CSV = ROOT / "eoh_go_workspace" / "reports" / "tables" / "eoh_grid_cleaned_summary_rc101_105" / "clean_valid_comparisons.csv"
+SUMMARY_JSON = ROOT / "eoh_go_workspace" / "reports" / "tables" / "eoh_grid_cleaned_summary_rc101_105" / "clean_summary.json"
+REPEAT_CSV = ROOT / "eoh_go_workspace" / "reports" / "tables" / "eoh_selected_repeats_summary_20260426" / "selected_repeat_summary.csv"
+
+
+MAIN_FIGURES = [
+    ("table3_valid_sa_eoh_comparison.png", TABLE_FIG_DIR / "table3_valid_sa_eoh_comparison.png"),
+    ("table4_repeat_validation.png", TABLE_FIG_DIR / "table4_repeat_validation.png"),
+    ("01_outcome_counts.png", CHART_DIR / "01_outcome_counts.png"),
+    ("02_outcome_by_density.png", CHART_DIR / "02_outcome_by_density.png"),
+    ("03_mean_delta_by_density.png", CHART_DIR / "03_mean_delta_by_density.png"),
+    ("04_delta_j_heatmap_all_valid.png", CHART_DIR / "04_delta_j_heatmap_all_valid.png"),
+    ("06_sa_vs_eoh_j_scatter.png", CHART_DIR / "06_sa_vs_eoh_j_scatter.png"),
+    ("07_sa_vs_eoh_res_scatter.png", CHART_DIR / "07_sa_vs_eoh_res_scatter.png"),
+    ("08_sorted_delta_j_all_valid.png", CHART_DIR / "08_sorted_delta_j_all_valid.png"),
+    ("09_quality_time_tradeoff.png", CHART_DIR / "09_quality_time_tradeoff.png"),
+    ("10_valid_candidates_by_outcome.png", CHART_DIR / "10_valid_candidates_by_outcome.png"),
+    ("11_repeat_validation_delta_j.png", CHART_DIR / "11_repeat_validation_delta_j.png"),
+    ("05_delta_j_heatmap_rc101.png", CHART_DIR / "05_delta_j_heatmap_rc101.png"),
+    ("05_delta_j_heatmap_rc102.png", CHART_DIR / "05_delta_j_heatmap_rc102.png"),
+    ("05_delta_j_heatmap_rc103.png", CHART_DIR / "05_delta_j_heatmap_rc103.png"),
+    ("05_delta_j_heatmap_rc104.png", CHART_DIR / "05_delta_j_heatmap_rc104.png"),
+    ("05_delta_j_heatmap_rc105.png", CHART_DIR / "05_delta_j_heatmap_rc105.png"),
+]
+
+
+def _read_csv(path: Path) -> list[dict[str, str]]:
+    with path.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
+def _num(value: object) -> float:
+    try:
+        return float(value)  # type: ignore[arg-type]
+    except Exception:
+        return 0.0
+
+
+def _copy_figures() -> None:
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    for name, src in MAIN_FIGURES:
+        if src.exists():
+            shutil.copy2(src, FIG_DIR / name)
+
+
+def _summary_numbers() -> dict[str, object]:
+    valid_rows = _read_csv(VALID_CSV)
+    repeat_rows = _read_csv(REPEAT_CSV)
+    full = json.loads(SUMMARY_JSON.read_text(encoding="utf-8"))
+    all_rows = full.get("rows", [])
+    counts = Counter(row.get("clean_class") for row in all_rows)
+    valid_counts = Counter(row["clean_class"] for row in valid_rows)
+    by_density: dict[str, Counter[str]] = {}
+    for row in valid_rows:
+        by_density.setdefault(row["density"], Counter())[row["clean_class"]] += 1
+    top = min(valid_rows, key=lambda row: _num(row["delta_J"]))
+    repeat_improved = [row for row in repeat_rows if int(row["improved"]) > 0]
+    repeat_negative = [row for row in repeat_rows if _num(row["mean_delta_J"]) < 0]
+    return {
+        "total_cells": len(all_rows),
+        "valid_cells": len(valid_rows),
+        "excluded_cells": len(all_rows) - len(valid_rows),
+        "valid_improved": valid_counts["improved"],
+        "valid_tie": valid_counts["tie"],
+        "valid_worse": valid_counts["worse"],
+        "excluded_no_sa": counts["excluded_no_sa"],
+        "excluded_no_eoh": counts["excluded_no_eoh"],
+        "excluded_suspicious_low": counts["excluded_suspicious_low"],
+        "excluded_negative_eoh": counts["excluded_negative_eoh"],
+        "d25_improved": by_density.get("d25", Counter())["improved"],
+        "d25_tie": by_density.get("d25", Counter())["tie"],
+        "d25_worse": by_density.get("d25", Counter())["worse"],
+        "d50_improved": by_density.get("d50", Counter())["improved"],
+        "d50_tie": by_density.get("d50", Counter())["tie"],
+        "d50_worse": by_density.get("d50", Counter())["worse"],
+        "d75_improved": by_density.get("d75", Counter())["improved"],
+        "d75_tie": by_density.get("d75", Counter())["tie"],
+        "d75_worse": by_density.get("d75", Counter())["worse"],
+        "best_inst": top["problem"].replace(".json", "").upper(),
+        "best_density": top["density"],
+        "best_t": f"{_num(top['arrival_scale']):.1f}",
+        "best_delta": f"{_num(top['delta_J']):.2f}",
+        "best_sa_j": f"{_num(top['seed_J']):.2f}",
+        "best_eoh_j": f"{_num(top['best_EOH_J']):.2f}",
+        "repeat_cells": len(repeat_rows),
+        "repeat_with_improved": len(repeat_improved),
+        "repeat_negative_mean": len(repeat_negative),
+    }
+
+
+def _fig(path: str, caption: str, label: str, width: str = r"0.96\textwidth") -> str:
+    return rf"""
+\begin{{figure}}[htbp]
+  \centering
+  \includegraphics[width={width}]{{\detokenize{{figures/{path}}}}}
+  \caption{{{caption}}}
+  \label{{{label}}}
+\end{{figure}}
+"""
+
+
+def _write_latex(stats: dict[str, object]) -> Path:
+    tex = rf"""\documentclass[UTF8,11pt]{{ctexart}}
+\usepackage[a4paper,margin=2.4cm]{{geometry}}
+\usepackage{{graphicx}}
+\usepackage{{booktabs}}
+\usepackage{{amsmath}}
+\usepackage{{amssymb}}
+\usepackage{{hyperref}}
+\usepackage{{float}}
+\usepackage{{enumitem}}
+\usepackage{{caption}}
+\usepackage{{longtable}}
+\usepackage{{array}}
+\usepackage{{xcolor}}
+\hypersetup{{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue}}
+\setlist[itemize]{{leftmargin=2em}}
+\setlist[enumerate]{{leftmargin=2em}}
+\captionsetup{{font=small,labelfont=bf}}
+
+\title{{面向实时动态调度的 Guarded EOH-Go 启发式代码进化研究}}
+\author{{EOH-Go 实验工作区整理稿}}
+\date{{2026年4月26日}}
+
+\begin{{document}}
+\maketitle
+
+\begin{{abstract}}
+封闭园区配送中的动态取送货问题要求系统在新请求到达后快速给出可行路线，同时尽可能降低最终调度成本。参考论文《实时路由与并发计算在封闭商业园区配送服务中的应用》将该类问题建模为具有时间窗约束的动态取送货问题，并以响应时间 Res. 与目标函数值 $J$ 共同评价实时路由算法。本文沿用这一评价口径，但研究对象从人工设计的实时路由求解器转向大语言模型驱动的启发式代码自动进化：我们使用 Evolution of Heuristics (EOH) 从 SA 基线的 Go 插入函数出发，自动生成和变异 \texttt{{InsertShips}} 代码，并通过 Go 编译、动态仿真和 evaluator guard 对候选代码进行筛选。
+
+最终实现的系统是一个小型 Guarded EOH-Go pipeline：SA seed、LLM mutation、Go code extraction、Go compile、dynamic source evaluation、candidate guard、filtered-best selection 和 cleaned reporting。实验覆盖 RC101--RC105、三种动态密度 $d\in\{{d25,d50,d75\}}$ 以及五种请求到达节奏 $t\in\{{1.0,0.9,0.8,0.7,0.6\}}$，共 {stats['total_cells']} 个 cell。清洗后得到 {stats['valid_cells']} 个有效 SA--EOH 对比，其中 EOH 改善 {stats['valid_improved']} 个、持平 {stats['valid_tie']} 个、变差 {stats['valid_worse']} 个；另有 {stats['excluded_cells']} 个 cell 因无有效输出、负值或 suspicious-low 结果被排除。结果表明，EOH-Go 不能被表述为全面优于 SA，但在部分密度和到达节奏下能够发现有效的 Go 插入启发式；同时，guard/filter 是 LLM 代码进化进入动态调度问题时不可省略的可信评估层。
+\end{{abstract}}
+
+\noindent\textbf{{关键词：}} 动态车辆路径；实时调度；Evolution of Heuristics；大语言模型；Go 代码进化；响应时间；evaluator guard
+
+\section{{引言}}
+动态车辆路径问题与静态车辆路径问题的核心差异在于，请求并不会在求解开始时全部已知，而是随着时间推进逐渐揭示。参考论文讨论的封闭商业园区配送场景同时包含快递包裹配送、上门收件和食品配送等服务类型，其中一部分请求具有严格时间窗，并且只有在服务过程中才会出现。对于这类系统，算法评价不能只看最终路径成本，还必须考虑从新请求到达到系统给出新路线之间的处理时间。参考论文因此将响应时间定义为系统状态发生变化后求解器生成相应新解所消耗的时间，并在实验表格中同时报告 Res. 与 $J$。
+
+本文的出发点与该参考论文一致：实时动态调度算法必须在质量与响应速度之间取得平衡。不同的是，参考论文主要研究人工设计的实时路由求解器、插入任务、优化任务、自适应内存和并发计算框架，而本文进一步追问：在已有 Go 调度程序和 SA 插入基线的基础上，大语言模型是否能够自动进化出更好的插入启发式代码？换言之，本文关注的不是重新设计整个实时路由系统，而是把实时系统中新请求到达时最关键的插入函数 \texttt{{InsertShips}} 作为代码进化目标，让 LLM 在 EOH 框架下生成、变异、编译并评估候选 Go 代码。
+
+这一路线的吸引力在于，动态路由问题高度依赖场景，手工设计一个在所有密度、时间节奏和实例上都表现稳定的插入启发式非常困难。参考论文也强调不同动态比例会对应不同类型的园区场景，因此算法表现需要分场景比较。EOH 提供了一种可能性：不预设唯一的通用启发式，而是在给定数据分布和评价器下自动搜索可执行代码。然而，这种方法也带来新的风险。LLM 生成的是可执行程序，而不是受限的参数向量；如果评价器存在漏洞，进化过程可能主动利用漏洞，例如漏单、提前退出、输出异常低成本或触发解析错误。因此，本文最终实现的重点不是 ``让 LLM 写一段看似聪明的代码''，而是建立一条可复现、可过滤、可审计的 Guarded EOH-Go 实验链路。
+
+本文贡献可以概括为三点。第一，将 EOH 从常见的 Python 或伪代码启发式生成迁移到 Go 实时动态调度代码生成，评价对象是可编译、可运行的 \texttt{{InsertShips}} 函数。第二，提出并实现 Guarded EOH-Go pipeline，把 LLM mutation、Go 编译、动态仿真、异常候选过滤和 cleaned reporting 串联起来。第三，沿用参考论文的 Res./$J$ 双指标与动态密度实验思想，在 RC101--RC105 的动态 Solomon-style 数据源上分析 EOH 在密度 $d$ 与到达节奏 $t$ 下的局部有效性、稳定性和场景敏感性。
+
+\section{{相关工作与参考问题设定}}
+\subsection{{实时动态取送货路由}}
+参考论文研究的是封闭商业园区内的混合配送服务，并将其形式化为带时间窗约束的动态取送货问题。该问题可被视为动态车辆路径问题的一个复杂子类，其中请求集合随时间变化，而车辆、地理节点和边集保持相对固定。论文中的目标函数 $J$ 衡量整个动态过程中累计的路线成本，响应时间则衡量系统从新状态出现到生成新路线的速度。该评价口径对本文非常关键，因为 EOH 进化出的插入代码即使降低了 $J$，如果响应时间不可接受，也未必适合实时调度。
+
+参考论文还将 Solomon benchmark 修改为不同动态比例的数据源，例如 25\%、50\%、75\% 的请求作为预先已知请求，其余作为动态请求。这一点直接启发了本文的密度变量设计。本文使用 \texttt{{solomon\_benchmark\_d25}}、\texttt{{solomon\_benchmark\_d50}} 和 \texttt{{solomon\_benchmark\_d75}} 作为动态密度源，并进一步引入 arrival scale $t$ 来改变请求释放节奏。这样做的目的不是简单增加参数，而是让实验真正反映不同动态场景对插入启发式的影响。
+
+\subsection{{EOH 与 LLM 辅助算法设计}}
+Evolution of Heuristics 将大语言模型与进化计算结合，用自然语言描述和可执行代码共同表示启发式，并通过评价器对候选进行选择和变异。与一次性 prompt 生成算法相比，EOH 的核心在于 population、mutation 和 selection 构成的迭代搜索过程。FunSearch、LLM4AD、ReEvo 等工作也表明，LLM 生成程序与自动评价器结合后可以成为算法设计工具。
+
+但是，这类方法的共同前提是评价器必须可信。对于数学构造或封闭任务，评价函数通常较容易检查；对于实时调度 Go 程序，候选代码可能通过非预期方式降低表面成本，例如不插入某些订单、遇到不可行情况直接 break、返回未更新的 dispatch 或制造异常输出。因此，本文的最终实现聚焦于 EOH 主线中的工程可信层：compile/run、guard、logging 和 filtered reporting。这个选择与最终实验一致：当前论文的重点是 Guarded EOH pipeline 本身，即如何让 LLM 生成的 Go 插入代码经过真实编译、动态仿真和可信过滤后再进入主表。
+
+\section{{问题定义与实验对象}}
+本文的目标函数是 Go 调度程序中的 \texttt{{InsertShips}}。当动态请求到达时，该函数接收当前 dispatch、请求起点集合、请求终点集合和订单数量，返回更新后的 dispatch。SA baseline 使用项目中已有的 Go 插入逻辑。EOH-Go 以该基线函数作为 seed，让 LLM 生成变异版本，然后将候选代码替换到 Go 项目中进行编译和动态仿真。
+
+实验变量包括两类。第一类是动态密度 $d$，取值为 $d25,d50,d75$，分别对应不同动态比例的数据源。第二类是到达节奏 $t$，取值为 $1.0,0.9,0.8,0.7,0.6$。早期尝试中曾使用不直接改变请求释放节奏的时间参数，导致同一密度下 $J$ 几乎不变；最终实现采用 arrival scale，使 $t$ 真正影响动态订单出现节奏。该设计与参考论文中的 timescale/hyperparameter 分析在思想上对应：动态系统不仅要比较算法，还要观察时间尺度和场景强度如何改变算法表现。
+
+评价指标沿用参考论文风格。Res. 表示首次产生可行 dispatch 的响应时间，$J$ 表示最终路线成本。主比较采用 $\Delta J = J_{{EOH}} - J_{{SA}}$：当 $\Delta J<0$ 时，EOH 的路线质量优于 SA；当 $\Delta J=0$ 时视为持平；当 $\Delta J>0$ 时视为变差。由于实时系统还要求响应速度，本文同时报告 $\Delta Res.$，但不把所有结论压缩为单一标量。
+
+\section{{方法：Guarded EOH-Go Pipeline}}
+最终实现的 pipeline 如下：
+\begin{{center}}
+\small
+\begin{{tabular}}{{c}}
+SA seed $\rightarrow$ LLM mutation $\rightarrow$ Go extraction $\rightarrow$ Go compile \\
+$\rightarrow$ dynamic simulation $\rightarrow$ candidate guard $\rightarrow$ filtered-best report
+\end{{tabular}}
+\end{{center}}
+这一流程中的每一步都有明确作用。SA seed 保证搜索从一个可运行的基线开始；LLM mutation 生成新的 \texttt{{InsertShips}} 候选；Go extraction 负责从 LLM 输出中提取函数代码；Go compile 将候选放回真实项目中检验语法和依赖；dynamic simulation 在 $d,t$ 对应的动态源上运行调度过程；candidate guard 对候选进行有效性过滤；最终报告只使用 filtered-best，而不使用 raw-best。
+
+\subsection{{候选过滤规则}}
+guard 的设计来自实际实验中暴露出的风险。早期运行曾出现候选全部被评为 $10^9$ 的惩罚值，也出现过 $J$ 异常极小的候选。前者通常对应编译、运行或解析失败；后者更危险，因为它可能在表面上优于 SA，但实际原因是漏单或提前退出。因此最终主表采用以下清洗规则：若 SA $J$ 缺失，记为 \texttt{{excluded\_no\_sa}}；若 EOH $J$ 缺失，记为 \texttt{{excluded\_no\_eoh}}；若 EOH $J<0$，记为 \texttt{{excluded\_negative\_eoh}}；若 EOH $J<0.3\times$ SA $J$，记为 \texttt{{excluded\_suspicious\_low}}。其余候选再按 $\Delta J$ 分类为 improved、tie 或 worse。
+
+这种清洗并不是为了人为剔除不利结果，而是为了使 LLM 代码进化具备最基本的可信性。对于人工编写的固定启发式，算法不会主动寻找评价器漏洞；对于 LLM 进化程序，评价器漏洞本身会成为搜索目标。因此，guard/filter 是本文最重要的方法组件之一，也是本文与普通路由算法比较论文的区别。
+
+\section{{实验设计}}
+实验覆盖 RC101--RC105 共五个 Solomon-style 实例，每个实例在 $d25,d50,d75$ 三种动态密度下，分别测试 $t=1.0,0.9,0.8,0.7,0.6$ 五种到达节奏，共 {stats['total_cells']} 个 cell。EOH 使用 deepseek-v4-flash 模型，每个 cell 设置 generations=1、pop\_size=4、evaluation timeout=120s、run timeout=60s，并使用 $J+0.2\times Res.$ 的复合 objective 引导候选选择。需要强调的是，复合 objective 用于进化过程中的候选排序，而论文主表仍分别报告 Res. 与 $J$，以保持与参考论文的评价口径一致。
+
+数据处理分为原始记录和清洗记录两层。原始记录保留每个 cell 的 population、candidate id、raw objective、valid/suspicious/invalid candidate 数量和运行输出；清洗记录只用于论文主表。这样既能避免异常值污染主结论，又能在需要时回溯候选代码和失败原因。
+
+\section{{实验结果}}
+\subsection{{总体结果}}
+在 {stats['total_cells']} 个 cell 中，guard 清洗后得到 {stats['valid_cells']} 个有效对比，另有 {stats['excluded_cells']} 个 cell 被排除。其中有效对比的分布为：EOH 改善 {stats['valid_improved']} 个，持平 {stats['valid_tie']} 个，变差 {stats['valid_worse']} 个。被排除结果中，\texttt{{excluded\_no\_sa}} 为 {stats['excluded_no_sa']} 个，\texttt{{excluded\_no\_eoh}} 为 {stats['excluded_no_eoh']} 个，\texttt{{excluded\_suspicious\_low}} 为 {stats['excluded_suspicious_low']} 个，\texttt{{excluded\_negative\_eoh}} 为 {stats['excluded_negative_eoh']} 个。这说明 EOH-Go 已经能够产生一批有效候选，但同时也暴露出自动代码进化的不稳定性。
+
+从有效 cell 看，最强单次改善出现在 {stats['best_inst']} 的 {stats['best_density']}, $t={stats['best_t']}$，SA $J={stats['best_sa_j']}$，EOH $J={stats['best_eoh_j']}$，$\Delta J={stats['best_delta']}$。不过，单次最强改善不应被直接写成稳定优势，因为后续 repeat validation 显示部分强胜点会退化。因此本文的主结论是局部有效和场景敏感，而不是全局支配。
+
+{_fig("01_outcome_counts.png", "Guard 清洗后的总体结果计数。EOH 在有效 cell 中既有改善也有变差，说明该方法更适合被表述为场景相关的自动启发式设计，而不是通用替代 SA。", "fig:outcome-counts")}
+
+\subsection{{主表：有效 SA--EOH 对比}}
+图 \ref{{fig:table3}} 给出了所有有效 cell 的论文风格对比表。表中同时报告 SA 与 Guarded EOH 的 Res. 和 $J$，并用星号标记每行更低的 $J$。这种表格形式直接参考了参考论文中算法效率比较表的写法：不只比较最终质量，也保留响应时间，使读者能够看到质量改善是否伴随额外时间开销。
+
+{_fig("table3_valid_sa_eoh_comparison.png", "所有有效 cell 的 SA 与 Guarded EOH 对比表。星号表示每行更低的 $J$，负的 $\\Delta J$ 表示 EOH 改善。", "fig:table3", r"1.0\textwidth")}
+
+\subsection{{密度影响}}
+按密度统计，有效 cell 中 $d25$ 的结果为 improved={stats['d25_improved']}、tie={stats['d25_tie']}、worse={stats['d25_worse']}；$d50$ 为 improved={stats['d50_improved']}、tie={stats['d50_tie']}、worse={stats['d50_worse']}；$d75$ 为 improved={stats['d75_improved']}、tie={stats['d75_tie']}、worse={stats['d75_worse']}。可以看到，EOH 的改善主要集中在 $d50$ 和部分 $d75$ cell，而在 $d25$ 中更多表现为持平或变差。这一现象与直觉一致：低密度动态请求较少，简单 SA 插入已足够有效，复杂变异不一定带来收益；中高密度下插入选择空间更大，LLM 生成的策略更可能找到不同于 SA 的改进路径。
+
+{_fig("02_outcome_by_density.png", "不同动态密度下 improved/tie/worse 的分布。", "fig:outcome-density", r"0.82\textwidth")}
+{_fig("03_mean_delta_by_density.png", "不同动态密度下平均 $\\Delta J$。负值表示 EOH 平均优于 SA。", "fig:mean-delta-density", r"0.82\textwidth")}
+
+\subsection{{密度--到达节奏二维影响}}
+图 \ref{{fig:heatmap-all}} 将所有有效 cell 的 $\Delta J$ 放到实例、密度和到达节奏构成的网格中。该图比单个平均值更重要，因为它显示 EOH 的效果不是单调随 $t$ 或 $d$ 改变，而是在局部区域出现改善。参考论文同样强调不同动态比例和超参数会改变算法表现；本文的结果进一步说明，LLM 进化出的代码也具有类似的场景敏感性。
+
+{_fig("04_delta_j_heatmap_all_valid.png", "所有有效 cell 的 $\\Delta J$ 热力图。绿色区域代表 EOH 改善，红色区域代表变差。", "fig:heatmap-all", r"0.96\textwidth")}
+
+\subsection{{质量与响应时间的权衡}}
+图 \ref{{fig:j-scatter}} 和图 \ref{{fig:res-scatter}} 分别比较 SA 与 EOH 的 $J$ 和 Res.。如果只看 $J$，部分 EOH 候选确实能明显降低成本；但从 Res. 散点和质量--时间权衡图看，不少改善伴随响应时间增加。这一点与参考论文的评价思想完全一致：实时动态调度不能只追求最低 $J$，还要把响应速度作为核心指标。因此，本文没有把 EOH 结果归结为单一胜率，而是使用 Res./$J$ 双指标解释其适用边界。
+
+{_fig("06_sa_vs_eoh_j_scatter.png", "SA 与 EOH 的最终成本 $J$ 散点图。虚线表示二者相等。", "fig:j-scatter", r"0.78\textwidth")}
+{_fig("07_sa_vs_eoh_res_scatter.png", "SA 与 EOH 的响应时间 Res. 散点图。虚线表示二者相等。", "fig:res-scatter", r"0.78\textwidth")}
+{_fig("09_quality_time_tradeoff.png", "有效 cell 中 $\\Delta Res.$ 与 $\\Delta J$ 的权衡关系。左下区域代表 EOH 同时更快且质量更好，右下区域代表质量更好但更慢。", "fig:tradeoff", r"0.82\textwidth")}
+
+\subsection{{候选质量与 guard 的作用}}
+图 \ref{{fig:candidate-count}} 展示不同 outcome 下通过 guard 的候选数量。该图的意义在于说明：有效候选数量本身并不保证结果改善，但候选能否通过 guard 决定了它是否有资格进入论文主表。没有 guard 时，raw-best 可能被异常极小值占据；有 guard 后，论文表格展示的是更可信的 filtered-best。这也是本文相较于直接运行原版 EOH 的关键改进。
+
+{_fig("10_valid_candidates_by_outcome.png", "不同 outcome 下平均有效候选数量。", "fig:candidate-count", r"0.82\textwidth")}
+{_fig("08_sorted_delta_j_all_valid.png", "所有有效 cell 按 $\\Delta J$ 排序后的条形图。", "fig:sorted-delta", r"0.96\textwidth")}
+
+\section{{Repeat Validation}}
+由于 LLM 生成和进化搜索具有随机性，单次运行的 improved cell 不能直接视为稳定结论。我们从初始主表中选择八个高价值 cell 进行 repeat validation，每个 cell 重新运行两次。结果表明，RC102 和 RC104 中部分初始改善在 repeat 中退化为持平或变差；相对更值得保留的证据集中在 RC105 的 $d50,t=0.9$ 与 $d75,t=0.6/0.9$。在 {stats['repeat_cells']} 个 repeat cell 中，有 {stats['repeat_with_improved']} 个至少出现一次 improved，有 {stats['repeat_negative_mean']} 个 mean $\Delta J$ 为负。
+
+这一结果加强了本文的保守表述：EOH-Go 可以发现有价值的插入启发式，但这些启发式具有场景敏感和随机不稳定性，需要 repeat validation 支撑。对于论文写作而言，repeat 表不应被看作削弱结果，而是提升可信度的必要环节。
+
+{_fig("table4_repeat_validation.png", "所选 cell 的 repeat validation 表。Mean 与 Best 均使用 $\\Delta J=J_{EOH}-J_{SA}$。", "fig:table4", r"0.96\textwidth")}
+{_fig("11_repeat_validation_delta_j.png", "repeat validation 中 mean $\\Delta J$ 与 best $\\Delta J$ 的图示。", "fig:repeat-delta", r"0.82\textwidth")}
+
+\section{{讨论}}
+\subsection{{与参考实时路由论文的关系}}
+本文不是要替代参考论文中的实时路由系统，而是在其问题设定和评价方式上扩展一个新的自动启发式设计层。参考论文证明了实时路由求解器可以通过管理模块、自适应内存、插入任务和优化任务在响应速度与路线质量之间取得平衡；本文则研究插入启发式本身是否可以由 LLM-driven EOH 自动生成。两者的关系可以理解为：参考论文提供动态调度问题框架和 Res./$J$ 评价标准，本文在该框架中引入自动代码进化机制。
+
+\subsection{{为什么不能声称 EOH 全面优于 SA}}
+从主表看，EOH 在 {stats['valid_improved']} 个有效 cell 中改善 SA，但也在 {stats['valid_worse']} 个 cell 中变差。这种结果不适合包装成单一胜率故事。更准确的解释是，EOH 在特定动态密度和到达节奏下能发现局部有效的插入策略，但当前搜索深度、候选数量和 guard 强度还不足以保证跨实例稳定优势。特别是 repeat validation 显示部分强胜点并不复现，因此论文结论必须保持谨慎。
+
+\subsection{{guard/filter 的方法论意义}}
+本文最重要的方法论发现是：LLM 代码进化会放大 evaluator 的漏洞。传统启发式比较通常默认算法逻辑固定，评价器只需计算输出质量；而在 EOH-Go 中，候选代码本身可能改变输出结构、跳过插入步骤或触发异常路径。若没有 guard，异常极小值会被误认为算法进步。本文将 suspicious-low、negative output、missing result 等情况显式排除，并保留 raw 记录用于追踪。这使得结果更保守，但也更接近可发表实验。
+
+\subsection{{有效性边界}}
+当前结论应被理解为一个受控范围内的实验结论。第一，本文的主实验范围限定在 RC101--RC105、$d25/d50/d75$ 和 $t=1.0$ 到 $0.6$ 的网格上，因此结论主要说明 Guarded EOH-Go 在这一组动态源和到达节奏下的表现。第二，EOH 设置较轻量，generations=1、pop\_size=4，目标是验证可执行 Go 启发式进化链路的可行性，而不是证明搜索过程已经充分收敛。第三，repeat validation 的作用是检查初始 improved cell 的稳定性；它显示部分胜点会退化，因此本文只把稳定性较强的 RC105 cell 作为相对更可信的证据，而不把所有单次 improved cell 都视为稳定优势。第四，guard 规则目前采用成本阈值、缺失输出、负值输出和 suspicious-low 过滤，主表结论严格限定在这些过滤规则之下。
+
+\section{{结论}}
+本文基于参考论文的实时动态取送货路由问题设定，构建了一个 Guarded EOH-Go pipeline，用于自动进化 Go 调度程序中的 \texttt{{InsertShips}} 插入启发式。实验表明，在 RC101--RC105 的动态密度与到达节奏网格中，EOH 能在部分 cell 中改善 SA 的最终成本 $J$，但也存在持平、变差和被 guard 排除的情况。因此，本文的核心结论不是 ``EOH 全面击败 SA''，而是 ``在可信评价和过滤机制保护下，LLM-driven EOH 可以作为动态实时路由中场景相关启发式设计工具''。
+
+\section{{未来展望}}
+本文没有把尚未完成的扩展路线写入方法主线，而是将其作为后续工作。第一，可以把实例范围从 RC101--RC105 扩展到 RC106--RC108，并对 RC105 中相对稳定的胜点继续增加 repeat，以提高统计可信度。第二，可以将订单完整性检查、时间窗检查和车辆状态一致性检查加入 guard，使 filtered-best 不只依赖成本阈值，还能验证候选代码是否完整服务了动态请求。第三，可以引入 ReEvo-style feedback，把 compile fail、timeout、suspicious-low、worse-than-seed 等失败原因转化为下一轮 prompt 的文字反馈，从而让 EOH 的变异方向更稳定。第四，ReAct、多 agent 调度和后训练机制更适合放在毕业论文或下一阶段系统中探索：它们可以用于自动选择任务、管理候选库、分析失败原因和调度多轮实验，但不属于本文已经完成的最小实现。当前文章应保持主线简洁，突出 Guarded EOH-Go 在实时动态路由启发式代码进化中的可行性和方法论价值。
+
+\clearpage
+\appendix
+\section{{附录：按实例划分的密度--到达节奏热力图}}
+以下图展示每个实例内部 $d$ 与 $t$ 对 EOH 表现的影响。它们主要用于支撑 ``场景敏感'' 这一讨论，而不是单独作为全局结论。
+
+{_fig("05_delta_j_heatmap_rc101.png", "RC101 的 $d\\times t$ 有效 cell $\\Delta J$ 热力图。", "fig:rc101", r"0.82\textwidth")}
+{_fig("05_delta_j_heatmap_rc102.png", "RC102 的 $d\\times t$ 有效 cell $\\Delta J$ 热力图。", "fig:rc102", r"0.82\textwidth")}
+{_fig("05_delta_j_heatmap_rc103.png", "RC103 的 $d\\times t$ 有效 cell $\\Delta J$ 热力图。", "fig:rc103", r"0.82\textwidth")}
+{_fig("05_delta_j_heatmap_rc104.png", "RC104 的 $d\\times t$ 有效 cell $\\Delta J$ 热力图。", "fig:rc104", r"0.82\textwidth")}
+{_fig("05_delta_j_heatmap_rc105.png", "RC105 的 $d\\times t$ 有效 cell $\\Delta J$ 热力图。", "fig:rc105", r"0.82\textwidth")}
+
+\begin{{thebibliography}}{{9}}
+\bibitem{{campus}} 参考论文：\emph{{实时路由与并发计算在封闭商业园区配送服务中的应用}}，本地文件 \texttt{{第二篇论文中文.pdf}}。
+\bibitem{{eoh}} Fei Liu et al. \emph{{Evolution of Heuristics: Towards Efficient Automatic Algorithm Design Using Large Language Model}}. ICML 2024.
+\bibitem{{funsearch}} Bernardino Romera-Paredes et al. \emph{{Mathematical discoveries from program search with large language models}}. Nature, 2023.
+\bibitem{{reevo}} ReEvo: Reflective Evolution for Large Language Model-guided Optimization.
+\bibitem{{llm4ad}} LLM4AD: A Platform for Large Language Model Assisted Algorithm Design.
+\end{{thebibliography}}
+
+\end{{document}}
+"""
+    path = OUT_DIR / "guarded_eoh_go_full_draft_cn.tex"
+    path.write_text(tex, encoding="utf-8")
+    return path
+
+
+def _write_markdown(stats: dict[str, object]) -> Path:
+    body = f"""# 面向实时动态调度的 Guarded EOH-Go 启发式代码进化研究
+
+这是一份由 `eoh_go_phase0_summary.md` 提炼出的论文主体草稿。它只保留最终实现内容：动态密度源、arrival scale、Guarded EOH、filtered-best、repeat validation 和论文图表。早期错误尝试不作为主线，只作为引出 guard 必要性的背景。
+
+核心结果：共 {stats['total_cells']} 个 cell，清洗后有效 {stats['valid_cells']} 个；EOH improved {stats['valid_improved']}、tie {stats['valid_tie']}、worse {stats['valid_worse']}；排除 {stats['excluded_cells']} 个。最强单次改善是 {stats['best_inst']} {stats['best_density']} t={stats['best_t']}，Delta J={stats['best_delta']}。Repeat validation 显示 RC105 的部分 cell 更值得保留，但整体结论应保持“局部有效、场景敏感、需要 guard”。
+
+完整正文请见 `guarded_eoh_go_full_draft_cn.tex`，编译 PDF 位于 `build/guarded_eoh_go_full_draft_cn.pdf`。
+"""
+    path = OUT_DIR / "paper_body_summary_cn.md"
+    path.write_text(body, encoding="utf-8")
+    return path
+
+
+def main() -> None:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    _copy_figures()
+    stats = _summary_numbers()
+    tex = _write_latex(stats)
+    md = _write_markdown(stats)
+    (OUT_DIR / "ARTIFACTS.json").write_text(
+        json.dumps({"tex": str(tex), "markdown": str(md), "figures": [name for name, _ in MAIN_FIGURES]}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    print(json.dumps({"out_dir": str(OUT_DIR), "tex": str(tex), "markdown": str(md)}, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()
