@@ -11,7 +11,6 @@ __pycache__/
 Agent_EOH/eoh/src/eoh/examples/user_insertships_go/results_insertships*/
 Agent_EOH/eoh/src/eoh/examples/user_insertships_go/v2_agent/run_logs/
 eoh_go_workspace/candidates/
-eoh_go_workspace/candidate_sources/
 eoh_go_workspace/runs/
 eoh_go_workspace/memory/
 eoh_go_workspace/reports/tables/eoh_arrival_grid*/

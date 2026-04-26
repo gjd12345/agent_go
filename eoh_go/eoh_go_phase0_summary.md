@@ -824,21 +824,11 @@ result = run_v0_eoh(config)
 | `EOH-balanced` | d50 | 改善 J，同时控制 Res | 最小边际成本、slack 二级排序、轻量剪枝 |
 | `EOH-robust` | d75/d100 | 可行性、timeout 控制、fallback | top-k 限制、尝试次数上限、SA fallback、硬约束过滤 |
 
-### 21.3 V2 ReAct 的最小采用方式
+### 21.3 V2 ReAct 的位置调整
 
-建议采用 V2 ReAct，但先做最小闭环，不做复杂多智能体。
+本阶段论文不再把 V2 ReAct 写入方法主线。ReAct、多智能体调度、自动诊断失败并生成修复动作等内容都属于后续系统扩展，统一放入“未来展望”。
 
-最小动作集合：
-
-- `run_cell_benchmark`
-- `analyze_latest_results`
-- `diagnose_failure_type`
-- `propose_strategy_patch`
-- `run_code_review`
-- `promote_candidate`
-- `write_report`
-
-每一轮 ReAct 必须基于结构化观察，而不是自由发挥。
+当前论文主体只保留已经完成并可由实验数据支撑的 Guarded EOH-Go 链路：LLM 变异 `InsertShips`、Go 编译、动态源评价、候选 guard、filtered-best 选择与 cleaned reporting。
 
 ### 21.4 近期实验顺序
 
@@ -1415,38 +1405,39 @@ EoH-S 强调互补启发式集合，UBER 强调 uncertainty-based exploration/ex
 
 ---
 
-## 28. 当前推荐路线：mini-LLM4AD，而不是完整 ReAct
+## 28. 当前论文主线：Guarded EOH-Go
 
 ### 28.1 判断
 
-当前最合理的路线是：
+当前论文采用的已实现路线是：
 
-> 保留原版 EOH 主线，补 evaluator guard、失败反馈、候选库和 density-aware 策略族，形成一个小型稳定 mini-LLM4AD pipeline。
+> 保留原版 EOH 主线，补 evaluator guard、动态源评价、异常候选过滤和 cleaned reporting，形成一个小型、可复现的 Guarded EOH-Go pipeline。
 
-不建议现在迁移到完整 ReAct，原因：
+ReAct、多 agent 调度、自动切换 EOH/ReEVO 框架、后训练、完整订单一致性 guard 等尚未完成内容，不进入当前论文的方法和实验主线，只作为未来展望。
 
-1. 当前瓶颈不是“agent 不会思考”，而是 evaluation guard 与数据可信性还不够。
-2. 完整 ReAct 会增加执行时间、状态复杂度和不可控性。
-3. 当前论文需要的是稳定可复现实验表，而不是复杂 agent 架构本身。
+论文当前应强调：
+
+1. EOH 可以生成并变异可编译的 Go 插入启发式。
+2. `arrival_scale` 与 `d25/d50/d75` 动态源已经接入 evaluation 链路。
+3. 主表只采用 guard 后的 filtered-best，而不是 raw-best。
+4. repeat validation 用于区分单次胜点和相对可信的稳定胜点。
 
 ### 28.2 具体 pipeline
 
 ```text
-SA seed / existing best candidate
-  -> LLM mutation with Go-specific prompt
-  -> code extraction
+SA seed
+  -> LLM mutation
+  -> Go code extraction
   -> Go compile
   -> dynamic source evaluation
   -> candidate guard
-  -> filtered population selection
-  -> ReEvo-style failure feedback
-  -> density-aware candidate archive
-  -> SA vs EOH table
+  -> filtered-best selection
+  -> cleaned SA vs EOH table
 ```
 
-### 28.3 ReEvo-style feedback 的最小实现
+### 28.3 放入未来展望的扩展方向
 
-下一步可以把 guard 结果转成 prompt feedback，例如：
+后续可以把 guard 结果转成 prompt feedback，例如：
 
 | 失败类型 | 反馈给下一轮 prompt 的信息 |
 |---|---|
@@ -1457,7 +1448,7 @@ SA seed / existing best candidate
 | `bestIndex == -1 break` | 要求 fallback 到 seed-style insertion |
 | J worse than seed | 要求保留 seed fallback 或减少破坏性改动 |
 
-这一步比完整 ReAct 轻得多，但已经能吸收 ReEvo 的核心思想。
+这属于 ReEvo-style feedback 的未来扩展，不作为当前论文已经完成的方法。完整 ReAct、多 agent 调度和后训练同样放入未来展望，不写入本文实验主线。
 
 ---
 
@@ -1573,3 +1564,61 @@ LaTeX 报告目录：
 2. 对 RC105 的稳定胜点增加 3--5 次 repeat，用来支撑论文中的稳定性声明。
 3. 对 suspicious-low 候选做 1--2 个代码案例分析，证明 guard 的必要性。
 4. 将结论写成“场景相关的自动启发式设计”，避免写成“EOH 普遍击败 SA”。
+
+---
+
+## 31. 论文版最终口径校准（2026-04-26）
+
+为避免前期探索路线影响论文主线，当前论文主体只保留已经完成并可由数据支撑的内容：
+
+```text
+SA seed
+  -> LLM mutation
+  -> Go code extraction
+  -> Go compile
+  -> dynamic source evaluation
+  -> candidate guard
+  -> filtered-best selection
+  -> cleaned reporting
+```
+
+论文正文不再把 ReAct、多 agent 调度、自动切换 EOH/ReEVO 框架、后训练、完整订单一致性校验等尚未完成内容写成当前方法。它们只作为“未来展望”出现，用来说明后续毕业论文或下一阶段系统可以扩展的方向。
+
+### 31.1 当前已经完成、可以进入论文主体的内容
+
+| 模块 | 是否进入正文 | 说明 |
+|---|---:|---|
+| EOH 变异 `InsertShips` Go 代码 | 是 | 当前实验的核心方法 |
+| Go 编译与动态仿真评价 | 是 | 保证候选代码可执行、可复现 |
+| `arrival_scale` 动态到达节奏 | 是 | 已正式接入 evaluation 链路 |
+| `d25/d50/d75` 动态密度源 | 是 | 对应参考论文动态比例思想 |
+| SA vs Guarded EOH 对比 | 是 | 论文主表使用 filtered-best |
+| suspicious-low/negative/missing 过滤 | 是 | 当前可信评价的关键机制 |
+| repeat validation | 是 | 用于支撑稳定性讨论 |
+| ReAct / 多 agent / 后训练 | 否 | 仅放入未来展望 |
+| 自动切换 EOH/ReEVO 框架 | 否 | 仅放入未来展望 |
+| 更完整的订单/时间窗一致性 guard | 否 | 当前未完整实现，作为未来工作 |
+
+### 31.2 论文结论应采用的保守表述
+
+当前结果支持的结论是：
+
+> 在参考论文的动态取送货实时路由评价框架下，Guarded EOH-Go 能够在部分密度与到达节奏组合上自动发现优于 SA seed 的 Go 插入启发式；但该优势不是全局稳定的，必须通过 guard/filter 与 repeat validation 才能形成可信结论。
+
+不建议在论文中写成：
+
+- EOH 全面优于 SA。
+- ReAct agent 已经提升了进化能力。
+- 多 agent 或后训练已经接入当前实验。
+- 自动框架切换已经完成。
+
+### 31.3 未来展望统一放置内容
+
+以下内容只放入未来展望，不进入方法和实验主线：
+
+1. 扩展 RC106--RC108，并增加 RC105 稳定胜点 repeat。
+2. 增加订单完整性、时间窗和车辆状态一致性 guard。
+3. 引入 ReEvo-style failure feedback，把 compile fail、timeout、suspicious-low、worse-than-seed 等失败原因反馈到下一轮 prompt。
+4. 在毕业论文阶段探索 ReAct、多 agent 调度、自动选择 EOH/ReEVO 框架和后训练机制。
+
+这一口径已经同步到 `eoh_go_workspace/reports/paper_draft_full_20260426/guarded_eoh_go_full_draft_cn.tex` 与重新编译后的 PDF 中。
