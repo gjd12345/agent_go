@@ -1,0 +1,70 @@
+{
+  "repo_commit": "fa35bcc863e5daf48bb4fec5295a2dba33d3c3a0",
+  "python": "3.9.6",
+  "runs": [
+    {
+      "instance_file": "data/cvrplib_instances/mini-n7-k2.vrp",
+      "instance": "mini-n7-k2",
+      "num_customers": 6,
+      "num_vehicles": 2,
+      "capacity": 4000,
+      "method": "C-ALM direct smoke test",
+      "max_iterations": 10,
+      "initial_penalty_mu": 1.0,
+      "best_cost": 160.0,
+      "feasible": true,
+      "violations": [],
+      "routes": [
+        [
+          1,
+          6,
+          2
+        ],
+        [
+          4,
+          3,
+          5
+        ]
+      ],
+      "iteration_count": 10,
+      "elapsed_s": 0.001351
+    },
+    {
+      "instance_file": "data/cvrplib_instances/E-n13-k4.vrp",
+      "instance": "E-n13-k4",
+      "num_customers": 12,
+      "num_vehicles": 4,
+      "capacity": 6000,
+      "method": "C-ALM direct smoke test",
+      "max_iterations": 10,
+      "initial_penalty_mu": 1.0,
+      "best_cost": 380.0,
+      "feasible": true,
+      "violations": [],
+      "routes": [
+        [
+          1,
+          12,
+          2,
+          5
+        ],
+        [
+          6,
+          10,
+          11,
+          7
+        ],
+        [
+          3,
+          9,
+          8
+        ],
+        [
+          4
+        ]
+      ],
+      "iteration_count": 10,
+      "elapsed_s": 0.001477
+    }
+  ]
+}

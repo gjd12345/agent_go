@@ -1,0 +1,19 @@
+# Core numerical and data handling
+numpy
+scipy
+
+# Reinforcement Learning
+torch 
+gymnasium
+
+# Quantum Computing
+qiskit
+qiskit-optimization
+qiskit-algorithms
+qiskit-aer
+
+# Utilities
+pyyaml
+
+# Testing
+pytest

@@ -1,0 +1,8 @@
+{
+  "metrics": {
+    "E-n13-k4 C-ALM gap (%)": {
+      "value": 53.84615384615385,
+      "source": "local_smoke_results.json, using E-n13-k4 optimal value 247 from .vrp comment"
+    }
+  }
+}

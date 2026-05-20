@@ -1,0 +1,72 @@
+{
+  "repo": "/Users/guojiadong.9/paper_reproductions/adaptive_quantum_cvrp",
+  "readmes": [
+    ".pytest_cache/README.md",
+    "README.md"
+  ],
+  "dependency_files": [
+    "requirements.txt"
+  ],
+  "entrypoints": {
+    "train": [],
+    "eval": [
+      "src/adaptive_quantum_cvrp/common/evaluator.py",
+      "tests/common/test_evaluator.py",
+      "tests/utils/test_config_loader.py"
+    ]
+  },
+  "core_files": [
+    "src/adaptive_quantum_cvrp/alm/classical_solver.py",
+    "src/adaptive_quantum_cvrp/quantum/decoder.py",
+    "src/adaptive_quantum_cvrp/quantum/solver.py",
+    "src/adaptive_quantum_cvrp/rl/agent.py",
+    "src/adaptive_quantum_cvrp/rl/environment.py"
+  ],
+  "data_hints": [
+    "data/.DS_Store",
+    "data/cvrplib_instances/B-n31-k5.vrp",
+    "data/cvrplib_instances/B-n34-k5.vrp",
+    "data/cvrplib_instances/E-n13-k4.vrp",
+    "data/cvrplib_instances/E-n22-k4.vrp",
+    "data/cvrplib_instances/E-n23-k3.vrp",
+    "data/cvrplib_instances/E-n30-k3.vrp",
+    "data/cvrplib_instances/E-n31-k7.vrp",
+    "data/cvrplib_instances/mini-n7-k2.vrp",
+    "data/cvrplib_instances_eval/A-n32-k5.vrp",
+    "data/cvrplib_instances_eval/E-n13-k4.vrp",
+    "data/cvrplib_instances_train/B-n31-k5.vrp",
+    "data/cvrplib_instances_train/B-n34-k5.vrp",
+    "data/cvrplib_instances_train/E-n22-k4.vrp",
+    "data/cvrplib_instances_train/E-n23-k3.vrp",
+    "data/cvrplib_instances_train/E-n30-k3.vrp",
+    "data/cvrplib_instances_train/E-n31-k7.vrp",
+    "data/cvrplib_instances_train/mini-n7-k2.vrp",
+    "data/generate_cvrp_instances.py",
+    "data/processed/A-n32-k5.sol",
+    "data/processed/A-n33-k5.sol",
+    "data/processed/A-n33-k6.sol",
+    "data/processed/A-n34-k5.sol",
+    "data/processed/A-n36-k5.sol",
+    "data/processed/A-n37-k5.sol",
+    "data/processed/A-n37-k6.sol",
+    "data/processed/A-n38-k5.sol",
+    "data/processed/A-n39-k5.sol",
+    "data/processed/A-n39-k6.sol",
+    "data/processed/A-n44-k6.sol"
+  ],
+  "weight_files": [
+    "models/rl_run_test_output/sac_penalty_learner_final_actor.pth",
+    "models/rl_run_test_output/sac_penalty_learner_final_critic.pth",
+    "models/rl_run_test_output/sac_penalty_learner_final_log_alpha.pth",
+    "models/test_sac_agent_actor.pth",
+    "models/test_sac_agent_critic.pth",
+    "models/test_sac_agent_log_alpha.pth"
+  ],
+  "config_files": [
+    "configs/default.yaml",
+    "configs/experiments/classical_alm.yaml",
+    "configs/experiments/rl_classical_alm.yaml",
+    "configs/experiments/rl_quantum_alm.yaml"
+  ],
+  "feasibility": "local-run"
+}
