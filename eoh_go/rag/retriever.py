@@ -1,0 +1,54 @@
+from __future__ import annotations
+
+import re
+from collections import Counter
+
+from .schemas import CorpusItem
+
+
+_TOKEN_RE = re.compile(r"[A-Za-z0-9_]+")
+_KIND_PRIORITY = {
+    "algorithm_card": 0,
+    "failure_case": 1,
+    "api_constraint": 2,
+    "code_example": 3,
+}
+
+
+def _tokens(text: str) -> list[str]:
+    return [token.lower() for token in _TOKEN_RE.findall(text)]
+
+
+def _weighted_terms(item: CorpusItem) -> Counter[str]:
+    terms: Counter[str] = Counter()
+    terms.update({token: 3 for token in _tokens(item.title)})
+    for tag in item.tags:
+        terms.update({token: 3 for token in _tokens(tag)})
+    terms.update({token: 2 for token in _tokens(item.summary)})
+    for constraint in item.constraints:
+        terms.update({token: 2 for token in _tokens(constraint)})
+    return terms
+
+
+def score_item(query: str, item: CorpusItem) -> int:
+    query_terms = _tokens(query)
+    if not query_terms:
+        return 0
+    weighted = _weighted_terms(item)
+    return sum(weighted.get(term, 0) for term in query_terms)
+
+
+def retrieve(query: str, corpus: list[CorpusItem], top_k: int = 3) -> list[CorpusItem]:
+    if not corpus or top_k <= 0:
+        return []
+
+    scored = [(score_item(query, item), item) for item in corpus]
+    scored = [(score, item) for score, item in scored if score > 0]
+    scored.sort(
+        key=lambda pair: (
+            -pair[0],
+            _KIND_PRIORITY.get(pair[1].kind, 99),
+            pair[1].id,
+        )
+    )
+    return [item for _, item in scored[:top_k]]

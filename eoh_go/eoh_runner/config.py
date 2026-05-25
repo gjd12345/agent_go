@@ -1,6 +1,6 @@
 import os
 from dataclasses import dataclass, field
-from pathlib import Path
+from typing import Optional
 
 
 @dataclass
@@ -26,7 +26,14 @@ class EOHConfig:
     arrival_scale: float = 1.0
     use_density_source_dirs: bool = False
     
-    seed_path: str | None = None
+    seed_path: Optional[str] = None
     exp_output_path: str = ""
     agent_eoh_root: str = ""
     use_sa_seed_as_init: bool = True
+
+    use_rag_context: bool = False
+    rag_context_path: str = ""
+    rag_top_k: int = 3
+    rag_query: str = ""
+    rag_corpus_dir: str = ""
+    rag_max_chars: int = 6000

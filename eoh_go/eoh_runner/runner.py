@@ -4,9 +4,22 @@ import sys
 import traceback
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from .config import EOHConfig
+
+
+_RUNNER_ENV_KEYS = [
+    "PYTHONUTF8",
+    "PYTHONIOENCODING",
+    "EOH_OBJECTIVE_USE_COMPOSITE",
+    "EOH_RES_WEIGHT",
+    "EOH_RUN_TIMEOUT_S",
+    "EOH_RAG_CONTEXT",
+]
+
+_RAG_CONTEXT_MAX_BYTES = 50 * 1024
+_RAG_CONTEXT_MAX_CHARS = 8000
 
 
 def _extract_insertships_from_main(main_text: str) -> str:
@@ -33,6 +46,90 @@ def _prepare_sa_seed(example_root: str, project_root: str) -> str:
     sa_seed_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
     return str(sa_seed_path)
 
+
+def _restore_env(saved: dict[str, Optional[str]]) -> None:
+    for key, value in saved.items():
+        if value is None:
+            os.environ.pop(key, None)
+        else:
+            os.environ[key] = value
+
+
+def _manual_rag_context_dir(project_root: str) -> Path:
+    return (Path(project_root) / "eoh_go_workspace" / "rag" / "manual_contexts").resolve()
+
+
+def _resolve_manual_rag_context_path(config: EOHConfig, project_root: str) -> Path:
+    allowed_dir = _manual_rag_context_dir(project_root)
+    configured_path = config.rag_context_path.strip()
+    if configured_path:
+        raw_path = Path(configured_path)
+        context_path = raw_path if raw_path.is_absolute() else allowed_dir / raw_path
+    else:
+        context_path = allowed_dir / "insertships_v1.txt"
+
+    resolved_path = context_path.resolve()
+    try:
+        resolved_path.relative_to(allowed_dir)
+    except ValueError:
+        raise ValueError("RAG context path must stay under eoh_go_workspace/rag/manual_contexts")
+    return resolved_path
+
+
+def _read_manual_rag_context(config: EOHConfig, project_root: str) -> str:
+    context_path = _resolve_manual_rag_context_path(config, project_root)
+    try:
+        stat_result = context_path.stat()
+    except OSError as exc:
+        raise ValueError(f"RAG context path is not readable: {context_path}") from exc
+    if not context_path.is_file():
+        raise ValueError(f"RAG context path is not a file: {context_path}")
+    if stat_result.st_size > _RAG_CONTEXT_MAX_BYTES:
+        raise ValueError("RAG context file exceeds 50KB limit")
+
+    text = context_path.read_text(encoding="utf-8").strip()
+    if len(text) > _RAG_CONTEXT_MAX_CHARS:
+        return text[:_RAG_CONTEXT_MAX_CHARS]
+    return text
+
+
+def _automatic_rag_query(config: EOHConfig) -> str:
+    query = config.rag_query.strip()
+    if query:
+        return query
+    return (
+        f"dynamic InsertShips insertion heuristic density={config.dataset_density} "
+        f"arrival_scale={config.arrival_scale} reduce final cost avoid skipped orders "
+        "avoid timeout safe rollback"
+    )
+
+
+def _build_retrieved_rag_context(config: EOHConfig, project_root: str) -> str:
+    from eoh_go.rag.build_corpus import load_all_corpora, resolve_corpus_dir
+    from eoh_go.rag.prompt_context import format_prompt_context
+    from eoh_go.rag.retriever import retrieve
+
+    corpus_dir = resolve_corpus_dir(project_root, config.rag_corpus_dir.strip())
+    corpus = load_all_corpora(project_root, corpus_dir)
+    retrieved = retrieve(_automatic_rag_query(config), corpus, top_k=config.rag_top_k)
+    return format_prompt_context(retrieved, max_chars=config.rag_max_chars).strip()
+
+
+def _set_rag_context_env(config: EOHConfig, project_root: str) -> None:
+    if not config.use_rag_context:
+        os.environ.pop("EOH_RAG_CONTEXT", None)
+        return
+
+    if config.rag_context_path.strip():
+        rag_context = _read_manual_rag_context(config, project_root)
+    else:
+        rag_context = _build_retrieved_rag_context(config, project_root)
+
+    if rag_context:
+        os.environ["EOH_RAG_CONTEXT"] = rag_context
+    else:
+        os.environ.pop("EOH_RAG_CONTEXT", None)
+
 def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
     """
     Directly invoke Agent_EOH as a Python library rather than a subprocess.
@@ -48,6 +145,7 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
     if example_root not in sys.path:
         sys.path.insert(0, example_root)
 
+    saved_env = {key: os.environ.get(key) for key in _RUNNER_ENV_KEYS}
     os.environ["PYTHONUTF8"] = "1"
     os.environ["PYTHONIOENCODING"] = "utf-8"
         
@@ -60,6 +158,7 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
         
         # 3. Setup Problem & Paras
         importlib.reload(prob_insertships_go)
+        _set_rag_context_env(config, project_root)
         problem_instance = prob_insertships_go.Evaluation(
             sim_time_multi=config.sim_time_multi,
             max_instances=config.max_instances,
@@ -135,3 +234,5 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
             "population_size": 0,
             "population": [],
         }
+    finally:
+        _restore_env(saved_env)
