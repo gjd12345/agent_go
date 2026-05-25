@@ -16,3 +16,4 @@ eoh_go_workspace/memory/
 eoh_go_workspace/reports/tables/eoh_arrival_grid*/
 !eoh_go_workspace/reports/tables/eoh_grid_cleaned_summary_rc101_105/
 !eoh_go_workspace/reports/tables/eoh_selected_repeats_summary_20260426/
+eoh_go_workspace/generated/
