@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 from datetime import datetime
 from pathlib import Path
@@ -13,6 +14,7 @@ from ..eoh_runner.candidate_guard import best_raw_candidate, classify_candidate,
 from ..evolution import _prepare_candidate_project
 from ..paths import EOHGoPaths
 from .arrival_scale_table import prepare_instance, resolve_source_path
+from .summarize_rag_ablation import summarize as summarize_rag_ablation
 
 
 def _safe_float(value: Any) -> float | None:
@@ -109,6 +111,12 @@ def run_grid(args: argparse.Namespace) -> dict[str, Any]:
                     arrival_scale=scale,
                     use_density_source_dirs=args.use_density_source_dirs,
                     use_sa_seed_as_init=True,
+                    use_rag_context=args.use_rag_context,
+                    rag_context_path=args.rag_context_path or "",
+                    rag_top_k=args.rag_top_k,
+                    rag_query=args.rag_query or "",
+                    rag_corpus_dir=args.rag_corpus_dir or "",
+                    rag_max_chars=args.rag_max_chars,
                 )
                 result = run_v0_eoh(cfg)
                 population = result.get("population", []) if isinstance(result, dict) else []
@@ -204,6 +212,12 @@ def run_grid(args: argparse.Namespace) -> dict[str, Any]:
                     "best_candidate_id": best_eval.get("candidate_id"),
                     "best_build_ok": best_eval.get("build_ok"),
                     "data_path": str(data_path),
+                    "rag_enabled": bool(args.use_rag_context),
+                    "rag_context_path": args.rag_context_path,
+                    "rag_top_k": args.rag_top_k,
+                    "rag_query": args.rag_query,
+                    "rag_corpus_dir": args.rag_corpus_dir,
+                    "rag_max_chars": args.rag_max_chars,
                 }
                 rows.append(row)
                 raw.append(
@@ -288,6 +302,35 @@ def build_markdown(rows: list[dict[str, Any]]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def run_ablation_pair(args: argparse.Namespace) -> dict[str, Any]:
+    baseline_args = copy.deepcopy(args)
+    baseline_args.ablation_pair = False
+    baseline_args.use_rag_context = False
+    baseline_args.rag_context_path = ""
+    baseline_args.output_dir = str(Path(args.output_dir) / "baseline")
+
+    rag_args = copy.deepcopy(args)
+    rag_args.ablation_pair = False
+    rag_args.use_rag_context = True
+    rag_args.rag_context_path = ""
+    rag_args.output_dir = str(Path(args.output_dir) / "rag")
+
+    baseline_payload = run_grid(baseline_args)
+    rag_payload = run_grid(rag_args)
+    baseline_json = Path(baseline_payload["output_dir"]) / "eoh_arrival_grid_results.json"
+    rag_json = Path(rag_payload["output_dir"]) / "eoh_arrival_grid_results.json"
+
+    root = Path(args.root).resolve()
+    summary_dir = root / "eoh_go_workspace" / "reports" / "tables" / "rag_ablation_summary"
+    summary = summarize_rag_ablation(str(baseline_json), str(rag_json), str(summary_dir))
+    return {
+        "baseline": baseline_payload,
+        "rag": rag_payload,
+        "summary": summary,
+        "summary_output_dir": str(summary_dir),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run EOH over density and arrival-scale grid.")
     parser.add_argument("--root", default=".")
@@ -309,8 +352,18 @@ def main() -> None:
     parser.add_argument("--sim-time-interval", type=int, default=1)
     parser.add_argument("--invalid-threshold", type=float, default=1e8)
     parser.add_argument("--suspicious-low-ratio", type=float, default=0.3)
+    parser.add_argument("--use-rag-context", action="store_true")
+    parser.add_argument("--rag-context-path", default="")
+    parser.add_argument("--rag-top-k", type=int, default=3)
+    parser.add_argument("--rag-query", default="")
+    parser.add_argument("--rag-corpus-dir", default="")
+    parser.add_argument("--rag-max-chars", type=int, default=6000)
+    parser.add_argument("--ablation-pair", action="store_true")
     args = parser.parse_args()
-    run_grid(args)
+    if args.ablation_pair:
+        run_ablation_pair(args)
+    else:
+        run_grid(args)
 
 
 if __name__ == "__main__":
