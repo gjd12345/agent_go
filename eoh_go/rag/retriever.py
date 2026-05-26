@@ -38,12 +38,8 @@ def score_item(query: str, item: CorpusItem) -> int:
     return sum(weighted.get(term, 0) for term in query_terms)
 
 
-def retrieve(query: str, corpus: list[CorpusItem], top_k: int = 3) -> list[CorpusItem]:
-    if not corpus or top_k <= 0:
-        return []
-
+def score_corpus(query: str, corpus: list[CorpusItem]) -> list[tuple[int, CorpusItem]]:
     scored = [(score_item(query, item), item) for item in corpus]
-    scored = [(score, item) for score, item in scored if score > 0]
     scored.sort(
         key=lambda pair: (
             -pair[0],
@@ -51,4 +47,12 @@ def retrieve(query: str, corpus: list[CorpusItem], top_k: int = 3) -> list[Corpu
             pair[1].id,
         )
     )
+    return scored
+
+
+def retrieve(query: str, corpus: list[CorpusItem], top_k: int = 3) -> list[CorpusItem]:
+    if not corpus or top_k <= 0:
+        return []
+
+    scored = [(score, item) for score, item in score_corpus(query, corpus) if score > 0]
     return [item for _, item in scored[:top_k]]

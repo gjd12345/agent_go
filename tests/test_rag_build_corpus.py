@@ -120,10 +120,19 @@ class RagBuildCorpusTests(unittest.TestCase):
         self.assertEqual(5, len(cards))
         self.assertNotIn("sa_seed_1", {item.id for item in cards})
         for item in cards:
-            self.assertLessEqual(len(item.tags), 4, item.id)
             self.assertLessEqual(len(item.constraints), 2, item.id)
             self.assertLessEqual(len(item.content), 450, item.id)
             item.content.encode("ascii")
+
+        by_id = {item.id: item for item in cards}
+        self.assertTrue({"d50", "d75", "medium-density", "capacity", "limited-capacity", "lookahead"}.issubset(by_id["regret2_insertion"].tags))
+        self.assertIn("d50+", by_id["regret2_insertion"].summary)
+        self.assertIn("limited route capacity", by_id["regret2_insertion"].summary)
+        self.assertTrue({"d50", "d75", "medium-density", "weighted-score", "cost-delta"}.issubset(by_id["solomon_i1"].tags))
+        self.assertIn("global weighted-score selection criterion", by_id["solomon_i1"].summary)
+        self.assertTrue({"d25", "low-density"}.issubset(by_id["nearest_insertion"].tags))
+        self.assertTrue({"dispersed", "low-density"}.issubset(by_id["farthest_insertion"].tags))
+        self.assertTrue({"merge", "pair-savings", "route-consolidation"}.issubset(by_id["cw_savings"].tags))
 
         literature = filter_corpus_by_mode(corpus, "literature")
         self.assertNotIn("sa_seed_1", {item.id for item in literature})

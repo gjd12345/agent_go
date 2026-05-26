@@ -101,24 +101,26 @@ def _automatic_rag_query(config: EOHConfig) -> str:
         return query
     return (
         f"dynamic InsertShips insertion heuristic density={config.dataset_density} "
-        f"arrival_scale={config.arrival_scale} reduce final cost avoid skipped orders "
-        "avoid timeout safe rollback"
+        f"arrival_scale={config.arrival_scale} medium density route capacity "
+        "insertion cost final cost"
     )
 
 
 def _build_retrieved_rag_context(config: EOHConfig, project_root: str) -> tuple[str, dict[str, Any]]:
     from eoh_go.rag.build_corpus import filter_corpus_by_mode, load_all_corpora, resolve_corpus_dir
     from eoh_go.rag.prompt_context import format_prompt_context
-    from eoh_go.rag.retriever import retrieve
+    from eoh_go.rag.retriever import retrieve, score_corpus
 
     corpus_dir = resolve_corpus_dir(project_root, config.rag_corpus_dir.strip())
     corpus = load_all_corpora(project_root, corpus_dir)
     corpus_size_before = len(corpus)
     filtered_corpus = filter_corpus_by_mode(corpus, config.rag_mode)
-    global_items = [item for item in filtered_corpus if item.kind == "api_constraint"]
-    strategy_pool = [item for item in filtered_corpus if item.kind != "api_constraint"]
+    global_items = [item for item in filtered_corpus if item.kind in {"api_constraint", "failure_case"}]
+    strategy_pool = [item for item in filtered_corpus if item.kind == "algorithm_card"]
     query = _automatic_rag_query(config)
     retrieved = retrieve(query, strategy_pool, top_k=config.rag_top_k)
+    all_scores = score_corpus(query, strategy_pool)
+    score_by_id = {item.id: score for score, item in all_scores}
     full_context = format_prompt_context(
         retrieved,
         max_chars=max(config.rag_max_chars, 1_000_000),
@@ -132,7 +134,11 @@ def _build_retrieved_rag_context(config: EOHConfig, project_root: str) -> tuple[
         "rag_corpus_size_before_filter": corpus_size_before,
         "rag_corpus_size_after_filter": len(filtered_corpus),
         "rag_global_items": [{"id": item.id, "kind": item.kind, "title": item.title} for item in global_items],
-        "rag_selected_items": [{"id": item.id, "kind": item.kind, "title": item.title} for item in retrieved],
+        "rag_all_scores": [{"id": item.id, "kind": item.kind, "score": score} for score, item in all_scores],
+        "rag_selected_items": [
+            {"id": item.id, "kind": item.kind, "title": item.title, "score": score_by_id.get(item.id, 0)}
+            for item in retrieved
+        ],
         "rag_context_chars": len(rag_context),
         "rag_context_truncated": len(rag_context) < len(full_context),
     }
@@ -154,6 +160,7 @@ def _set_rag_context_env(config: EOHConfig, project_root: str) -> dict[str, Any]
             "rag_corpus_size_before_filter": None,
             "rag_corpus_size_after_filter": None,
             "rag_global_items": [],
+            "rag_all_scores": [],
             "rag_selected_items": [],
             "rag_context_chars": len(rag_context),
             "rag_context_truncated": truncated,

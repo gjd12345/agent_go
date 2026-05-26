@@ -23,6 +23,16 @@ def _global_block(item: CorpusItem) -> str:
     ).rstrip()
 
 
+def _warning_block(item: CorpusItem) -> str:
+    return (
+        f"[Warning: {item.id}]\n"
+        f"Title: {item.title}\n"
+        f"Summary: {item.summary}\n"
+        "Constraints:\n"
+        f"{_constraints_text(item, limit=2)}"
+    ).rstrip()
+
+
 def _strategy_block(index: int, item: CorpusItem) -> str:
     if item.kind == "failure_case":
         return (
@@ -62,12 +72,25 @@ def format_prompt_context(
     if not global_items and not strategy_items:
         return ""
 
-    global_parts = ["GLOBAL SAFETY / API RULES"]
-    for item in global_items:
-        global_parts.append(_global_block(item))
-    global_section = "\n\n".join(global_parts)
+    api_items = [item for item in global_items if item.kind == "api_constraint"]
+    warning_items = [item for item in global_items if item.kind == "failure_case"]
+    global_sections = []
+    if api_items:
+        api_parts = ["API RULES"]
+        for item in api_items:
+            api_parts.append(_global_block(item))
+        global_sections.append("\n\n".join(api_parts))
+    if warning_items:
+        warning_parts = ["WARNINGS"]
+        for item in warning_items[:1]:
+            warning_parts.append(_warning_block(item))
+        global_sections.append("\n\n".join(warning_parts))
 
-    context = f"{global_section}\n\nRETRIEVED STRATEGY CARDS"
+    if global_sections:
+        global_text = "\n\n".join(global_sections)
+        context = f"{global_text}\n\nRETRIEVED STRATEGY CARDS"
+    else:
+        context = "RETRIEVED STRATEGY CARDS"
     for index, item in enumerate(strategy_items, start=1):
         candidate = f"\n\n{_strategy_block(index, item)}"
         if len(context) + len(candidate) <= max_chars:
