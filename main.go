@@ -245,6 +245,9 @@ func (assign *Assign) AddShip(id int, ori, des Station) bool {
 		assign.Stations[assign.StationsLen] = des
 		assign.StationsLen += 1
 	}
+	if assign.StaIndexesLen >= MAXSHIPS {
+		return false
+	}
 	assign.StaIndexes[assign.StaIndexesLen] = ship
 	assign.StaIndexesLen += 1
 	return true
@@ -952,7 +955,10 @@ func main() {
 	event_ich := make(chan Event, 1)
 	event_och := make(chan EventOutput, 1)
 	filename := os.Args[1]
-	read_json(filename, &input_data)
+	if err := read_json(filename, &input_data); err != nil {
+		fmt.Fprintf(os.Stderr, "read_json: %v\n", err)
+		os.Exit(1)
+	}
 	template.LoadCap = input_data.LoadCap
 	template.Speed = 1
 
