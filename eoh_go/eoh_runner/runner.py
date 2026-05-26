@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import os
 import sys
@@ -76,7 +78,7 @@ def _resolve_manual_rag_context_path(config: EOHConfig, project_root: str) -> Pa
     return resolved_path
 
 
-def _read_manual_rag_context(config: EOHConfig, project_root: str) -> str:
+def _read_manual_rag_context(config: EOHConfig, project_root: str) -> tuple[str, bool]:
     context_path = _resolve_manual_rag_context_path(config, project_root)
     try:
         stat_result = context_path.stat()
@@ -89,8 +91,8 @@ def _read_manual_rag_context(config: EOHConfig, project_root: str) -> str:
 
     text = context_path.read_text(encoding="utf-8").strip()
     if len(text) > _RAG_CONTEXT_MAX_CHARS:
-        return text[:_RAG_CONTEXT_MAX_CHARS]
-    return text
+        return text[:_RAG_CONTEXT_MAX_CHARS], True
+    return text, False
 
 
 def _automatic_rag_query(config: EOHConfig) -> str:
@@ -104,31 +106,66 @@ def _automatic_rag_query(config: EOHConfig) -> str:
     )
 
 
-def _build_retrieved_rag_context(config: EOHConfig, project_root: str) -> str:
-    from eoh_go.rag.build_corpus import load_all_corpora, resolve_corpus_dir
+def _build_retrieved_rag_context(config: EOHConfig, project_root: str) -> tuple[str, dict[str, Any]]:
+    from eoh_go.rag.build_corpus import filter_corpus_by_mode, load_all_corpora, resolve_corpus_dir
     from eoh_go.rag.prompt_context import format_prompt_context
     from eoh_go.rag.retriever import retrieve
 
     corpus_dir = resolve_corpus_dir(project_root, config.rag_corpus_dir.strip())
     corpus = load_all_corpora(project_root, corpus_dir)
-    retrieved = retrieve(_automatic_rag_query(config), corpus, top_k=config.rag_top_k)
-    return format_prompt_context(retrieved, max_chars=config.rag_max_chars).strip()
+    corpus_size_before = len(corpus)
+    filtered_corpus = filter_corpus_by_mode(corpus, config.rag_mode)
+    global_items = [item for item in filtered_corpus if item.kind == "api_constraint"]
+    strategy_pool = [item for item in filtered_corpus if item.kind != "api_constraint"]
+    query = _automatic_rag_query(config)
+    retrieved = retrieve(query, strategy_pool, top_k=config.rag_top_k)
+    full_context = format_prompt_context(
+        retrieved,
+        max_chars=max(config.rag_max_chars, 1_000_000),
+        global_items=global_items,
+    ).strip()
+    rag_context = format_prompt_context(retrieved, max_chars=config.rag_max_chars, global_items=global_items).strip()
+    trace = {
+        "rag_mode": config.rag_mode,
+        "rag_query": query,
+        "rag_top_k": config.rag_top_k,
+        "rag_corpus_size_before_filter": corpus_size_before,
+        "rag_corpus_size_after_filter": len(filtered_corpus),
+        "rag_global_items": [{"id": item.id, "kind": item.kind, "title": item.title} for item in global_items],
+        "rag_selected_items": [{"id": item.id, "kind": item.kind, "title": item.title} for item in retrieved],
+        "rag_context_chars": len(rag_context),
+        "rag_context_truncated": len(rag_context) < len(full_context),
+    }
+    return rag_context, trace
 
 
-def _set_rag_context_env(config: EOHConfig, project_root: str) -> None:
+def _set_rag_context_env(config: EOHConfig, project_root: str) -> dict[str, Any] | None:
     if not config.use_rag_context:
         os.environ.pop("EOH_RAG_CONTEXT", None)
-        return
+        return None
 
     if config.rag_context_path.strip():
-        rag_context = _read_manual_rag_context(config, project_root)
+        rag_context, truncated = _read_manual_rag_context(config, project_root)
+        trace = {
+            "rag_mode": config.rag_mode,
+            "rag_context_path": str(_resolve_manual_rag_context_path(config, project_root)),
+            "rag_query": None,
+            "rag_top_k": config.rag_top_k,
+            "rag_corpus_size_before_filter": None,
+            "rag_corpus_size_after_filter": None,
+            "rag_global_items": [],
+            "rag_selected_items": [],
+            "rag_context_chars": len(rag_context),
+            "rag_context_truncated": truncated,
+        }
     else:
-        rag_context = _build_retrieved_rag_context(config, project_root)
+        rag_context, trace = _build_retrieved_rag_context(config, project_root)
 
     if rag_context:
         os.environ["EOH_RAG_CONTEXT"] = rag_context
     else:
         os.environ.pop("EOH_RAG_CONTEXT", None)
+    return trace
 
 def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
     """
@@ -148,6 +185,7 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
     saved_env = {key: os.environ.get(key) for key in _RUNNER_ENV_KEYS}
     os.environ["PYTHONUTF8"] = "1"
     os.environ["PYTHONIOENCODING"] = "utf-8"
+    rag_trace = None
         
     try:
         # 2. Imports from Agent_EOH
@@ -158,7 +196,7 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
         
         # 3. Setup Problem & Paras
         importlib.reload(prob_insertships_go)
-        _set_rag_context_env(config, project_root)
+        rag_trace = _set_rag_context_env(config, project_root)
         problem_instance = prob_insertships_go.Evaluation(
             sim_time_multi=config.sim_time_multi,
             max_instances=config.max_instances,
@@ -223,6 +261,7 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
             "population_file": str(latest_pop_file) if latest_pop_file else None,
             "population_size": len(population),
             "population": population,
+            "rag_trace": rag_trace,
         }
     except Exception as e:
         return {
@@ -233,6 +272,7 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
             "population_file": None,
             "population_size": 0,
             "population": [],
+            "rag_trace": rag_trace,
         }
     finally:
         _restore_env(saved_env)

@@ -33,6 +33,7 @@ class EOHConfig:
 
     use_rag_context: bool = False
     rag_context_path: str = ""
+    rag_mode: str = "mixed"
     rag_top_k: int = 3
     rag_query: str = ""
     rag_corpus_dir: str = ""

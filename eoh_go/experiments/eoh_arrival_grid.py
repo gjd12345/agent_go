@@ -113,12 +113,14 @@ def run_grid(args: argparse.Namespace) -> dict[str, Any]:
                     use_sa_seed_as_init=True,
                     use_rag_context=args.use_rag_context,
                     rag_context_path=args.rag_context_path or "",
+                    rag_mode=args.rag_mode,
                     rag_top_k=args.rag_top_k,
                     rag_query=args.rag_query or "",
                     rag_corpus_dir=args.rag_corpus_dir or "",
                     rag_max_chars=args.rag_max_chars,
                 )
                 result = run_v0_eoh(cfg)
+                rag_trace = result.get("rag_trace") if isinstance(result, dict) and isinstance(result.get("rag_trace"), dict) else {}
                 population = result.get("population", []) if isinstance(result, dict) else []
 
                 data_path = prepare_instance(src, tmp_dir, density_arg, float(scale))
@@ -214,6 +216,14 @@ def run_grid(args: argparse.Namespace) -> dict[str, Any]:
                     "data_path": str(data_path),
                     "rag_enabled": bool(args.use_rag_context),
                     "rag_context_path": args.rag_context_path,
+                    "rag_mode_requested": args.rag_mode,
+                    "rag_mode_effective": rag_trace.get("rag_mode"),
+                    "rag_query_effective": rag_trace.get("rag_query"),
+                    "rag_corpus_size_before": rag_trace.get("rag_corpus_size_before_filter"),
+                    "rag_corpus_size_after": rag_trace.get("rag_corpus_size_after_filter"),
+                    "rag_retrieved_ids": [item.get("id") for item in rag_trace.get("rag_selected_items", [])],
+                    "rag_context_chars": rag_trace.get("rag_context_chars"),
+                    "rag_context_truncated": rag_trace.get("rag_context_truncated"),
                     "rag_top_k": args.rag_top_k,
                     "rag_query": args.rag_query,
                     "rag_corpus_dir": args.rag_corpus_dir,
@@ -354,6 +364,7 @@ def main() -> None:
     parser.add_argument("--suspicious-low-ratio", type=float, default=0.3)
     parser.add_argument("--use-rag-context", action="store_true")
     parser.add_argument("--rag-context-path", default="")
+    parser.add_argument("--rag-mode", choices=["history", "literature", "mixed"], default="mixed")
     parser.add_argument("--rag-top-k", type=int, default=3)
     parser.add_argument("--rag-query", default="")
     parser.add_argument("--rag-corpus-dir", default="")

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import re
 from pathlib import Path
 
@@ -13,6 +12,8 @@ CORPUS_FILES = {
     "api_constraint": "api_constraints.jsonl",
     "failure_case": "failure_cases.jsonl",
 }
+
+LITERATURE_IDS = {"nearest_insertion", "farthest_insertion", "solomon_i1", "regret2_insertion", "cw_savings"}
 
 _STANDARD_INSERTSHIPS_CONSTRAINTS = [
     "Never skip orders unless no feasible assignment exists.",
@@ -95,57 +96,45 @@ def build_code_examples(project_root: str | Path) -> list[CorpusItem]:
 
 
 def build_algorithm_cards(project_root: str | Path) -> list[CorpusItem]:
-    root = Path(project_root).resolve()
-    seed_path = root / "Agent_EOH" / "eoh" / "src" / "eoh" / "examples" / "user_insertships_go" / "seeds_insertships_go_sa.json"
-    if not seed_path.exists():
-        return []
-    try:
-        payload = json.loads(seed_path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return []
-    if not isinstance(payload, list):
-        return []
+    """Algorithm cards are curated manually; SA seed content moved to api_constraint."""
+    return []
 
-    items: list[CorpusItem] = []
-    for index, entry in enumerate(payload, start=1):
-        if not isinstance(entry, dict):
-            continue
-        algorithm = str(entry.get("algorithm") or f"Seed InsertShips algorithm {index}")
-        code = str(entry.get("code") or "")
-        items.append(
-            CorpusItem(
-                id=f"sa_seed_{index}",
-                kind="algorithm_card",
-                title=algorithm,
-                tags=["insertships", "sa", "fallback", "seed"],
-                source_path=_source_path(root, seed_path),
-                summary="SA baseline or seed heuristic for safe InsertShips generation.",
-                constraints=list(_STANDARD_INSERTSHIPS_CONSTRAINTS),
-                content=code,
-            )
-        )
-    return items
+
+def filter_corpus_by_mode(corpus: list[CorpusItem], mode: str) -> list[CorpusItem]:
+    normalized = mode.strip().lower() if mode else "mixed"
+    if normalized == "mixed":
+        return list(corpus)
+    if normalized == "history":
+        return [item for item in corpus if item.id not in LITERATURE_IDS]
+    if normalized == "literature":
+        return [item for item in corpus if item.id in LITERATURE_IDS or item.kind in {"api_constraint", "failure_case"}]
+    raise ValueError("RAG mode must be one of: history, literature, mixed")
 
 
 def build_api_constraints(project_root: str | Path) -> list[CorpusItem]:
     root = Path(project_root).resolve()
-    main_path = root / "main.go"
-    content = main_path.read_text(encoding="utf-8", errors="replace") if main_path.exists() else ""
-    snippet = content[:6000].strip()
-    description = (
-        "InsertShips must return a Dispatch, preserve all customer assignments, use Dispatch/Assign route APIs "
-        "consistently, and refresh total cost before returning."
+    content = (
+        "API: insertships_skeleton\n"
+        "Rules:\n"
+        "- Save Assign state before trial AddShip.\n"
+        "- If AddShip succeeds: GenRoute, record cost_delta, then RemoveShip+GenRoute to undo.\n"
+        "- Commit: re-apply best (Assign, position) once. GenRoute after final insert.\n"
+        "- Every order needs a fallback insertion path.\n"
+        "- Call RenewnTotalCost exactly once before return."
     )
     return [
         CorpusItem(
-            id="insertships_api_contract",
+            id="insertships_api_skeleton",
             kind="api_constraint",
-            title="InsertShips Dispatch API contract",
-            tags=["insertships", "dispatch", "assign", "api", "renewntotalcost"],
-            source_path=_source_path(root, main_path) if main_path.exists() else "main.go",
-            summary=description,
-            constraints=list(_STANDARD_INSERTSHIPS_CONSTRAINTS),
-            content=snippet or description,
+            title="InsertShips Go API skeleton",
+            tags=["insertships", "api", "safety"],
+            source_path="curated",
+            summary="Safe Go API call sequence: save state, trial insert, record delta, rollback, commit best, RenewnTotalCost.",
+            constraints=[
+                "Every order MUST be inserted; fallback to new Assign if no existing Assign works.",
+                "RenewnTotalCost() exactly once before return.",
+            ],
+            content=content,
         )
     ]
 
@@ -195,16 +184,29 @@ def build_failure_cases(project_root: str | Path) -> list[CorpusItem]:
 def build_all_corpora(project_root: str | Path, corpus_dir: str | Path | None = None) -> list[Path]:
     target_dir = resolve_corpus_dir(project_root, corpus_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
+    algorithm_path = target_dir / CORPUS_FILES["algorithm_card"]
+    curated_algorithm_cards: list[CorpusItem] = []
+    if algorithm_path.exists():
+        existing_algorithm_cards = [item for item in load_corpus(algorithm_path) if item.id in LITERATURE_IDS]
+        curated_algorithm_cards = existing_algorithm_cards
+        lit_count = len({item.id for item in curated_algorithm_cards})
+        if lit_count < 5:
+            print("Warning: algorithm_cards.jsonl has fewer than 5 curated literature cards.")
+    else:
+        print("Warning: algorithm_cards.jsonl missing; writing empty curated algorithm card corpus.")
+
     grouped = {
         "code_example": build_code_examples(project_root),
-        "algorithm_card": build_algorithm_cards(project_root),
+        "algorithm_card": curated_algorithm_cards,
         "api_constraint": build_api_constraints(project_root),
         "failure_case": build_failure_cases(project_root),
     }
+
     written: list[Path] = []
     for kind, filename in CORPUS_FILES.items():
         path = target_dir / filename
-        save_corpus(grouped[kind], path)
+        if kind != "algorithm_card" or not algorithm_path.exists():
+            save_corpus(grouped[kind], path)
         written.append(path)
     return written
 
