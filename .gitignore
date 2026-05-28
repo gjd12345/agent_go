@@ -17,3 +17,11 @@ eoh_go_workspace/reports/tables/eoh_arrival_grid*/
 !eoh_go_workspace/reports/tables/eoh_grid_cleaned_summary_rc101_105/
 !eoh_go_workspace/reports/tables/eoh_selected_repeats_summary_20260426/
 eoh_go_workspace/generated/
+node_modules/
+package.json
+package-lock.json
+build_slides.js
+
+# Exclude per-generation population JSONs (hundreds of small files)
+**/pops/population_generation_*.json
+**/pops_best/population_generation_*.json
