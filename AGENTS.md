@@ -57,11 +57,112 @@ P0/P1 findings block completion.
 5. Runtime evidence beats static speculation.
 6. If unresolved, choose the lower-risk option and document the tradeoff.
 
+## Project: EOH-VRP
+
+Evolutionary optimization of InsertShips heuristics for VRPTW with RAG context injection.
+
+### Key Paths
+
+| Path | Purpose |
+|------|---------|
+| `eoh_go/experiments/eoh_arrival_grid.py` | Main experiment runner (grid + ablation pair) |
+| `eoh_go/eoh_runner/runner.py` | EOH config + RAG context injection |
+| `eoh_go/rag/build_corpus.py` | Corpus building + mode filtering |
+| `eoh_go/rag/retriever.py` | Keyword-weighted retrieval |
+| `eoh_go/rag/prompt_context.py` | Prompt formatting with max_chars limit |
+| `eoh_go_workspace/reports/tables/` | Experiment results |
+| `eoh_go_workspace/reports/figures/` | Diagrams + slides |
+| `eoh_go_workspace/rag/corpus/` | RAG corpus JSONL files |
+| `~/.config/agent_go/chatrhino.env` | API credentials (never echo) |
+
+### Architecture Rule
+
+When the codebase architecture changes (new modules, pipeline refactors, RAG flow modifications), draw an architecture diagram with version suffix:
+
+```
+eoh_go_workspace/reports/figures/architecture_v{1,2,3...}.drawio
+```
+
+Labels: RAG Pipeline, EOH Evolution Loop, Experiment Flow, Module Dependencies.
+
+### Evolution Retention Rule
+
+After every evolution run (gen >= 3 or best_J significantly below seed), save the best
+candidate to `eoh_go_workspace/candidate_sources/` and rebuild the corpus.
+
+**Admission criteria**: only candidates with `best_build_ok=true` AND
+`selected_best_status_after_eval=valid` AND `best_EOH_J` not null.
+Move candidates from build-failed runs to `candidate_sources/quarantine/`.
+
+```bash
+# Save best candidate from last generation
+python3 -c "
+import json, os, glob
+# Find pop best from last gen, copy code to candidate_sources/
+..."
+
+# Rebuild corpus
+python3 -c "from eoh_go.rag.build_corpus import build_all_corpora; build_all_corpora('.')"
+```
+
+This creates a positive feedback loop: evolution discovers strategies → corpus grows
+→ history-RAG retrieves proven patterns → future runs benefit.
+
+### Documentation Milestones
+
+Proactively suggest updating `eoh_go_workspace/reports/tables/rag_experiments_report.md`
+when a **genuine inflection point** is reached. Do NOT suggest for routine runs.
+
+**Trigger (suggest):**
+- A new experiment completes that shifts a finding from tentative → confirmed
+- A bug is found and verified (e.g. history-RAG strategy_pool was broken)
+- A parameter/methodology decision that changes future direction (e.g. "switch from gen=1 to gen=8 exploration")
+- A new cell or RAG mode shows a result that contradicts or extends previous claims
+
+**Don't trigger for:**
+- Routine experiment runs, repeat completions, parameter tweaks
+- Slides or diagrams (those have their own rules)
+
+**Format:** one-line suggestion before taking action, e.g. "Worth adding this to the report?"
+Wait for user nod before writing. Keep updates targeted — don't rewrite the whole file.
+
+### Skills
+
+| Skill | Trigger | Use |
+|-------|---------|-----|
+| `drawio` | diagram, flowchart, architecture, draw.io | Draw/update architecture diagrams |
+| `pptx` | slides, presentation, deck | Generate meeting/presentation slides |
+| `eoh-experiment` | run experiment, ablation, grid search | Run EOH experiments with correct params |
+| `eoh-analyze` | analyze results, compare, delta J, summary | Compute median ΔJ, valid rates, seed checks |
+
+### Commands Quick Reference
+
+```bash
+# Source API key
+export $(grep -v '^#' ~/.config/agent_go/chatrhino.env | xargs)
+
+# Run ablation pair
+python3 -m eoh_go.experiments.eoh_arrival_grid \
+  --root . --problem rc101.json rc102.json --density d50 d75 \
+  --arrival-scale 1.0 --pop-size 8 --generations 1 \
+  --rag-mode literature --rag-top-k 0 --rag-max-chars 2500 \
+  --llm-model JoyAI-LLM-Pro \
+  --output-dir eoh_go_workspace/reports/tables/<exp> \
+  --ablation-pair --use-density-source-dirs --source-dir solomon_benchmark
+
+# Deep evolution
+--pop-size 4 --generations 8  # gen > pop for exploration depth
+
+# Resume
+--resume --output-dir <existing_run_dir>
+```
+
 ## Safety Rules
 
 Generated candidate code must run only through guarded evaluator paths.
 Do not execute generated Python or Go directly in the main process.
 RAG code must live under `eoh_go/rag/`; generated artifacts and reports stay under `eoh_go_workspace/`.
+API credentials must never be printed or echoed.
 
 ## Completion Requirements
 

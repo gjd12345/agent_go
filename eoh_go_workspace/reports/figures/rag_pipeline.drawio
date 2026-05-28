@@ -1,0 +1,134 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="lane1" value="Corpus Building (eoh_go/rag/build_corpus.py)" style="swimlane;horizontal=0;startSize=110;fillColor=#e8f4f8;html=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="0" width="1600" height="140" as="geometry"/>
+    </mxCell>
+    <mxCell id="cb1" value="code_examples.jsonl&#xa;10 Go sources" style="shape=document;whiteSpace=wrap;html=1;fillColor=#d5e8d4;" vertex="1" parent="lane1">
+      <mxGeometry x="120" y="35" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="cb2" value="algorithm_cards.jsonl&#xa;5 literature cards" style="shape=document;whiteSpace=wrap;html=1;fillColor=#fff2cc;" vertex="1" parent="lane1">
+      <mxGeometry x="320" y="35" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="cb3" value="api_constraints.jsonl&#xa;API skeleton" style="shape=document;whiteSpace=wrap;html=1;fillColor=#dae8fc;" vertex="1" parent="lane1">
+      <mxGeometry x="540" y="35" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="cb4" value="failure_cases.jsonl&#xa;3 guard patterns" style="shape=document;whiteSpace=wrap;html=1;fillColor=#f8cecc;" vertex="1" parent="lane1">
+      <mxGeometry x="760" y="35" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="cb5" value="load_all_corpora()" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;" vertex="1" parent="lane1">
+      <mxGeometry x="1000" y="35" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="ecb1" edge="1" parent="1" source="cb4" target="cb5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="lane2" value="Mode Filtering &amp; Pool Split (runner.py:117-124)" style="swimlane;horizontal=0;startSize=110;fillColor=#fff0e6;html=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="140" width="1600" height="140" as="geometry"/>
+    </mxCell>
+    <mxCell id="f1" value="filter_corpus_by_mode()&#xa;history/literature/mixed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;" vertex="1" parent="lane2">
+      <mxGeometry x="140" y="35" width="180" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="f2" value="global_items&#xa;api_constraint&#xa;+ failure_case" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;" vertex="1" parent="lane2">
+      <mxGeometry x="460" y="35" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="f3" value="strategy_pool&#xa;algorithm_card&#xa;or code_example" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;" vertex="1" parent="lane2">
+      <mxGeometry x="760" y="35" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef1" edge="1" parent="1" source="f1" target="f2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef2" edge="1" parent="1" source="f1" target="f3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="lane3" value="Retrieval &amp; Scoring (eoh_go/rag/retriever.py)" style="swimlane;horizontal=0;startSize=110;fillColor=#e8f5e9;html=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="280" width="1600" height="140" as="geometry"/>
+    </mxCell>
+    <mxCell id="r1" value="automatic query&#xa;keyword-weighted" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;" vertex="1" parent="lane3">
+      <mxGeometry x="140" y="35" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="r2" value="score_corpus()&#xa;title*3, summary*2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;" vertex="1" parent="lane3">
+      <mxGeometry x="460" y="35" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="r3" value="retrieve()&#xa;top_k items" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;" vertex="1" parent="lane3">
+      <mxGeometry x="760" y="35" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="er1" edge="1" parent="1" source="r1" target="r2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="er2" edge="1" parent="1" source="r2" target="r3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="lane4" value="Prompt Context (eoh_go/rag/prompt_context.py)" style="swimlane;horizontal=0;startSize=110;fillColor=#fff9e6;html=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="420" width="1600" height="140" as="geometry"/>
+    </mxCell>
+    <mxCell id="p1" value="API RULES block&#xa;(global api_constraint)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;" vertex="1" parent="lane4">
+      <mxGeometry x="120" y="35" width="180" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="p2" value="WARNINGS block&#xa;(failure_case x1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;" vertex="1" parent="lane4">
+      <mxGeometry x="370" y="35" width="180" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="p3" value="STRATEGY CARDS&#xa;(retrieved items)&#xa;max_chars limit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;" vertex="1" parent="lane4">
+      <mxGeometry x="620" y="35" width="180" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="p4" value="format_prompt_context()&#xa;full text assembled" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;" vertex="1" parent="lane4">
+      <mxGeometry x="920" y="35" width="160" height="80" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="lane5" value="EOH Evolution (Agent_EOH + eoh_go/eoh_runner/runner.py)" style="swimlane;horizontal=0;startSize=110;fillColor=#fce4ec;html=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="560" width="1600" height="160" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" value="EOH Config&#xa;(pop, gen, model)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;" vertex="1" parent="lane5">
+      <mxGeometry x="80" y="35" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="Seed Algorithm&#xa;(greedy SA)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;" vertex="1" parent="lane5">
+      <mxGeometry x="280" y="35" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="LLM Mutation&#xa;+ Crossover&#xa;(with RAG context)" style="rhombus;whiteSpace=wrap;html=1;fillColor=#d5e8d4;" vertex="1" parent="lane5">
+      <mxGeometry x="480" y="25" width="160" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="Go SA Simulator&#xa;Evaluation" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#ffe6cc;" vertex="1" parent="lane5">
+      <mxGeometry x="700" y="35" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="Candidate Guard&#xa;(classify, select)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;" vertex="1" parent="lane5">
+      <mxGeometry x="900" y="35" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="insertShips()&#xa;Go source output" style="shape=document;whiteSpace=wrap;html=1;fillColor=#e1d5e7;" vertex="1" parent="lane5">
+      <mxGeometry x="1120" y="35" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="ee1" edge="1" parent="1" source="e2" target="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ee2" edge="1" parent="1" source="e3" target="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ee3" edge="1" parent="1" source="e4" target="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ee4" edge="1" parent="1" source="e5" target="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eloop" value="for gen=1..N" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;" edge="1" parent="1" source="e5" target="e3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="cross1" edge="1" parent="1" source="cb5" target="f1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="cross2" edge="1" parent="1" source="f3" target="r1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="cross3" edge="1" parent="1" source="r3" target="p3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="cross4" edge="1" parent="1" source="f2" target="p1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="cross5" edge="1" parent="1" source="p4" target="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

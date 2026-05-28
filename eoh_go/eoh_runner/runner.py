@@ -116,7 +116,12 @@ def _build_retrieved_rag_context(config: EOHConfig, project_root: str) -> tuple[
     corpus_size_before = len(corpus)
     filtered_corpus = filter_corpus_by_mode(corpus, config.rag_mode)
     global_items = [item for item in filtered_corpus if item.kind in {"api_constraint", "failure_case"}]
-    strategy_pool = [item for item in filtered_corpus if item.kind == "algorithm_card"]
+    if config.rag_mode == "history":
+        strategy_pool = [item for item in filtered_corpus if item.kind == "code_example"]
+    elif config.rag_mode == "literature":
+        strategy_pool = [item for item in filtered_corpus if item.kind == "algorithm_card"]
+    else:
+        strategy_pool = [item for item in filtered_corpus if item.kind in {"algorithm_card", "code_example"}]
     query = _automatic_rag_query(config)
     retrieved = retrieve(query, strategy_pool, top_k=config.rag_top_k)
     all_scores = score_corpus(query, strategy_pool)
