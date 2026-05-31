@@ -1,0 +1,83 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="lane1" value="" style="swimlane;horizontal=0;startSize=30;fillColor=#fce4ec;html=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="0" width="1300" height="150" as="geometry"/>
+    </mxCell>
+    <mxCell id="title1" value="v0522 之前：纯 EOH（无 RAG）" style="text;html=1;fontSize=18;fontStyle=1;align=left;fillColor=none;fontColor=#991B1B;" vertex="1" parent="lane1">
+      <mxGeometry x="40" y="5" width="500" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="old_seed" value="Greedy SA Seed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;fontSize=15;" vertex="1" parent="lane1">
+      <mxGeometry x="40" y="50" width="170" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="old_llm" value="LLM (JoyAI)&#xa;只接收 prompt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;fontSize=14;" vertex="1" parent="lane1">
+      <mxGeometry x="280" y="50" width="170" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="old_eval" value="Go SA Simulator" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#d5e8d4;fontSize=15;" vertex="1" parent="lane1">
+      <mxGeometry x="520" y="50" width="170" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="old_best" value="Best Candidate&#xa;(不回流)" style="shape=document;whiteSpace=wrap;html=1;fillColor=#e1d5e7;fontSize=14;" vertex="1" parent="lane1">
+      <mxGeometry x="760" y="50" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="old_note" value="&#x2717; 无外部知识注入&#xa;&#x2717; 无上下文控制&#xa;&#x2717; 最优候选不回流" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;fontColor=#DC2626;fontSize=14;" vertex="1" parent="lane1">
+      <mxGeometry x="1000" y="40" width="260" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="eold1" edge="1" parent="1" source="old_seed" target="old_llm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eold2" edge="1" parent="1" source="old_llm" target="old_eval" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eold3" edge="1" parent="1" source="old_eval" target="old_best" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="lane2" value="" style="swimlane;horizontal=0;startSize=30;fillColor=#e8f5e9;html=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="190" width="1300" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="title2" value="v0526 之后：EOH + RAG（新增 Context Layer + 正反馈闭环）" style="text;html=1;fontSize=18;fontStyle=1;align=left;fillColor=none;fontColor=#166534;" vertex="1" parent="lane2">
+      <mxGeometry x="40" y="5" width="700" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r1" value="RAG Corpus&#xa;四类知识" style="shape=document;whiteSpace=wrap;html=1;fillColor=#fff2cc;fontSize=14;" vertex="1" parent="lane2">
+      <mxGeometry x="40" y="60" width="160" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="r2" value="filter + retrieve&#xa;top_k + max_chars" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;fontSize=14;" vertex="1" parent="lane2">
+      <mxGeometry x="260" y="60" width="160" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="r3" value="format_prompt&#xa;API→Warning→Strategy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;fontSize=14;" vertex="1" parent="lane2">
+      <mxGeometry x="480" y="60" width="160" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="r4" value="LLM (JoyAI)&#xa;接收 RAG Context" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;fontSize=14;" vertex="1" parent="lane2">
+      <mxGeometry x="700" y="60" width="160" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="r5" value="Go SA&#xa;Simulator" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#d5e8d4;fontSize=14;" vertex="1" parent="lane2">
+      <mxGeometry x="920" y="60" width="140" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="r6" value="Best Candidate&#xa;+ 入库 corpus" style="shape=document;whiteSpace=wrap;html=1;fillColor=#e1d5e7;fontSize=14;" vertex="1" parent="lane2">
+      <mxGeometry x="1110" y="60" width="150" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="er1" edge="1" parent="1" source="r1" target="r2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="er2" edge="1" parent="1" source="r2" target="r3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="er3" edge="1" parent="1" source="r3" target="r4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="er4" edge="1" parent="1" source="r4" target="r5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="er5" edge="1" parent="1" source="r5" target="r6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="efeedback" value="演化最优候选 → 入库 → 下次检索" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=13;fontColor=#0F766E;fontStyle=1;" edge="1" parent="1" source="r6" target="r1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="arrow" value="新增 Context Layer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=14;fontStyle=1;fontColor=#0F766E;" edge="1" parent="1" source="old_best" target="r1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

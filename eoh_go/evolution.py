@@ -14,6 +14,7 @@ from .memory import append_research_note
 from .paths import EOHGoPaths, ensure_workspace
 from .store import read_json, write_json
 from .eoh_runner import EOHConfig, run_v0_eoh
+from .eoh_runner.registry import get_target_spec
 
 
 DEFAULT_PROBLEMS = [f"rc10{i}.json" for i in range(1, 9)]
@@ -57,17 +58,21 @@ def _discover_default_datasets(paths: EOHGoPaths) -> list[str]:
     return out or DEFAULT_DATASETS
 
 
-def _replace_insertships(main_go_text: str, insertships_method_go: str) -> str:
-    pat = r"func\s+InsertShips\s*\(\s*dispatch\s+Dispatch\s*,\s*oris\s*,\s*dess\s*\[\]Station\s*,\s*total_ship\s+int\s*\)\s*Dispatch\s*\{[\s\S]*?\n\}"
+def _replace_target_method(main_go_text: str, method_go: str, target_function: str = "InsertShips") -> str:
+    pat = get_target_spec(target_function).extract_regex
     matched = re.search(pat, main_go_text)
     if not matched:
-        raise ValueError("InsertShips method not found in main.go")
-    patched = main_go_text[: matched.start()] + insertships_method_go.strip() + "\n" + main_go_text[matched.end() :]
-    if "sort.Sort" in insertships_method_go:
+        raise ValueError(f"{target_function} method not found in main.go")
+    patched = main_go_text[: matched.start()] + method_go.strip() + "\n" + main_go_text[matched.end() :]
+    if "sort.Sort" in method_go:
         patched = _ensure_go_import(patched, "sort")
-    if "SortManager" in insertships_method_go and not re.search(r"type\s+SortManager\s+struct\s*\{", patched):
-        patched = _inject_sort_manager_definition(patched)
+    if "SortManager" in method_go and not re.search(r"type\s+SortManager\s+struct\s*\{", patched):
+        patched = _inject_sort_manager_definition(patched, target_function)
     return patched
+
+
+def _replace_insertships(main_go_text: str, insertships_method_go: str) -> str:
+    return _replace_target_method(main_go_text, insertships_method_go, "InsertShips")
 
 
 def _ensure_go_import(go_text: str, pkg_name: str) -> str:
@@ -81,8 +86,8 @@ def _ensure_go_import(go_text: str, pkg_name: str) -> str:
     return go_text[: import_block.start(1)] + updated_body + go_text[import_block.end(1) :]
 
 
-def _inject_sort_manager_definition(go_text: str) -> str:
-    insert_pos = go_text.find("func InsertShips(")
+def _inject_sort_manager_definition(go_text: str, target_function: str = "InsertShips") -> str:
+    insert_pos = go_text.find(f"func {target_function}(")
     if insert_pos < 0:
         return go_text
     sort_manager_block = (
@@ -320,9 +325,10 @@ def _prepare_candidate_project(paths: EOHGoPaths, candidate: dict[str, Any]) -> 
 
     root = _root(paths)
     candidate_meta = candidate.get("metadata", {})
-    if candidate_meta.get("code_mode") == "insertships_only":
+    target_function = candidate_meta.get("target_function", "InsertShips")
+    if candidate_meta.get("code_mode") in {"insertships_only", "function_only"}:
         base_main_text = (root / "main.go").read_text(encoding="utf-8")
-        patched = _replace_insertships(base_main_text, candidate.get("code", ""))
+        patched = _replace_target_method(base_main_text, candidate.get("code", ""), target_function)
         (project_dir / "main.go").write_text(patched, encoding="utf-8")
     else:
         source_main = Path(candidate_meta["source_main"])

@@ -1,0 +1,199 @@
+{
+  "rows": [
+    {
+      "problem": "rc101.json",
+      "problem_name": "vrp_insertships",
+      "target": "Optimization",
+      "density": "d50",
+      "arrival_scale": 1.0,
+      "eoh_ok": true,
+      "eoh_duration": 178.397363,
+      "population_file": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/tables/weekly_optimization_smoke/api_only/run_20260531_140257/cells/rc101_d50_t1p0/agent_eoh_results/results/pops/population_generation_1.json",
+      "population_size": 2,
+      "valid_candidates": 1,
+      "suspicious_candidates": 0,
+      "invalid_candidates": 1,
+      "non_penalty_candidates": 1,
+      "raw_best_objective": 713.52158,
+      "raw_best_status": "valid",
+      "raw_best_flags": [],
+      "filtered_best_objective": 713.52158,
+      "filtered_best_status": "valid",
+      "filtered_best_flags": [],
+      "selected_best_kind": "filtered",
+      "best_objective": 713.52158,
+      "selected_best_status_after_eval": "valid",
+      "selected_best_flags_after_eval": [],
+      "seed_Res": 0.732823161375,
+      "seed_J": 713.5215792178652,
+      "best_EOH_Res": 0.72524720825,
+      "best_EOH_J": 713.5215792178652,
+      "best_candidate_id": "eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_140257",
+      "best_build_ok": true,
+      "data_path": "/Users/guojiadong.9/agent_ad/agent_go/solomon_benchmark_d50/rc101.json",
+      "rag_enabled": true,
+      "rag_context_path": "optimization_api.txt",
+      "rag_mode_requested": "mixed",
+      "rag_mode_effective": "mixed",
+      "rag_query_effective": null,
+      "rag_corpus_size_before": null,
+      "rag_corpus_size_after": null,
+      "rag_retrieved_ids": [],
+      "rag_context_chars": 482,
+      "rag_context_truncated": false,
+      "rag_top_k": 0,
+      "rag_query": "",
+      "rag_corpus_dir": "",
+      "rag_max_chars": 1500
+    }
+  ],
+  "raw": [
+    {
+      "row": {
+        "problem": "rc101.json",
+        "problem_name": "vrp_insertships",
+        "target": "Optimization",
+        "density": "d50",
+        "arrival_scale": 1.0,
+        "eoh_ok": true,
+        "eoh_duration": 178.397363,
+        "population_file": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/tables/weekly_optimization_smoke/api_only/run_20260531_140257/cells/rc101_d50_t1p0/agent_eoh_results/results/pops/population_generation_1.json",
+        "population_size": 2,
+        "valid_candidates": 1,
+        "suspicious_candidates": 0,
+        "invalid_candidates": 1,
+        "non_penalty_candidates": 1,
+        "raw_best_objective": 713.52158,
+        "raw_best_status": "valid",
+        "raw_best_flags": [],
+        "filtered_best_objective": 713.52158,
+        "filtered_best_status": "valid",
+        "filtered_best_flags": [],
+        "selected_best_kind": "filtered",
+        "best_objective": 713.52158,
+        "selected_best_status_after_eval": "valid",
+        "selected_best_flags_after_eval": [],
+        "seed_Res": 0.732823161375,
+        "seed_J": 713.5215792178652,
+        "best_EOH_Res": 0.72524720825,
+        "best_EOH_J": 713.5215792178652,
+        "best_candidate_id": "eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_140257",
+        "best_build_ok": true,
+        "data_path": "/Users/guojiadong.9/agent_ad/agent_go/solomon_benchmark_d50/rc101.json",
+        "rag_enabled": true,
+        "rag_context_path": "optimization_api.txt",
+        "rag_mode_requested": "mixed",
+        "rag_mode_effective": "mixed",
+        "rag_query_effective": null,
+        "rag_corpus_size_before": null,
+        "rag_corpus_size_after": null,
+        "rag_retrieved_ids": [],
+        "rag_context_chars": 482,
+        "rag_context_truncated": false,
+        "rag_top_k": 0,
+        "rag_query": "",
+        "rag_corpus_dir": "",
+        "rag_max_chars": 1500
+      },
+      "eoh_result": {
+        "ok": true,
+        "duration": 178.397363,
+        "population_file": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/tables/weekly_optimization_smoke/api_only/run_20260531_140257/cells/rc101_d50_t1p0/agent_eoh_results/results/pops/population_generation_1.json",
+        "population_size": 2,
+        "population": [
+          {
+            "algorithm": "SA baseline Optimization extracted from project root main.go",
+            "code": "func Optimization(dispatch Dispatch, temperature float64) Dispatch {\n\tvar a1, a2 int\n\tvar delta, best_delta float64 //TODO: return best delta and assigns\n\tvar best_dispatch Dispatch\n\t//assigns := dispatch.Assigns[:dispatch.AssignsLen]\n\tbest_dispatch = dispatch\n\t//如果没有assign则直接退出\n\tif dispatch.AssignsLen == 0 {\n\t\treturn best_dispatch\n\t}\n\tfor ii := 0; ii < SA_STEPS; ii++ {\n\t\ta1 = rand.Intn(dispatch.AssignsLen)\n\t\ta2 = rand.Intn(dispatch.AssignsLen)\n\t\tif a1 == a2 {\n\t\t\tcontinue\n\t\t}\n\t\tori_cost := dispatch.Assigns[a1].Cost + dispatch.Assigns[a2].Cost\n\t\tid, ori, des := dispatch.Assigns[a1].RandShip()\n\t\t//fmt.Println(\"random dispatch.Assigns[a1] dispatch.Assigns[a2]:\", dispatch.Assigns[a1].StaIndexes, dispatch.Assigns[a2].StaIndexes)\n\t\t//fmt.Println(\"This is the return\", id)\n\t\tif id >= 0 {\n\t\t\t//fmt.Println(\"add dispatch.Assigns[a2]\")\n\t\t\tif !dispatch.Assigns[a2].AddShip(id, ori, des) {\n\n\t\t\t\tcontinue\n\n\t\t\t}\n\t\t\t//fmt.Println(dispatch.Assigns[a1])\n\t\t\tdispatch.Assigns[a2].GenRoute()\n\t\t\t//fmt.Println(dispatch.Assigns[a2].StaIndexes)\n\t\t\tif dispatch.Assigns[a2].Cost >= 0 {\n\t\t\t\t//fmt.Println(\"passing dispatch.Assigns[a2], remove dispatch.Assigns[a1]\")\n\t\t\t\tdispatch.Assigns[a1].RemoveShip(id)\n\t\t\t\tdispatch.Assigns[a1].GenRoute()\n\t\t\t\tif math.Exp((ori_cost-dispatch.Assigns[a1].Cost-dispatch.Assigns[a2].Cost)/temperature) < rand.Float64() {\n\t\t\t\t\tdispatch.Assigns[a1].AddShip(id, ori, des)\n\t\t\t\t\tdispatch.Assigns[a1].GenRoute()\n\t\t\t\t\tdispatch.Assigns[a2].RemoveShip(id)\n\t\t\t\t\tdispatch.Assigns[a2].GenRoute()\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[a2].RemoveShip(id)\n\t\t\t\tdispatch.Assigns[a2].GenRoute()\n\t\t\t}\n\t\t}\n\t\tdelta += dispatch.Assigns[a1].Cost + dispatch.Assigns[a2].Cost - ori_cost\n\t\tif delta < best_delta {\n\t\t\tbest_delta = delta\n\t\t\tbest_dispatch = dispatch\n\t\t}\n\t}\n\tdispatch.RenewnTotalCost()\n\treturn best_dispatch\n}\n",
+            "objective": 713.52158,
+            "other_inf": null
+          },
+          {
+            "algorithm": null,
+            "code": null,
+            "objective": 1000000000.0,
+            "other_inf": "No valid code block extracted from LLM response"
+          }
+        ],
+        "rag_trace": {
+          "rag_mode": "mixed",
+          "rag_context_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/rag/manual_contexts/optimization_api.txt",
+          "rag_query": null,
+          "rag_top_k": 0,
+          "rag_corpus_size_before_filter": null,
+          "rag_corpus_size_after_filter": null,
+          "rag_global_items": [],
+          "rag_all_scores": [],
+          "rag_selected_items": [],
+          "rag_context_chars": 482,
+          "rag_context_truncated": false
+        }
+      },
+      "raw_best_population_item": {
+        "algorithm": "SA baseline Optimization extracted from project root main.go",
+        "code": "func Optimization(dispatch Dispatch, temperature float64) Dispatch {\n\tvar a1, a2 int\n\tvar delta, best_delta float64 //TODO: return best delta and assigns\n\tvar best_dispatch Dispatch\n\t//assigns := dispatch.Assigns[:dispatch.AssignsLen]\n\tbest_dispatch = dispatch\n\t//如果没有assign则直接退出\n\tif dispatch.AssignsLen == 0 {\n\t\treturn best_dispatch\n\t}\n\tfor ii := 0; ii < SA_STEPS; ii++ {\n\t\ta1 = rand.Intn(dispatch.AssignsLen)\n\t\ta2 = rand.Intn(dispatch.AssignsLen)\n\t\tif a1 == a2 {\n\t\t\tcontinue\n\t\t}\n\t\tori_cost := dispatch.Assigns[a1].Cost + dispatch.Assigns[a2].Cost\n\t\tid, ori, des := dispatch.Assigns[a1].RandShip()\n\t\t//fmt.Println(\"random dispatch.Assigns[a1] dispatch.Assigns[a2]:\", dispatch.Assigns[a1].StaIndexes, dispatch.Assigns[a2].StaIndexes)\n\t\t//fmt.Println(\"This is the return\", id)\n\t\tif id >= 0 {\n\t\t\t//fmt.Println(\"add dispatch.Assigns[a2]\")\n\t\t\tif !dispatch.Assigns[a2].AddShip(id, ori, des) {\n\n\t\t\t\tcontinue\n\n\t\t\t}\n\t\t\t//fmt.Println(dispatch.Assigns[a1])\n\t\t\tdispatch.Assigns[a2].GenRoute()\n\t\t\t//fmt.Println(dispatch.Assigns[a2].StaIndexes)\n\t\t\tif dispatch.Assigns[a2].Cost >= 0 {\n\t\t\t\t//fmt.Println(\"passing dispatch.Assigns[a2], remove dispatch.Assigns[a1]\")\n\t\t\t\tdispatch.Assigns[a1].RemoveShip(id)\n\t\t\t\tdispatch.Assigns[a1].GenRoute()\n\t\t\t\tif math.Exp((ori_cost-dispatch.Assigns[a1].Cost-dispatch.Assigns[a2].Cost)/temperature) < rand.Float64() {\n\t\t\t\t\tdispatch.Assigns[a1].AddShip(id, ori, des)\n\t\t\t\t\tdispatch.Assigns[a1].GenRoute()\n\t\t\t\t\tdispatch.Assigns[a2].RemoveShip(id)\n\t\t\t\t\tdispatch.Assigns[a2].GenRoute()\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[a2].RemoveShip(id)\n\t\t\t\tdispatch.Assigns[a2].GenRoute()\n\t\t\t}\n\t\t}\n\t\tdelta += dispatch.Assigns[a1].Cost + dispatch.Assigns[a2].Cost - ori_cost\n\t\tif delta < best_delta {\n\t\t\tbest_delta = delta\n\t\t\tbest_dispatch = dispatch\n\t\t}\n\t}\n\tdispatch.RenewnTotalCost()\n\treturn best_dispatch\n}\n",
+        "objective": 713.52158,
+        "other_inf": null
+      },
+      "filtered_best_population_item": {
+        "algorithm": "SA baseline Optimization extracted from project root main.go",
+        "code": "func Optimization(dispatch Dispatch, temperature float64) Dispatch {\n\tvar a1, a2 int\n\tvar delta, best_delta float64 //TODO: return best delta and assigns\n\tvar best_dispatch Dispatch\n\t//assigns := dispatch.Assigns[:dispatch.AssignsLen]\n\tbest_dispatch = dispatch\n\t//如果没有assign则直接退出\n\tif dispatch.AssignsLen == 0 {\n\t\treturn best_dispatch\n\t}\n\tfor ii := 0; ii < SA_STEPS; ii++ {\n\t\ta1 = rand.Intn(dispatch.AssignsLen)\n\t\ta2 = rand.Intn(dispatch.AssignsLen)\n\t\tif a1 == a2 {\n\t\t\tcontinue\n\t\t}\n\t\tori_cost := dispatch.Assigns[a1].Cost + dispatch.Assigns[a2].Cost\n\t\tid, ori, des := dispatch.Assigns[a1].RandShip()\n\t\t//fmt.Println(\"random dispatch.Assigns[a1] dispatch.Assigns[a2]:\", dispatch.Assigns[a1].StaIndexes, dispatch.Assigns[a2].StaIndexes)\n\t\t//fmt.Println(\"This is the return\", id)\n\t\tif id >= 0 {\n\t\t\t//fmt.Println(\"add dispatch.Assigns[a2]\")\n\t\t\tif !dispatch.Assigns[a2].AddShip(id, ori, des) {\n\n\t\t\t\tcontinue\n\n\t\t\t}\n\t\t\t//fmt.Println(dispatch.Assigns[a1])\n\t\t\tdispatch.Assigns[a2].GenRoute()\n\t\t\t//fmt.Println(dispatch.Assigns[a2].StaIndexes)\n\t\t\tif dispatch.Assigns[a2].Cost >= 0 {\n\t\t\t\t//fmt.Println(\"passing dispatch.Assigns[a2], remove dispatch.Assigns[a1]\")\n\t\t\t\tdispatch.Assigns[a1].RemoveShip(id)\n\t\t\t\tdispatch.Assigns[a1].GenRoute()\n\t\t\t\tif math.Exp((ori_cost-dispatch.Assigns[a1].Cost-dispatch.Assigns[a2].Cost)/temperature) < rand.Float64() {\n\t\t\t\t\tdispatch.Assigns[a1].AddShip(id, ori, des)\n\t\t\t\t\tdispatch.Assigns[a1].GenRoute()\n\t\t\t\t\tdispatch.Assigns[a2].RemoveShip(id)\n\t\t\t\t\tdispatch.Assigns[a2].GenRoute()\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[a2].RemoveShip(id)\n\t\t\t\tdispatch.Assigns[a2].GenRoute()\n\t\t\t}\n\t\t}\n\t\tdelta += dispatch.Assigns[a1].Cost + dispatch.Assigns[a2].Cost - ori_cost\n\t\tif delta < best_delta {\n\t\t\tbest_delta = delta\n\t\t\tbest_dispatch = dispatch\n\t\t}\n\t}\n\tdispatch.RenewnTotalCost()\n\treturn best_dispatch\n}\n",
+        "objective": 713.52158,
+        "other_inf": null
+      },
+      "best_population_item": {
+        "algorithm": "SA baseline Optimization extracted from project root main.go",
+        "code": "func Optimization(dispatch Dispatch, temperature float64) Dispatch {\n\tvar a1, a2 int\n\tvar delta, best_delta float64 //TODO: return best delta and assigns\n\tvar best_dispatch Dispatch\n\t//assigns := dispatch.Assigns[:dispatch.AssignsLen]\n\tbest_dispatch = dispatch\n\t//如果没有assign则直接退出\n\tif dispatch.AssignsLen == 0 {\n\t\treturn best_dispatch\n\t}\n\tfor ii := 0; ii < SA_STEPS; ii++ {\n\t\ta1 = rand.Intn(dispatch.AssignsLen)\n\t\ta2 = rand.Intn(dispatch.AssignsLen)\n\t\tif a1 == a2 {\n\t\t\tcontinue\n\t\t}\n\t\tori_cost := dispatch.Assigns[a1].Cost + dispatch.Assigns[a2].Cost\n\t\tid, ori, des := dispatch.Assigns[a1].RandShip()\n\t\t//fmt.Println(\"random dispatch.Assigns[a1] dispatch.Assigns[a2]:\", dispatch.Assigns[a1].StaIndexes, dispatch.Assigns[a2].StaIndexes)\n\t\t//fmt.Println(\"This is the return\", id)\n\t\tif id >= 0 {\n\t\t\t//fmt.Println(\"add dispatch.Assigns[a2]\")\n\t\t\tif !dispatch.Assigns[a2].AddShip(id, ori, des) {\n\n\t\t\t\tcontinue\n\n\t\t\t}\n\t\t\t//fmt.Println(dispatch.Assigns[a1])\n\t\t\tdispatch.Assigns[a2].GenRoute()\n\t\t\t//fmt.Println(dispatch.Assigns[a2].StaIndexes)\n\t\t\tif dispatch.Assigns[a2].Cost >= 0 {\n\t\t\t\t//fmt.Println(\"passing dispatch.Assigns[a2], remove dispatch.Assigns[a1]\")\n\t\t\t\tdispatch.Assigns[a1].RemoveShip(id)\n\t\t\t\tdispatch.Assigns[a1].GenRoute()\n\t\t\t\tif math.Exp((ori_cost-dispatch.Assigns[a1].Cost-dispatch.Assigns[a2].Cost)/temperature) < rand.Float64() {\n\t\t\t\t\tdispatch.Assigns[a1].AddShip(id, ori, des)\n\t\t\t\t\tdispatch.Assigns[a1].GenRoute()\n\t\t\t\t\tdispatch.Assigns[a2].RemoveShip(id)\n\t\t\t\t\tdispatch.Assigns[a2].GenRoute()\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[a2].RemoveShip(id)\n\t\t\t\tdispatch.Assigns[a2].GenRoute()\n\t\t\t}\n\t\t}\n\t\tdelta += dispatch.Assigns[a1].Cost + dispatch.Assigns[a2].Cost - ori_cost\n\t\tif delta < best_delta {\n\t\t\tbest_delta = delta\n\t\t\tbest_dispatch = dispatch\n\t\t}\n\t}\n\tdispatch.RenewnTotalCost()\n\treturn best_dispatch\n}\n",
+        "objective": 713.52158,
+        "other_inf": null
+      },
+      "candidate_statuses": [
+        {
+          "index": 0,
+          "status": "valid",
+          "objective": 713.52158,
+          "flags": [],
+          "reason": "ok"
+        },
+        {
+          "index": 1,
+          "status": "invalid",
+          "objective": 1000000000.0,
+          "flags": [
+            "penalty_objective",
+            "missing_code"
+          ],
+          "reason": "penalty_objective, missing_code"
+        }
+      ],
+      "selected_after_eval": {
+        "status": "valid",
+        "objective": 713.52158,
+        "flags": [],
+        "reason": "ok"
+      },
+      "build_info": {
+        "candidate_id": "eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_140257",
+        "project_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/generated/projects/eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_140257",
+        "bin_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/generated/bins/eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_140257.exe",
+        "build_ok": true,
+        "build_return_code": 0,
+        "build_stdout": "",
+        "build_stderr": "",
+        "build_duration": 1.307142,
+        "algorithm": "agent_eoh_arrival_scale_best",
+        "target_file": "main.go",
+        "candidate_label": "eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_140257",
+        "candidate_origin": "eoh_arrival_grid",
+        "rationale": "Best EOH candidate from arrival-scale grid experiment."
+      },
+      "best_eval": {
+        "candidate_id": "eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_140257",
+        "build_ok": true,
+        "Res": 0.72524720825,
+        "J": 713.5215792178652,
+        "return_code": 0,
+        "bin_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/generated/bins/eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_140257.exe"
+      }
+    }
+  ]
+}

@@ -2252,5 +2252,215 @@
       "dataset_density": "d75",
       "arrival_scale": 1.0
     }
+  },
+  {
+    "candidate_id": "eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_135910",
+    "algorithm": "agent_eoh_arrival_scale_best",
+    "target_file": "main.go",
+    "candidate_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/candidates/eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_135910.json",
+    "created_at": "2026-05-31T14:02:20",
+    "metadata": {
+      "origin": "eoh_arrival_grid",
+      "strategy_family": "optimization",
+      "code_mode": "function_only",
+      "target_function": "Optimization",
+      "dataset_density": "d50",
+      "arrival_scale": 1.0
+    }
+  },
+  {
+    "candidate_id": "eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_140257",
+    "algorithm": "agent_eoh_arrival_scale_best",
+    "target_file": "main.go",
+    "candidate_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/candidates/eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_140257.json",
+    "created_at": "2026-05-31T14:06:02",
+    "metadata": {
+      "origin": "eoh_arrival_grid",
+      "strategy_family": "optimization",
+      "code_mode": "function_only",
+      "target_function": "Optimization",
+      "dataset_density": "d50",
+      "arrival_scale": 1.0
+    }
+  },
+  {
+    "candidate_id": "eoh_arrival_insertships_d50_t1p0_rc101_d50_t1p0_20260531_145007",
+    "algorithm": "agent_eoh_arrival_scale_best",
+    "target_file": "main.go",
+    "candidate_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/candidates/eoh_arrival_insertships_d50_t1p0_rc101_d50_t1p0_20260531_145007.json",
+    "created_at": "2026-05-31T14:51:50",
+    "metadata": {
+      "origin": "eoh_arrival_grid",
+      "strategy_family": "insertships",
+      "code_mode": "function_only",
+      "target_function": "InsertShips",
+      "dataset_density": "d50",
+      "arrival_scale": 1.0
+    }
+  },
+  {
+    "candidate_id": "eoh_arrival_insertships_d50_t1p0_rc101_d50_t1p0_20260531_145201",
+    "algorithm": "agent_eoh_arrival_scale_best",
+    "target_file": "main.go",
+    "candidate_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/candidates/eoh_arrival_insertships_d50_t1p0_rc101_d50_t1p0_20260531_145201.json",
+    "created_at": "2026-05-31T14:53:58",
+    "metadata": {
+      "origin": "eoh_arrival_grid",
+      "strategy_family": "insertships",
+      "code_mode": "function_only",
+      "target_function": "InsertShips",
+      "dataset_density": "d50",
+      "arrival_scale": 1.0
+    }
+  },
+  {
+    "candidate_id": "eoh_arrival_insertships_d75_t1p0_rc101_d75_t1p0_20260531_145421",
+    "algorithm": "agent_eoh_arrival_scale_best",
+    "target_file": "main.go",
+    "candidate_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/candidates/eoh_arrival_insertships_d75_t1p0_rc101_d75_t1p0_20260531_145421.json",
+    "created_at": "2026-05-31T14:56:12",
+    "metadata": {
+      "origin": "eoh_arrival_grid",
+      "strategy_family": "insertships",
+      "code_mode": "function_only",
+      "target_function": "InsertShips",
+      "dataset_density": "d75",
+      "arrival_scale": 1.0
+    }
+  },
+  {
+    "candidate_id": "eoh_arrival_insertships_d75_t1p0_rc101_d75_t1p0_20260531_145622",
+    "algorithm": "agent_eoh_arrival_scale_best",
+    "target_file": "main.go",
+    "candidate_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/candidates/eoh_arrival_insertships_d75_t1p0_rc101_d75_t1p0_20260531_145622.json",
+    "created_at": "2026-05-31T14:58:09",
+    "metadata": {
+      "origin": "eoh_arrival_grid",
+      "strategy_family": "insertships",
+      "code_mode": "function_only",
+      "target_function": "InsertShips",
+      "dataset_density": "d75",
+      "arrival_scale": 1.0
+    }
+  },
+  {
+    "candidate_id": "eoh_arrival_insertships_d75_t1p0_rc101_d75_t1p0_20260531_145822",
+    "algorithm": "agent_eoh_arrival_scale_best",
+    "target_file": "main.go",
+    "candidate_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/candidates/eoh_arrival_insertships_d75_t1p0_rc101_d75_t1p0_20260531_145822.json",
+    "created_at": "2026-05-31T15:00:26",
+    "metadata": {
+      "origin": "eoh_arrival_grid",
+      "strategy_family": "insertships",
+      "code_mode": "function_only",
+      "target_function": "InsertShips",
+      "dataset_density": "d75",
+      "arrival_scale": 1.0
+    }
+  },
+  {
+    "candidate_id": "eoh_arrival_insertships_d75_t1p0_rc101_d75_t1p0_20260531_150037",
+    "algorithm": "agent_eoh_arrival_scale_best",
+    "target_file": "main.go",
+    "candidate_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/candidates/eoh_arrival_insertships_d75_t1p0_rc101_d75_t1p0_20260531_150037.json",
+    "created_at": "2026-05-31T15:02:21",
+    "metadata": {
+      "origin": "eoh_arrival_grid",
+      "strategy_family": "insertships",
+      "code_mode": "function_only",
+      "target_function": "InsertShips",
+      "dataset_density": "d75",
+      "arrival_scale": 1.0
+    }
+  },
+  {
+    "candidate_id": "eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_150254",
+    "algorithm": "agent_eoh_arrival_scale_best",
+    "target_file": "main.go",
+    "candidate_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/candidates/eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_150254.json",
+    "created_at": "2026-05-31T15:08:39",
+    "metadata": {
+      "origin": "eoh_arrival_grid",
+      "strategy_family": "optimization",
+      "code_mode": "function_only",
+      "target_function": "Optimization",
+      "dataset_density": "d50",
+      "arrival_scale": 1.0
+    }
+  },
+  {
+    "candidate_id": "eoh_arrival_optimization_d75_t1p0_rc101_d75_t1p0_20260531_150254",
+    "algorithm": "agent_eoh_arrival_scale_best",
+    "target_file": "main.go",
+    "candidate_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/candidates/eoh_arrival_optimization_d75_t1p0_rc101_d75_t1p0_20260531_150254.json",
+    "created_at": "2026-05-31T15:13:42",
+    "metadata": {
+      "origin": "eoh_arrival_grid",
+      "strategy_family": "optimization",
+      "code_mode": "function_only",
+      "target_function": "Optimization",
+      "dataset_density": "d75",
+      "arrival_scale": 1.0
+    }
+  },
+  {
+    "candidate_id": "eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_151350",
+    "algorithm": "agent_eoh_arrival_scale_best",
+    "target_file": "main.go",
+    "candidate_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/candidates/eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_151350.json",
+    "created_at": "2026-05-31T15:19:19",
+    "metadata": {
+      "origin": "eoh_arrival_grid",
+      "strategy_family": "optimization",
+      "code_mode": "function_only",
+      "target_function": "Optimization",
+      "dataset_density": "d50",
+      "arrival_scale": 1.0
+    }
+  },
+  {
+    "candidate_id": "eoh_arrival_optimization_d75_t1p0_rc101_d75_t1p0_20260531_151350",
+    "algorithm": "agent_eoh_arrival_scale_best",
+    "target_file": "main.go",
+    "candidate_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/candidates/eoh_arrival_optimization_d75_t1p0_rc101_d75_t1p0_20260531_151350.json",
+    "created_at": "2026-05-31T15:24:22",
+    "metadata": {
+      "origin": "eoh_arrival_grid",
+      "strategy_family": "optimization",
+      "code_mode": "function_only",
+      "target_function": "Optimization",
+      "dataset_density": "d75",
+      "arrival_scale": 1.0
+    }
+  },
+  {
+    "candidate_id": "eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_152444",
+    "algorithm": "agent_eoh_arrival_scale_best",
+    "target_file": "main.go",
+    "candidate_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/candidates/eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_152444.json",
+    "created_at": "2026-05-31T15:47:13",
+    "metadata": {
+      "origin": "eoh_arrival_grid",
+      "strategy_family": "optimization",
+      "code_mode": "function_only",
+      "target_function": "Optimization",
+      "dataset_density": "d50",
+      "arrival_scale": 1.0
+    }
+  },
+  {
+    "candidate_id": "eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_161728",
+    "algorithm": "agent_eoh_arrival_scale_best",
+    "target_file": "main.go",
+    "candidate_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/candidates/eoh_arrival_optimization_d50_t1p0_rc101_d50_t1p0_20260531_161728.json",
+    "created_at": "2026-05-31T16:22:38",
+    "metadata": {
+      "origin": "eoh_arrival_grid",
+      "strategy_family": "optimization",
+      "code_mode": "function_only",
+      "target_function": "Optimization",
+      "dataset_density": "d50",
+      "arrival_scale": 1.0
+    }
   }
 ]

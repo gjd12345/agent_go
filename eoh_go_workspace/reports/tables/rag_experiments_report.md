@@ -170,3 +170,80 @@ API key: export $(grep -v '^#' ~/.config/agent_go/chatrhino.env | xargs)（不�
 | Progressive disclosure | 密度分支效应——不同密度需要不同 context | Section 5 |
 | Harness > Model | gen=8 baseline 274.90 在 L 层自主超越 C 层 gen=1 最优 | Section 6 |
 | C+L+V harness | 本工作的三层工程闭环 | c_l_v_harness_mapping.md |
+
+## 附录 D: 演化产生的 InsertShips 代码
+
+以下为 gen=8 baseline 产生的两个密度最优候选，来自纯演化（无 RAG 注入）。
+
+### d50 最优 (best_J = 274.90, 62 行)
+
+```
+func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {
+    for orderIdx := 0; orderIdx < len(oris); orderIdx++ {
+        shipId := total_ship + orderIdx
+        bestAssignIdx := -1; bestDeltaCost := 1e308
+        for aIdx := 0; aIdx < dispatch.AssignsLen; aIdx++ {
+            assign := &dispatch.Assigns[aIdx]
+            origCost := assign.Cost
+            trialOk := assign.AddShip(shipId, ori, des)
+            if trialOk {
+                assign.GenRoute()
+                deltaCost := assign.Cost - origCost
+                if deltaCost < bestDeltaCost { bestDeltaCost = deltaCost; bestAssignIdx = aIdx }
+                assign.RemoveShip(shipId); assign.GenRoute()
+            }
+        }
+        // commit best, fallback to new Assign if fails
+        if bestAssignIdx != -1 { ... commit ... }
+        if !inserted { ... fallback new Assign ... }
+    }
+    dispatch.RenewnTotalCost()
+}
+```
+
+**策略**: trial-insert 所有 Assign → 记录最小 deltaCost → commit 最优 → 失败 fallback。
+
+### d75 最优 (best_J = 393.30, 142 行)
+
+```
+func InsertShips(...) {
+    const slackWeight=0.6, costWeight=0.4, improveFactor=1.08, minSlackThresh=3600
+
+    for jj := range oris {
+        // Pass 1: trial with time_slack aware scoring
+        for ii := 0; ii < dispatch.AssignsLen; ii++ {
+            trial insert → GenRoute
+            delta := newCost - prevCost
+            timeSlack := float64(des.TimeEnd - des.TimeStart)
+            score := costWeight*(delta/normalize) + slackWeight*(base/timeSlack)
+            if score < bestScore { ... }
+            RemoveShip; GenRoute()  // undo
+        }
+        // Pass 2: improve scan — if other Assign beats best*1.08, switch
+        for ii := 0; ii < dispatch.AssignsLen; ii++ {
+            delta := newCost - prevCost
+            if delta < bestDelta * improveFactor { selectedIdx = ii }
+        }
+        // Pass 3-4: seed fallback → brute force all MAXASSIGNS
+        if selectedIdx < 0 { ... }
+        // commit final
+        dispatch.Assigns[selectedIdx].AddShip(...); GenRoute()
+    }
+    dispatch.RenewnTotalCost()
+}
+```
+
+**策略**: weighted scoring (cost + slack) → multi-pass refine with improve_factor → 4 级 fallback。
+
+### 对比与启示
+
+| | d50 (274.90) | d75 (393.30) |
+|------|------|------|
+| 行数 | 62 | 142 |
+| 核心策略 | best-delta greedy | weighted scoring + multi-pass |
+| time window 感知 | 无 | slackWeight=0.6, minSlackThresh |
+| fallback 级数 | 1 | 4 |
+| 适用密度 | 中等 | 高 |
+
+LLM 在纯演化中自主学会了密度分化——d50 保持简洁，d75 引入时间窗口权重和多轮优化。
+没有人类设计这些策略，evolution 发现的。

@@ -61,18 +61,29 @@ def _parse_res_time(output: str) -> float | None:
         return None
 
 
-def _replace_insertships(main_go_path: str, new_method: str) -> None:
+def _target_function() -> str:
+    return os.environ.get("EOH_TARGET_FUNCTION", "InsertShips").strip() or "InsertShips"
+
+
+def _target_regex(target_function: str) -> str:
+    if target_function == "Optimization":
+        return r"func\s+Optimization\s*\(\s*dispatch\s+Dispatch\s*,\s*temperature\s+float64\s*\)\s*Dispatch\s*\{[\s\S]*?\n\}"
+    return r"func\s+InsertShips\s*\(\s*dispatch\s+Dispatch\s*,\s*oris\s*,\s*dess\s*\[\]Station\s*,\s*total_ship\s+int\s*\)\s*Dispatch\s*\{[\s\S]*?\n\}"
+
+
+def _replace_target_method(main_go_path: str, new_method: str, target_function: str | None = None) -> None:
+    target_function = target_function or _target_function()
     with open(main_go_path, "r", encoding="utf-8") as f:
         s = f.read()
-    pat = r"func\s+InsertShips\s*\(\s*dispatch\s+Dispatch\s*,\s*oris\s*,\s*dess\s*\[\]Station\s*,\s*total_ship\s+int\s*\)\s*Dispatch\s*\{[\s\S]*?\n\}"
+    pat = _target_regex(target_function)
     m = re.search(pat, s)
     if not m:
-        raise ValueError("InsertShips method not found in main.go")
+        raise ValueError(f"{target_function} method not found in main.go")
     s2 = s[: m.start()] + new_method.strip() + "\n" + s[m.end() :]
     if "sort." in new_method:
         s2 = _ensure_go_import(s2, "sort")
     if "SortManager" in new_method and not re.search(r"type\s+SortManager\s+struct\s*\{", s2):
-        s2 = _inject_sort_manager_definition(s2)
+        s2 = _inject_sort_manager_definition(s2, target_function)
     with open(main_go_path, "w", encoding="utf-8") as f:
         f.write(s2)
 
@@ -88,8 +99,8 @@ def _ensure_go_import(go_text: str, pkg_name: str) -> str:
     return go_text[: import_block.start(1)] + updated_body + go_text[import_block.end(1) :]
 
 
-def _inject_sort_manager_definition(go_text: str) -> str:
-    insert_pos = go_text.find("func InsertShips(")
+def _inject_sort_manager_definition(go_text: str, target_function: str = "InsertShips") -> str:
+    insert_pos = go_text.find(f"func {target_function}(")
     if insert_pos < 0:
         return go_text
     sort_manager_block = (
@@ -284,7 +295,7 @@ class Evaluation:
             json.dump(data, f, ensure_ascii=False, indent=2)
         return dst
 
-    def _build_and_run(self, insertships_method_go: str) -> float | None:
+    def _build_and_run(self, target_method_go: str) -> float | None:
         tmp = tempfile.mkdtemp(prefix="eoh_insertships_go_")
         try:
             shutil.copy2(self.go_main, os.path.join(tmp, "main.go"))
@@ -294,7 +305,7 @@ class Evaluation:
                 shutil.copy2(self.go_sum, os.path.join(tmp, "go.sum"))
 
             main_go_path = os.path.join(tmp, "main.go")
-            _replace_insertships(main_go_path, insertships_method_go)
+            _replace_target_method(main_go_path, target_method_go, self.prompts.get_func_name())
 
             build = _run_command(
                 ["go", "build", "-o", "mainbin.exe", "."],
@@ -381,8 +392,9 @@ class Evaluation:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
 
-                if "func" not in code_string or "InsertShips" not in code_string:
-                    self._last_error = "Missing InsertShips method definition"
+                target_name = self.prompts.get_func_name()
+                if "func" not in code_string or target_name not in code_string:
+                    self._last_error = f"Missing {target_name} method definition"
                     return self.per_instance_penalty
 
                 fitness = self._build_and_run(code_string)

@@ -30,6 +30,8 @@ class EOHConfig:
     exp_output_path: str = ""
     agent_eoh_root: str = ""
     use_sa_seed_as_init: bool = True
+    problem_name: str = "vrp_insertships"
+    target_function: str = "InsertShips"
 
     use_rag_context: bool = False
     rag_context_path: str = ""

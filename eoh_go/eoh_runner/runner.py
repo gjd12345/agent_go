@@ -18,31 +18,35 @@ _RUNNER_ENV_KEYS = [
     "EOH_RES_WEIGHT",
     "EOH_RUN_TIMEOUT_S",
     "EOH_RAG_CONTEXT",
+    "EOH_TARGET_FUNCTION",
 ]
 
 _RAG_CONTEXT_MAX_BYTES = 50 * 1024
 _RAG_CONTEXT_MAX_CHARS = 8000
 
 
-def _extract_insertships_from_main(main_text: str) -> str:
+def _extract_target_from_main(main_text: str, target_function: str) -> str:
     import re
-    pat = r"func\s+InsertShips\s*\(\s*dispatch\s+Dispatch\s*,\s*oris\s*,\s*dess\s*\[\]Station\s*,\s*total_ship\s+int\s*\)\s*Dispatch\s*\{[\s\S]*?\n\}"
+    from eoh_go.eoh_runner.registry import get_target_spec
+
+    pat = get_target_spec(target_function).extract_regex
     matched = re.search(pat, main_text)
     if not matched:
-        raise ValueError("InsertShips method not found in SA main.go")
+        raise ValueError(f"{target_function} method not found in SA main.go")
     return matched.group(0).strip() + "\n"
 
 
-def _prepare_sa_seed(example_root: str, project_root: str) -> str:
+def _prepare_sa_seed(example_root: str, project_root: str, target_function: str = "InsertShips") -> str:
     sa_main = Path(project_root) / "main.go"
     if not sa_main.exists():
         return str(Path(example_root) / "seeds_insertships_go.json")
-    insertships_code = _extract_insertships_from_main(sa_main.read_text(encoding="utf-8"))
-    sa_seed_path = Path(example_root) / "seeds_insertships_go_sa.json"
+    target_code = _extract_target_from_main(sa_main.read_text(encoding="utf-8"), target_function)
+    safe_target = "".join(ch.lower() if ch.isalnum() else "_" for ch in target_function).strip("_")
+    sa_seed_path = Path(example_root) / f"seeds_{safe_target}_go_sa.json"
     payload = [
         {
-            "algorithm": "SA baseline InsertShips extracted from project root main.go",
-            "code": insertships_code,
+            "algorithm": f"SA baseline {target_function} extracted from project root main.go",
+            "code": target_code,
         }
     ]
     sa_seed_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
@@ -100,7 +104,7 @@ def _automatic_rag_query(config: EOHConfig) -> str:
     if query:
         return query
     return (
-        f"dynamic InsertShips insertion heuristic density={config.dataset_density} "
+        f"dynamic {config.target_function} heuristic density={config.dataset_density} "
         f"arrival_scale={config.arrival_scale} medium density route capacity "
         "insertion cost final cost"
     )
@@ -116,6 +120,11 @@ def _build_retrieved_rag_context(config: EOHConfig, project_root: str) -> tuple[
     corpus_size_before = len(corpus)
     filtered_corpus = filter_corpus_by_mode(corpus, config.rag_mode)
     global_items = [item for item in filtered_corpus if item.kind in {"api_constraint", "failure_case"}]
+    target_tag = config.target_function.lower() if hasattr(config, 'target_function') else "insertships"
+    global_items = [
+        item for item in global_items
+        if "all" in item.tags or target_tag in item.tags
+    ]
     if config.rag_mode == "history":
         strategy_pool = [item for item in filtered_corpus if item.kind == "code_example"]
     elif config.rag_mode == "literature":
@@ -187,7 +196,13 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
     agent_root = os.path.abspath(config.agent_eoh_root)
     project_root = os.path.abspath(os.path.join(agent_root, ".."))
     src_path = os.path.join(agent_root, "eoh", "src")
-    example_root = os.path.join(src_path, "eoh", "examples", "user_insertships_go")
+    if config.problem_name == "knapsack":
+        example_name = "user_knapsack_go"
+        problem_module_name = "prob_knapsack_go"
+    else:
+        example_name = "user_insertships_go"
+        problem_module_name = "prob_insertships_go"
+    example_root = os.path.join(src_path, "eoh", "examples", example_name)
     
     if src_path not in sys.path:
         sys.path.insert(0, src_path)
@@ -197,26 +212,30 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
     saved_env = {key: os.environ.get(key) for key in _RUNNER_ENV_KEYS}
     os.environ["PYTHONUTF8"] = "1"
     os.environ["PYTHONIOENCODING"] = "utf-8"
+    os.environ["EOH_TARGET_FUNCTION"] = config.target_function
     rag_trace = None
         
     try:
         # 2. Imports from Agent_EOH
         from eoh import EVOL
         from eoh.utils.getParas import Paras
-        import prob_insertships_go
         import importlib
+        problem_module = importlib.import_module(problem_module_name)
         
         # 3. Setup Problem & Paras
-        importlib.reload(prob_insertships_go)
+        problem_module = importlib.reload(problem_module)
         rag_trace = _set_rag_context_env(config, project_root)
-        problem_instance = prob_insertships_go.Evaluation(
-            sim_time_multi=config.sim_time_multi,
-            max_instances=config.max_instances,
-            dataset_density=config.dataset_density,
-            sim_time_interval=config.sim_time_interval,
-            arrival_scale=config.arrival_scale,
-            use_density_source_dirs=config.use_density_source_dirs,
-        )
+        if config.problem_name == "knapsack":
+            problem_instance = problem_module.Evaluation(run_timeout_s=config.run_timeout_s)
+        else:
+            problem_instance = problem_module.Evaluation(
+                sim_time_multi=config.sim_time_multi,
+                max_instances=config.max_instances,
+                dataset_density=config.dataset_density,
+                sim_time_interval=config.sim_time_interval,
+                arrival_scale=config.arrival_scale,
+                use_density_source_dirs=config.use_density_source_dirs,
+            )
 
         paras = Paras()
         exp_out = config.exp_output_path or os.path.join(example_root, "results_insertships_v0")
@@ -224,8 +243,10 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
 
         if config.seed_path:
             seed_path = config.seed_path
+        elif config.problem_name == "knapsack":
+            seed_path = os.path.join(example_root, "seeds_knapsack_go.json")
         elif config.use_sa_seed_as_init:
-            seed_path = _prepare_sa_seed(example_root, project_root)
+            seed_path = _prepare_sa_seed(example_root, project_root, config.target_function)
         else:
             seed_path = os.path.join(example_root, "seeds_insertships_go.json")
 

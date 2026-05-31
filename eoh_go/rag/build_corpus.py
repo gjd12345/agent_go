@@ -113,15 +113,6 @@ def filter_corpus_by_mode(corpus: list[CorpusItem], mode: str) -> list[CorpusIte
 
 def build_api_constraints(project_root: str | Path) -> list[CorpusItem]:
     root = Path(project_root).resolve()
-    content = (
-        "API: insertships_skeleton\n"
-        "Rules:\n"
-        "- Save Assign state before trial AddShip.\n"
-        "- If AddShip succeeds: GenRoute, record cost_delta, then RemoveShip+GenRoute to undo.\n"
-        "- Commit: re-apply best (Assign, position) once. GenRoute after final insert.\n"
-        "- Every order needs a fallback insertion path.\n"
-        "- Call RenewnTotalCost exactly once before return."
-    )
     return [
         CorpusItem(
             id="insertships_api_skeleton",
@@ -134,8 +125,57 @@ def build_api_constraints(project_root: str | Path) -> list[CorpusItem]:
                 "Every order MUST be inserted; fallback to new Assign if no existing Assign works.",
                 "RenewnTotalCost() exactly once before return.",
             ],
-            content=content,
-        )
+            content=(
+                "API: insertships_skeleton\n"
+                "Rules:\n"
+                "- Save Assign state before trial AddShip.\n"
+                "- If AddShip succeeds: GenRoute, record cost_delta, then RemoveShip+GenRoute to undo.\n"
+                "- Commit: re-apply best (Assign, position) once. GenRoute after final insert.\n"
+                "- Every order needs a fallback insertion path.\n"
+                "- Call RenewnTotalCost exactly once before return."
+            ),
+        ),
+        CorpusItem(
+            id="optimization_api_skeleton",
+            kind="api_constraint",
+            title="Optimization Go API skeleton",
+            tags=["optimization", "api", "safety"],
+            source_path="curated",
+            summary="SA-style route improvement: move orders between vehicles, preserve dispatch integrity.",
+            constraints=[
+                "Never lose or duplicate orders during vehicle-to-vehicle moves.",
+                "RenewnTotalCost() exactly once before return.",
+            ],
+            content=(
+                "API: optimization_skeleton\n"
+                "Rules:\n"
+                "- Use dispatch.Assigns[].RemoveShip/AddShip/GenRoute to move orders between vehicles.\n"
+                "- Use dispatch.RenewnTotalCost() before return.\n"
+                "- Temperature parameter controls acceptance of worse moves (SA).\n"
+                "- Return the modified dispatch. Never create new Assign objects from scratch."
+            ),
+        ),
+        CorpusItem(
+            id="knapsack_api_skeleton",
+            kind="api_constraint",
+            title="Knapsack SelectItems Go API skeleton",
+            tags=["knapsack", "api", "safety"],
+            source_path="curated",
+            summary="0/1 knapsack: return boolean array, respect capacity, maximize value.",
+            constraints=[
+                "Return len(items) booleans.",
+                "Total selected weight must NOT exceed capacity.",
+            ],
+            content=(
+                "API: knapsack_selectitems_skeleton\n"
+                "Rules:\n"
+                "- func SelectItems(items []Item, capacity int) []bool\n"
+                "- Return a boolean slice of length len(items).\n"
+                "- selected weight := sum(items[i].Weight for i where result[i] is true).\n"
+                "- selected must be <= capacity.\n"
+                "- Maximize total value := sum(items[i].Value for i where result[i] is true)."
+            ),
+        ),
     ]
 
 
@@ -149,33 +189,30 @@ def build_failure_cases(project_root: str | Path) -> list[CorpusItem]:
             id="suspicious_low_objective",
             kind="failure_case",
             title="Suspiciously low objective",
-            tags=["insertships", "suspicious-low", "guard", "objective"],
+            tags=["all", "suspicious-low", "guard", "objective"],
             source_path=source,
             summary="Very low objective values can indicate skipped orders, broken costs, or incomplete evaluation.",
-            constraints=[
-                "Do not treat suspicious-low objective values as valid unless guard checks pass.",
-                "Preserve all orders and recompute total cost.",
-            ],
+            constraints=["Do not treat suspicious-low objective values as valid.", "Preserve all data and recompute total."],
             content=guard_text,
         ),
         CorpusItem(
             id="negative_or_missing_result",
             kind="failure_case",
             title="Negative cost or missing result",
-            tags=["insertships", "negative", "missing-result", "guard"],
+            tags=["all", "negative", "missing-result", "guard"],
             source_path=source,
             summary="Negative costs and missing results are invalid candidate outcomes.",
-            constraints=["Return a complete Dispatch object.", "Do not allow negative cost artifacts."],
+            constraints=["Return a complete result object.", "Do not allow negative cost artifacts."],
             content=guard_text,
         ),
         CorpusItem(
             id="timeout_or_unbounded_search",
             kind="failure_case",
             title="Timeout or unbounded search",
-            tags=["insertships", "timeout", "guard", "fallback"],
+            tags=["all", "timeout", "guard", "fallback"],
             source_path=source,
-            summary="Expensive exhaustive insertion can timeout on dense or large instances.",
-            constraints=["Limit candidate route scans.", "Use bounded top-k attempts and safe fallback logic."],
+            summary="Expensive exhaustive search can timeout on dense or large instances.",
+            constraints=["Limit candidate scans.", "Use bounded attempts and safe fallback logic."],
             content=guard_text,
         ),
     ]

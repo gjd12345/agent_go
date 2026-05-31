@@ -48,8 +48,9 @@ def _register_and_build_best(
     density: str,
     arrival_scale: float,
     run_tag: str,
+    target_function: str = "InsertShips",
 ) -> dict[str, Any]:
-    candidate_id = f"eoh_arrival_{density}_t{arrival_scale:.1f}_{run_tag}".replace(".", "p")
+    candidate_id = f"eoh_arrival_{target_function.lower()}_{density}_t{arrival_scale:.1f}_{run_tag}".replace(".", "p")
     add_candidate(
         paths,
         candidate_id=candidate_id,
@@ -59,13 +60,32 @@ def _register_and_build_best(
         rationale="Best EOH candidate from arrival-scale grid experiment.",
         metadata={
             "origin": "eoh_arrival_grid",
-            "strategy_family": "insertships",
-            "code_mode": "insertships_only",
+            "strategy_family": target_function.lower(),
+            "code_mode": "function_only",
+            "target_function": target_function,
             "dataset_density": density,
             "arrival_scale": arrival_scale,
         },
     )
     return _prepare_candidate_project(paths, load_candidate(paths, candidate_id))
+
+
+def _find_latest_run(base_out_dir: Path) -> tuple[Path | None, list[dict[str, Any]], list[dict[str, Any]]]:
+    if not base_out_dir.exists():
+        return None, [], []
+    for d in sorted(base_out_dir.glob("run_*"), key=lambda p: p.name, reverse=True):
+        partial = d / "eoh_arrival_grid_partial.json"
+        if partial.exists():
+            try:
+                data = json.loads(partial.read_text(encoding="utf-8"))
+                return d, data.get("rows", []), data.get("raw", [])
+            except Exception:
+                continue
+    return None, [], []
+
+
+def _completed_cell_keys(rows: list[dict[str, Any]]) -> set[tuple[str, str, float]]:
+    return {(r["problem"], r["density"], r.get("arrival_scale", 1.0)) for r in rows if r.get("problem")}
 
 
 def run_grid(args: argparse.Namespace) -> dict[str, Any]:
@@ -76,20 +96,45 @@ def run_grid(args: argparse.Namespace) -> dict[str, Any]:
     problems = args.problem or ["rc101.json"]
     source_dir = (root / args.source_dir).resolve()
     base_out_dir = (root / args.output_dir).resolve()
-    run_tag = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_dir = base_out_dir / f"run_{run_tag}"
-    out_dir.mkdir(parents=True, exist_ok=False)
+
+    resume_mode = getattr(args, "resume", False)
+    resumed_dir: Path | None = None
+    existing_rows: list[dict[str, Any]] = []
+    existing_raw: list[dict[str, Any]] = []
+    completed_keys: set[tuple[str, str, float]] = set()
+
+    if resume_mode:
+        resumed_dir, existing_rows, existing_raw = _find_latest_run(base_out_dir)
+        completed_keys = _completed_cell_keys(existing_rows)
+        if resumed_dir is not None:
+            print(f"Resume: {len(completed_keys)} cells already completed in {resumed_dir}")
+        else:
+            print("Resume: no previous run found, starting fresh")
+
+    if resumed_dir is not None:
+        out_dir = resumed_dir
+        run_tag = resumed_dir.name.replace("run_", "")
+    else:
+        run_tag = datetime.now().strftime("%Y%m%d_%H%M%S")
+        out_dir = base_out_dir / f"run_{run_tag}"
+        out_dir.mkdir(parents=True, exist_ok=False)
+
     tmp_dir = out_dir / "generated_instances"
     tmp_dir.mkdir(parents=True, exist_ok=True)
 
-    rows: list[dict[str, Any]] = []
-    raw: list[dict[str, Any]] = []
+    rows: list[dict[str, Any]] = list(existing_rows)
+    raw: list[dict[str, Any]] = list(existing_raw)
     for problem in problems:
         for density in densities:
             src = resolve_source_path(root, source_dir, problem, density, args.use_density_source_dirs)
             density_arg = "d100" if args.use_density_source_dirs else density
             for scale in scales:
                 cell_tag = f"{problem.replace('.json', '')}_{density}_t{scale:.1f}".replace(".", "p")
+                cell_key = (problem, density, float(scale))
+                if resume_mode and cell_key in completed_keys:
+                    print(f"  skip {cell_tag} (already completed)")
+                    continue
+                print(f"  running {cell_tag}...")
                 cell_out = out_dir / "cells" / cell_tag
                 eoh_out = cell_out / "agent_eoh_results"
                 eoh_out.mkdir(parents=True, exist_ok=True)
@@ -111,6 +156,8 @@ def run_grid(args: argparse.Namespace) -> dict[str, Any]:
                     arrival_scale=scale,
                     use_density_source_dirs=args.use_density_source_dirs,
                     use_sa_seed_as_init=True,
+                    problem_name=args.problem_name,
+                    target_function=args.target,
                     use_rag_context=args.use_rag_context,
                     rag_context_path=args.rag_context_path or "",
                     rag_mode=args.rag_mode,
@@ -128,9 +175,10 @@ def run_grid(args: argparse.Namespace) -> dict[str, Any]:
                 seed_res = sa_result.get("first_response_time")
                 seed_j = parse_numeric_cost(sa_result.get("cost"))
                 population_items = population if isinstance(population, list) else []
-                raw_best = best_raw_candidate(population_items)
+                raw_best = best_raw_candidate(population_items, target_function=args.target)
                 filtered_best, candidate_statuses = select_best_candidate(
                     population_items,
+                    target_function=args.target,
                     seed_j=seed_j,
                     invalid_threshold=args.invalid_threshold,
                     suspicious_low_ratio=args.suspicious_low_ratio,
@@ -157,6 +205,7 @@ def run_grid(args: argparse.Namespace) -> dict[str, Any]:
                         density=density,
                         arrival_scale=float(scale),
                         run_tag=cell_tag + "_" + run_tag,
+                        target_function=args.target,
                     )
                     best_eval["candidate_id"] = build_info.get("candidate_id")
                     best_eval["build_ok"] = bool(build_info.get("build_ok"))
@@ -182,11 +231,14 @@ def run_grid(args: argparse.Namespace) -> dict[str, Any]:
                         best,
                         seed_j=seed_j,
                         candidate_j=best_eval.get("J"),
+                        target_function=args.target,
                         invalid_threshold=args.invalid_threshold,
                         suspicious_low_ratio=args.suspicious_low_ratio,
                     )
                 row = {
                     "problem": problem,
+                    "problem_name": args.problem_name,
+                    "target": args.target,
                     "density": density,
                     "arrival_scale": float(scale),
                     "eoh_ok": result.get("ok") if isinstance(result, dict) else False,
@@ -346,6 +398,8 @@ def main() -> None:
     parser.add_argument("--root", default=".")
     parser.add_argument("--source-dir", default="solomon_benchmark")
     parser.add_argument("--output-dir", default="eoh_go_workspace/reports/tables/eoh_arrival_grid")
+    parser.add_argument("--target", choices=["InsertShips", "Optimization", "SelectItems"], default="InsertShips")
+    parser.add_argument("--problem-name", choices=["vrp_insertships", "knapsack"], default="vrp_insertships")
     parser.add_argument("--problem", action="append")
     parser.add_argument("--density", action="append")
     parser.add_argument("--arrival-scale", action="append", type=float)
@@ -370,6 +424,7 @@ def main() -> None:
     parser.add_argument("--rag-corpus-dir", default="")
     parser.add_argument("--rag-max-chars", type=int, default=6000)
     parser.add_argument("--ablation-pair", action="store_true")
+    parser.add_argument("--resume", action="store_true", help="Resume from the latest partial run under output-dir")
     args = parser.parse_args()
     if args.ablation_pair:
         run_ablation_pair(args)

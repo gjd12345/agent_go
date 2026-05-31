@@ -27,6 +27,7 @@ def _has_failed_insert_break(code: str) -> bool:
 def classify_candidate(
     item: dict[str, Any],
     *,
+    target_function: str = "InsertShips",
     seed_j: float | None = None,
     candidate_j: float | None = None,
     invalid_threshold: float = 1e8,
@@ -46,8 +47,8 @@ def classify_candidate(
     if not isinstance(code, str) or not code.strip():
         flags.append("missing_code")
         code = ""
-    elif "func InsertShips" not in code:
-        flags.append("missing_insertships")
+    elif f"func {target_function}" not in code:
+        flags.append(f"missing_{target_function.lower()}")
 
     if isinstance(code, str) and code:
         if "RenewnTotalCost" not in code:
@@ -67,7 +68,12 @@ def classify_candidate(
         if external_j is not None and 0 <= external_j < seed * suspicious_low_ratio:
             flags.append("suspicious_low_external_j")
 
-    invalid_flags = {"missing_objective", "penalty_objective", "missing_code", "missing_insertships"}
+    invalid_flags = {
+        "missing_objective",
+        "penalty_objective",
+        "missing_code",
+        f"missing_{target_function.lower()}",
+    }
     if any(flag in invalid_flags for flag in flags):
         status = "invalid"
     elif any(
@@ -97,6 +103,7 @@ def classify_candidate(
 def select_best_candidate(
     population: list[dict[str, Any]],
     *,
+    target_function: str = "InsertShips",
     seed_j: float | None = None,
     invalid_threshold: float = 1e8,
     suspicious_low_ratio: float = 0.3,
@@ -108,6 +115,7 @@ def select_best_candidate(
             continue
         status = classify_candidate(
             item,
+            target_function=target_function,
             seed_j=seed_j,
             invalid_threshold=invalid_threshold,
             suspicious_low_ratio=suspicious_low_ratio,
@@ -124,14 +132,14 @@ def select_best_candidate(
     return ranked[0][2], statuses
 
 
-def best_raw_candidate(population: list[dict[str, Any]]) -> dict[str, Any] | None:
+def best_raw_candidate(population: list[dict[str, Any]], *, target_function: str = "InsertShips") -> dict[str, Any] | None:
     ranked: list[tuple[float, int, dict[str, Any]]] = []
     for index, item in enumerate(population):
         if not isinstance(item, dict):
             continue
         objective = _safe_float(item.get("objective"))
         code = item.get("code")
-        if objective is None or not isinstance(code, str) or "func InsertShips" not in code:
+        if objective is None or not isinstance(code, str) or f"func {target_function}" not in code:
             continue
         ranked.append((objective, index, item))
     if not ranked:
