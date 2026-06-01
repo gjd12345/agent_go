@@ -270,16 +270,65 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
 }
 ```
 
+### 2026-06-01 OBP 修正实验
+
+复核发现上一轮 `pop_size=8` 但最终 population 只有 2 条，不是“8 个候选都无提升”。根因是 `Agent_EOH` 的 Go 抽取逻辑只识别 `func InsertShips(`，导致 `ScoreBin` 被误判成 Python target，LLM 返回的 Go 代码无法被抽取，最终变成 `code=None` penalty。
+
+已修复：
+
+- `eoh_evolution.py`：`_extract_go_function(response, function_name)` 支持任意 Go target。
+- `prompts_bin_packing_go.py`：强化公式型 `ScoreBin` 约束，要求简单 loop、填满 `scores`、不写复杂结构。
+- `tests/test_eoh_runner_specs.py`：新增 `ScoreBin` Go 抽取回归测试。
+
+修正后 smoke：
+
+| Arm | Run | Population | Valid | Seed gap | Best verified gap | RAG context | Verdict |
+|---|---|---:|---:|---:|---:|---|---|
+| Vanilla | `eoh_obp_repair_20260601/vanilla/run_20260601_114904` | 6 | 5 | 0.0590303 | 0.05903 | none | PASS: 生成稳定性恢复 |
+| API+Warning-only | `eoh_obp_repair_20260601/api_warning/run_20260601_114956` | 2 | 2 | 0.0590303 | 0.05903 | 894 chars, not truncated | STOP: 未达 `population>=5/valid>=3` |
+
+API+Warning-only trace：
+
+```text
+rag_context_chars = 894
+rag_context_truncated = false
+rag_global_items = obp_api_skeleton + suspicious_low_objective + negative_or_missing_result + timeout_or_unbounded_search
+rag_selected_items = []
+```
+
+注意：`rag_global_items` 记录的是可用 global items；当前 `prompt_context.py` 实际只注入第一个 warning。这里仍称为 API+Warning-only，而不是纯 API-only。
+
+两组 best code 均为 best-fit seed：
+
+```go
+func ScoreBin(item int, remaining []int, capacity int) []float64 {
+    scores := make([]float64, len(remaining))
+    for i, rem := range remaining {
+        scores[i] = float64(capacity - (rem - item))
+    }
+    return scores
+}
+```
+
+解读：
+
+- vanilla arm 已经满足 `population_size >= 5` 和 `valid_candidates >= 3`。
+- API+Warning-only arm 未满足停止门槛，因此按 goal 没有继续跑 Residual-RAG。
+- 当前能说的是：OBP 的主工程问题已经从“Go 抽取失败”修复为“RAG arm 候选多样性/去重不足”。还不能比较 RAG 性能。
+
 已运行命令：
 
 ```bash
 PYTHONPATH=. python3 -m unittest tests/test_eoh_runner_specs.py -q
 PYTHONPATH=. python3 -m unittest discover -s tests -q
 python3 -m compileall -q eoh_go Agent_EOH/eoh/src/eoh/examples/user_insertships_go Agent_EOH/eoh/src/eoh/examples/user_knapsack_go Agent_EOH/eoh/src/eoh/examples/user_bin_packing_go
+python3 -m compileall -q Agent_EOH/eoh/src/eoh/methods/eoh/eoh_evolution.py Agent_EOH/eoh/src/eoh/examples/user_bin_packing_go/prompts_bin_packing_go.py
 go build -o /tmp/eoh_go_mainbin .
 go build -o /tmp/eoh_go_obp_solver eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go
 go run eoh_go_workspace/problems/knapsack/knapsack_solver.go eoh_go_workspace/problems/knapsack/testdata/testdata_01.json
 go run eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go eoh_go_workspace/problems/bin_packing_online/testdata/obp_5x60_c100.json
+caffeinate -i -m -s python3 -m eoh_go.experiments.eoh_obp_smoke --root . --output-dir eoh_go_workspace/reports/tables/eoh_obp_repair_20260601/vanilla --llm-model JoyAI-LLM-Pro --generations 1 --pop-size 8 --run-timeout-s 10
+caffeinate -i -m -s python3 -m eoh_go.experiments.eoh_obp_smoke --root . --output-dir eoh_go_workspace/reports/tables/eoh_obp_repair_20260601/api_warning --llm-model JoyAI-LLM-Pro --generations 1 --pop-size 8 --run-timeout-s 10 --use-rag-context --rag-mode literature --rag-top-k 0 --rag-max-chars 900
 ```
 
 观察结果：
@@ -647,6 +696,6 @@ func SplitOrders(orders []Order, vehicles []Vehicle, workHours float64) []SubOrd
 | `Optimization` | VRP route/order improvement | smoke | 已验证 | 未超过 seed |
 | `SelectItems` | Knapsack | LLM smoke | `knapsack_api_skeleton` 已验证 | 未超过 seed |
 | `SplitOrders` | Mixer/concrete truck order split | LLM smoke | `mixer_split_api_skeleton` 已验证 | 未超过 seed |
-| `ScoreBin` | Online Bin Packing | LLM smoke | `obp_api_skeleton` + OBP skill cards 已验证 | 未超过 seed |
+| `ScoreBin` | Online Bin Packing | 修正 smoke | `obp_api_skeleton` 已验证；Residual-RAG 按停止条件未跑 | vanilla 生成稳定性恢复，RAG arm 未达比较门槛 |
 
 结论：本周展示可以诚实表达为“C+L+V harness 已经能跨 target 和跨组合优化问题运行；目前只有 InsertShips 有性能证据，Knapsack/Mixer/OBP 先作为跑通证据。下一阶段要补的是每个新问题的 domain skill cards、prompt 稳定性和多实例 evaluator，而不是再证明框架能不能跑。”

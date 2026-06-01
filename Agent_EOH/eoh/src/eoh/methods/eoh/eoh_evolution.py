@@ -33,8 +33,9 @@ class Evolution():
 
         self.interface_llm = InterfaceLLM(self.api_endpoint, self.api_key, self.model_LLM,llm_use_local,llm_local_url, self.debug_mode)
 
-    def _extract_go_insertships(self, response: str):
-        start = response.find("func InsertShips(")
+    @staticmethod
+    def _extract_go_function(response: str, function_name: str):
+        start = response.find(f"func {function_name}(")
         if start < 0:
             return None
         brace_start = response.find("{", start)
@@ -143,12 +144,12 @@ Finally, provide the revised code, keeping the function name, inputs, and output
 
         response = self.interface_llm.get_response(prompt_content)
 
-        response_language = "go" if "func InsertShips(" in prompt_content else "python"
-
         algorithm = re.findall(r"\{(.*)\}", response, re.DOTALL)
+        go_code = self._extract_go_function(response, self.prompt_func_name)
+        response_language = "go" if go_code is not None else "python"
         if len(algorithm) == 0:
             if response_language == "go":
-                algorithm = ["Evolved InsertShips candidate"]
+                algorithm = [f"Evolved {self.prompt_func_name} candidate"]
             elif 'python' in response:
                 algorithm = re.findall(r'^.*?(?=python)', response,re.DOTALL)
             elif 'import' in response:
@@ -158,7 +159,6 @@ Finally, provide the revised code, keeping the function name, inputs, and output
 
         if response_language == "go":
             code = []
-            go_code = self._extract_go_insertships(response)
             if go_code is not None:
                 code = [go_code]
         else:
@@ -174,9 +174,11 @@ Finally, provide the revised code, keeping the function name, inputs, and output
             response = self.interface_llm.get_response(prompt_content)
 
             algorithm = re.findall(r"\{(.*)\}", response, re.DOTALL)
+            go_code = self._extract_go_function(response, self.prompt_func_name)
+            response_language = "go" if go_code is not None else "python"
             if len(algorithm) == 0:
                 if response_language == "go":
-                    algorithm = ["Evolved InsertShips candidate"]
+                    algorithm = [f"Evolved {self.prompt_func_name} candidate"]
                 elif 'python' in response:
                     algorithm = re.findall(r'^.*?(?=python)', response,re.DOTALL)
                 elif 'import' in response:
@@ -186,7 +188,6 @@ Finally, provide the revised code, keeping the function name, inputs, and output
 
             if response_language == "go":
                 code = []
-                go_code = self._extract_go_insertships(response)
                 if go_code is not None:
                     code = [go_code]
             else:

@@ -54,6 +54,32 @@ class TestEOHRunnerSpecs(unittest.TestCase):
         with self.assertRaises(ValueError):
             get_problem_spec("missing_problem")
 
+    def test_eoh_go_extractor_supports_non_insertships_targets(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        src_path = root / "Agent_EOH" / "eoh" / "src"
+        sys.path.insert(0, str(src_path))
+        try:
+            from eoh.methods.eoh.eoh_evolution import Evolution
+
+            response = """{Best-fit scoring}
+func ScoreBin(item int, remaining []int, capacity int) []float64 {
+    scores := make([]float64, len(remaining))
+    for i, rem := range remaining {
+        scores[i] = float64(capacity - (rem - item))
+    }
+    return scores
+}
+"""
+            extracted = Evolution._extract_go_function(response, "ScoreBin")
+            self.assertIsNotNone(extracted)
+            self.assertIn("func ScoreBin", extracted)
+            self.assertIn("return scores", extracted)
+        finally:
+            try:
+                sys.path.remove(str(src_path))
+            except ValueError:
+                pass
+
     def test_knapsack_seed_evaluator_runs(self) -> None:
         root = Path(__file__).resolve().parents[1]
         example_root = root / "Agent_EOH" / "eoh" / "src" / "eoh" / "examples" / "user_knapsack_go"

@@ -147,3 +147,72 @@ dataset: obp_5x60_c100
 跑通：OBP harness + target-specific Literature-RAG trace 生效。
 未验证：gen=1 pop=8 下 Literature-RAG 未超过 vanilla/seed，原因是候选有效率不足。
 ```
+
+## 2026-06-01 修正实验
+
+### Phase A: population 过小根因
+
+上一轮 vanilla 和 Literature-RAG 的 `population_generation_1.json` 都只有 2 条：
+
+```text
+idx 0: seed, objective=0.05903, code exists
+idx 1: failed candidate, objective=1000000000.0, code=None
+```
+
+直接原因不是 `ScoreBin` evaluator 太严格，而是 `Agent_EOH/eoh/src/eoh/methods/eoh/eoh_evolution.py` 的代码抽取逻辑只把 `func InsertShips(` 识别为 Go。`ScoreBin` prompt 被误判成 Python target，LLM 即使返回合法 Go 函数，也会因为 Python regex 抽取失败变成 `code=None`。
+
+修复：
+
+- 将 `_extract_go_insertships()` 改成通用 `_extract_go_function(response, function_name)`。
+- 对 `ScoreBin` 增加回归测试，确认非 `InsertShips` Go target 也能被抽取。
+- 在 `prompts_bin_packing_go.py` 中补充公式型 `ScoreBin` 约束，要求分配 `scores := make([]float64, len(remaining))`、填满每个 `scores[i]` 并返回。
+
+### Phase B/C: 修正后 smoke
+
+固定配置：
+
+```text
+model: JoyAI-LLM-Pro
+generations: 1
+pop_size: 8
+dataset: obp_5x60_c100
+```
+
+结果：
+
+| Arm | RAG | Population | Valid | Seed gap | Best gap | Context | 裁决 |
+|---|---|---:|---:|---:|---:|---|---|
+| Vanilla | off | 6 | 5 | 0.0590303 | 0.05903 | - | 达到生成稳定性门槛 |
+| API+Warning-only | `rag_top_k=0` | 2 | 2 | 0.0590303 | 0.05903 | 894 chars, not truncated | 未达门槛，停止 |
+
+Residual-RAG 没有继续跑，因为 goal 的停止条件是：
+
+```text
+population_size < 5 或 valid_candidates < 3 时停止，不扩大实验。
+```
+
+API+Warning-only 已触发该停止条件。继续跑 Residual-RAG 会让对比建立在不稳定的候选生成基础上。
+
+当前 best code 仍是 best-fit seed：
+
+```go
+func ScoreBin(item int, remaining []int, capacity int) []float64 {
+    scores := make([]float64, len(remaining))
+    for i, rem := range remaining {
+        scores[i] = float64(capacity - (rem - item))
+    }
+    return scores
+}
+```
+
+### 当前判断
+
+- 修复通用 Go 抽取后，vanilla 从 `population=2/valid=1` 提升到 `population=6/valid=5`，说明上一轮主要瓶颈确实是代码抽取，而不是 OBP evaluator。
+- API+Warning-only 仍退化到 `population=2/valid=2`，说明即使 context 不截断，API skeleton + warning 也可能让模型生成更同质的候选，被 `pop_greedy` 按 objective 去重后只剩少量个体。
+- 当前仍不能比较 RAG 性能；下一步应先让 RAG arm 的 `population_size >= 5` 且 `valid_candidates >= 3`，再跑 Residual-RAG。
+
+建议下一步：
+
+1. API+Warning-only 改成真正 API-only：允许禁用 failure_case warning，避免 global warning 干扰。
+2. 或缩短 global block，只保留 `obp_api_skeleton` 的 Rules，不重复 Summary/Constraints。
+3. Residual-RAG 用 `rag_top_k=1, rag_max_chars=1800`，因为本地 trace 显示 top-1 可做到 `rag_context_truncated=false`，top-2 在 1800 字符下仍截断。

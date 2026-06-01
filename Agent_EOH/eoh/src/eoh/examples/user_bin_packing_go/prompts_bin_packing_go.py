@@ -12,6 +12,10 @@ class GetPrompts:
             "The evaluator processes items one by one. `remaining` contains only feasible bins "
             "whose remaining capacity is >= item. Return one score per feasible bin. The item is "
             "placed into the bin with the highest score. Lower final bin count is better.\n"
+            "Use a simple formula-only scoring function.\n"
+            "Do not create structs, helper functions, goroutines, maps, file/env/network calls, or random logic.\n"
+            "Do not check infeasible bins; `remaining` already contains only feasible bins.\n"
+            "Always allocate `scores := make([]float64, len(remaining))`, fill every `scores[i]`, and return `scores`.\n"
             "You may use math.Sqrt and math.Exp. Do not use file, network, goroutine, random, or env APIs.\n"
         )
         self.prompt_func_name = "ScoreBin"
@@ -24,6 +28,7 @@ class GetPrompts:
             "Do not write `package main` and do not add any imports.\n"
             "The returned score slice length must equal len(remaining).\n"
             "Scores must be finite numbers. Do not return NaN or Inf.\n"
+            "Use a simple loop over remaining and assign every scores[i].\n"
         )
         rag_context = os.environ.get("EOH_RAG_CONTEXT", "").strip()
         if rag_context:
