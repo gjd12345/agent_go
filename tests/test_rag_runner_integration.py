@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest import mock
 
 from eoh_go.eoh_runner.config import EOHConfig
-from eoh_go.eoh_runner.runner import _automatic_rag_query, _set_rag_context_env, run_v0_eoh
+from eoh_go.eoh_runner.runner import _automatic_rag_query, _build_retrieved_rag_context, _set_rag_context_env, run_v0_eoh
 from eoh_go.rag.build_corpus import LITERATURE_IDS, build_api_constraints, filter_corpus_by_mode, load_all_corpora
 from eoh_go.rag.schemas import CorpusItem
 
@@ -108,8 +108,45 @@ class RagRunnerIntegrationTests(unittest.TestCase):
     def test_api_constraint_source_path_is_curated(self) -> None:
         api_items = build_api_constraints(ROOT)
 
-        self.assertEqual(["insertships_api_skeleton"], [item.id for item in api_items])
-        self.assertEqual("curated", api_items[0].source_path)
+        self.assertEqual(
+            {
+                "insertships_api_skeleton",
+                "optimization_api_skeleton",
+                "knapsack_api_skeleton",
+                "mixer_split_api_skeleton",
+            },
+            {item.id for item in api_items},
+        )
+        self.assertTrue(all(item.source_path == "curated" for item in api_items))
+
+    def test_target_specific_global_items_use_aliases(self) -> None:
+        cases = [
+            ("InsertShips", "vrp_insertships", "insertships_api_skeleton"),
+            ("Optimization", "vrp_insertships", "optimization_api_skeleton"),
+            ("SelectItems", "knapsack", "knapsack_api_skeleton"),
+            ("SplitOrders", "mixer_split", "mixer_split_api_skeleton"),
+        ]
+
+        for target, problem, expected_id in cases:
+            with self.subTest(target=target):
+                context, trace = _build_retrieved_rag_context(
+                    EOHConfig(
+                        agent_eoh_root=str(ROOT / "Agent_EOH"),
+                        problem_name=problem,
+                        target_function=target,
+                        use_rag_context=True,
+                        rag_mode="literature",
+                        rag_top_k=0,
+                        rag_max_chars=1000,
+                        dataset_density="d50",
+                        arrival_scale=1.0,
+                    ),
+                    str(ROOT),
+                )
+                global_ids = [item["id"] for item in trace["rag_global_items"]]
+                self.assertIn(expected_id, global_ids)
+                self.assertIn("timeout_or_unbounded_search", global_ids)
+                self.assertGreater(len(context), 0)
 
     def test_full_corpus_mode_filters_and_literature_compression(self) -> None:
         corpus = load_all_corpora(ROOT)

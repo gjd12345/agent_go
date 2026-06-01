@@ -23,6 +23,12 @@ _RUNNER_ENV_KEYS = [
 
 _RAG_CONTEXT_MAX_BYTES = 50 * 1024
 _RAG_CONTEXT_MAX_CHARS = 8000
+_TARGET_RAG_TAGS = {
+    "InsertShips": {"insertships"},
+    "Optimization": {"optimization"},
+    "SelectItems": {"knapsack", "selectitems"},
+    "SplitOrders": {"mixer", "splitorders"},
+}
 
 
 def _extract_target_from_main(main_text: str, target_function: str) -> str:
@@ -110,6 +116,10 @@ def _automatic_rag_query(config: EOHConfig) -> str:
     )
 
 
+def _target_rag_tags(target_function: str) -> set[str]:
+    return _TARGET_RAG_TAGS.get(target_function, {target_function.lower()})
+
+
 def _build_retrieved_rag_context(config: EOHConfig, project_root: str) -> tuple[str, dict[str, Any]]:
     from eoh_go.rag.build_corpus import filter_corpus_by_mode, load_all_corpora, resolve_corpus_dir
     from eoh_go.rag.prompt_context import format_prompt_context
@@ -120,10 +130,10 @@ def _build_retrieved_rag_context(config: EOHConfig, project_root: str) -> tuple[
     corpus_size_before = len(corpus)
     filtered_corpus = filter_corpus_by_mode(corpus, config.rag_mode)
     global_items = [item for item in filtered_corpus if item.kind in {"api_constraint", "failure_case"}]
-    target_tag = config.target_function.lower() if hasattr(config, 'target_function') else "insertships"
+    target_tags = _target_rag_tags(config.target_function if hasattr(config, "target_function") else "InsertShips")
     global_items = [
         item for item in global_items
-        if "all" in item.tags or target_tag in item.tags
+        if "all" in item.tags or target_tags.intersection(set(item.tags))
     ]
     if config.rag_mode == "history":
         strategy_pool = [item for item in filtered_corpus if item.kind == "code_example"]
@@ -199,6 +209,9 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
     if config.problem_name == "knapsack":
         example_name = "user_knapsack_go"
         problem_module_name = "prob_knapsack_go"
+    elif config.problem_name == "mixer_split":
+        example_name = "user_mixer_split_go"
+        problem_module_name = "prob_mixer_split_go"
     else:
         example_name = "user_insertships_go"
         problem_module_name = "prob_insertships_go"
@@ -225,7 +238,7 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
         # 3. Setup Problem & Paras
         problem_module = importlib.reload(problem_module)
         rag_trace = _set_rag_context_env(config, project_root)
-        if config.problem_name == "knapsack":
+        if config.problem_name in {"knapsack", "mixer_split"}:
             problem_instance = problem_module.Evaluation(run_timeout_s=config.run_timeout_s)
         else:
             problem_instance = problem_module.Evaluation(
@@ -245,6 +258,8 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
             seed_path = config.seed_path
         elif config.problem_name == "knapsack":
             seed_path = os.path.join(example_root, "seeds_knapsack_go.json")
+        elif config.problem_name == "mixer_split":
+            seed_path = os.path.join(example_root, "seeds_mixer_split_go.json")
         elif config.use_sa_seed_as_init:
             seed_path = _prepare_sa_seed(example_root, project_root, config.target_function)
         else:

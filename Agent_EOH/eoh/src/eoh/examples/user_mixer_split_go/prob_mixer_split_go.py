@@ -9,7 +9,7 @@ import tempfile
 import traceback
 import warnings
 
-from prompts_knapsack_go import GetPrompts
+from prompts_mixer_split_go import GetPrompts
 
 
 _SUBPROCESS_ENV_ALLOWLIST = {
@@ -71,12 +71,15 @@ def _parse_final_cost(output: str) -> float | None:
         return None
 
 
-def _replace_select_items(solver_path: str, method_go: str) -> None:
+def _replace_split_orders(solver_path: str, method_go: str) -> None:
     text = open(solver_path, "r", encoding="utf-8").read()
-    pat = r"func\s+SelectItems\s*\(\s*items\s+\[\]Item\s*,\s*capacity\s+int\s*\)\s*\[\]bool\s*\{[\s\S]*?\n\}"
+    pat = (
+        r"func\s+SplitOrders\s*\(\s*orders\s+\[\]Order\s*,\s*vehicles\s+\[\]Vehicle\s*,"
+        r"\s*workHours\s+float64\s*\)\s*\[\]SubOrder\s*\{[\s\S]*?\n\}"
+    )
     match = re.search(pat, text)
     if not match:
-        raise ValueError("SelectItems method not found in knapsack_solver.go")
+        raise ValueError("SplitOrders method not found in mixer_split_solver.go")
     patched = text[: match.start()] + method_go.strip() + "\n" + text[match.end() :]
     with open(solver_path, "w", encoding="utf-8") as f:
         f.write(patched)
@@ -94,12 +97,18 @@ class Evaluation:
         self._last_traceback = None
         base_dir = os.path.dirname(__file__)
         self.project_root = _find_project_root(base_dir)
-        self.solver_path = os.path.join(self.project_root, "eoh_go_workspace", "problems", "knapsack", "knapsack_solver.go")
+        self.solver_path = os.path.join(
+            self.project_root,
+            "eoh_go_workspace",
+            "problems",
+            "mixer_split",
+            "mixer_split_solver.go",
+        )
         self.instance_path = os.path.join(
             self.project_root,
             "eoh_go_workspace",
             "problems",
-            "knapsack",
+            "mixer_split",
             "testdata",
             "testdata_01.json",
         )
@@ -108,13 +117,13 @@ class Evaluation:
         self.run_timeout_s = int(run_timeout_s)
 
     def _build_and_run(self, method_go: str) -> float | None:
-        tmp = tempfile.mkdtemp(prefix="eoh_knapsack_go_")
+        tmp = tempfile.mkdtemp(prefix="eoh_mixer_split_go_")
         try:
-            shutil.copy2(self.solver_path, os.path.join(tmp, "knapsack_solver.go"))
-            solver = os.path.join(tmp, "knapsack_solver.go")
-            _replace_select_items(solver, method_go)
+            shutil.copy2(self.solver_path, os.path.join(tmp, "mixer_split_solver.go"))
+            solver = os.path.join(tmp, "mixer_split_solver.go")
+            _replace_split_orders(solver, method_go)
             build = _run_command(
-                ["go", "build", "-o", "knapsack_solver", "knapsack_solver.go"],
+                ["go", "build", "-o", "mixer_split_solver", "mixer_split_solver.go"],
                 cwd=tmp,
                 timeout_s=self.build_timeout_s,
             )
@@ -123,7 +132,7 @@ class Evaluation:
                 self._last_traceback = json.dumps(build, ensure_ascii=True)
                 return None
             run = _run_command(
-                [os.path.join(tmp, "knapsack_solver"), self.instance_path],
+                [os.path.join(tmp, "mixer_split_solver"), self.instance_path],
                 cwd=tmp,
                 timeout_s=self.run_timeout_s,
             )
@@ -143,8 +152,8 @@ class Evaluation:
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                if "func SelectItems" not in code_string:
-                    self._last_error = "Missing SelectItems method definition"
+                if "func SplitOrders" not in code_string:
+                    self._last_error = "Missing SplitOrders method definition"
                     return self.per_instance_penalty
                 fitness = self._build_and_run(code_string)
                 if fitness is None:

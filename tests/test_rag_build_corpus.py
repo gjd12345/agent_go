@@ -38,10 +38,18 @@ class RagBuildCorpusTests(unittest.TestCase):
             self.assertEqual({"code_example", "api_constraint", "failure_case"}, {item.kind for item in loaded})
             self.assertTrue(any(item.source_path.endswith("topk_delta.go") for item in loaded))
             api_items = [item for item in loaded if item.kind == "api_constraint"]
-            self.assertEqual(["insertships_api_skeleton"], [item.id for item in api_items])
-            self.assertLessEqual(len(api_items[0].content), 400)
-            self.assertNotIn("package main", api_items[0].content)
-            self.assertNotIn("func InsertShips", api_items[0].content)
+            self.assertEqual(
+                {
+                    "insertships_api_skeleton",
+                    "optimization_api_skeleton",
+                    "knapsack_api_skeleton",
+                    "mixer_split_api_skeleton",
+                },
+                {item.id for item in api_items},
+            )
+            for item in api_items:
+                self.assertLessEqual(len(item.content), 400, item.id)
+                self.assertNotIn("package main", item.content)
 
     def test_resolve_corpus_dir_rejects_paths_outside_workspace_corpus(self) -> None:
         from eoh_go.rag.build_corpus import resolve_corpus_dir

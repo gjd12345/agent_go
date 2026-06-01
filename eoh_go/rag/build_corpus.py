@@ -176,6 +176,28 @@ def build_api_constraints(project_root: str | Path) -> list[CorpusItem]:
                 "- Maximize total value := sum(items[i].Value for i where result[i] is true)."
             ),
         ),
+        CorpusItem(
+            id="mixer_split_api_skeleton",
+            kind="api_constraint",
+            title="Mixer SplitOrders Go API skeleton",
+            tags=["mixer", "splitorders", "api", "safety"],
+            source_path="curated",
+            summary="Concrete mixer order splitting: preserve volume, obey vehicle capacity, return valid suborders.",
+            constraints=[
+                "Preserve each original order volume exactly.",
+                "Every suborder volume must be positive and <= chosen vehicle capacity.",
+            ],
+            content=(
+                "API: mixer_split_skeleton\n"
+                "Rules:\n"
+                "- func SplitOrders(orders []Order, vehicles []Vehicle, workHours float64) []SubOrder\n"
+                "- Return []SubOrder.\n"
+                "- Preserve each original order volume exactly.\n"
+                "- Every suborder volume must be <= chosen vehicle capacity.\n"
+                "- Use fallback splitting by largest available vehicle.\n"
+                "- Never invent unknown order IDs."
+            ),
+        ),
     ]
 
 

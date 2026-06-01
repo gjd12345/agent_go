@@ -27,8 +27,8 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     cfg = EOHConfig(
         agent_eoh_root=str(root / "Agent_EOH"),
         exp_output_path=str(out_dir / "agent_eoh_results"),
-        problem_name="knapsack",
-        target_function="SelectItems",
+        problem_name="mixer_split",
+        target_function="SplitOrders",
         llm_model=args.llm_model,
         ec_n_pop=args.generations,
         ec_pop_size=args.pop_size,
@@ -46,21 +46,20 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     valid = [x for x in objectives if x is not None and x < 1e8]
     best_objective = min(valid) if valid else None
     summary = {
-        "problem_name": "knapsack",
-        "target": "SelectItems",
+        "problem_name": "mixer_split",
+        "target": "SplitOrders",
         "run_tag": run_tag,
         "eoh_ok": result.get("ok") if isinstance(result, dict) else False,
         "population_size": len(population) if isinstance(population, list) else 0,
         "valid_candidates": len(valid),
         "best_objective": best_objective,
-        "best_value": -best_objective if best_objective is not None else None,
         "population_file": result.get("population_file") if isinstance(result, dict) else None,
         "rag_trace": result.get("rag_trace") if isinstance(result, dict) else None,
     }
     rag_trace = summary["rag_trace"] if isinstance(summary["rag_trace"], dict) else None
     summary["rag_context_chars"] = rag_trace.get("rag_context_chars") if rag_trace else None
     summary["rag_global_items"] = rag_trace.get("rag_global_items") if rag_trace else []
-    (out_dir / "knapsack_smoke_summary.json").write_text(
+    (out_dir / "mixer_split_smoke_summary.json").write_text(
         json.dumps(summary, ensure_ascii=True, indent=2),
         encoding="utf-8",
     )
@@ -71,7 +70,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default=".")
-    parser.add_argument("--output-dir", type=Path, default=Path("eoh_go_workspace/reports/tables/knapsack_smoke"))
+    parser.add_argument("--output-dir", type=Path, default=Path("eoh_go_workspace/reports/tables/mixer_split_smoke"))
     parser.add_argument("--llm-model", default="deepseek-v4-pro")
     parser.add_argument("--generations", type=int, default=1)
     parser.add_argument("--pop-size", type=int, default=4)

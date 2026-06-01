@@ -74,6 +74,35 @@ TARGET_SPECS: dict[str, TargetSpec] = {
         ),
         guard_checks=["knapsack_capacity_not_exceeded", "return_array_correct_length"],
     ),
+    "SplitOrders": TargetSpec(
+        name="SplitOrders",
+        function_name="SplitOrders",
+        signature="func SplitOrders(orders []Order, vehicles []Vehicle, workHours float64) []SubOrder",
+        inputs=["orders", "vehicles", "workHours"],
+        outputs=["[]SubOrder"],
+        prompt_constraints=(
+            "Return suborders that preserve every original order volume. Each suborder volume must be "
+            "<= its vehicle capacity. Never invent order IDs."
+        ),
+        extract_regex=(
+            r"func\s+SplitOrders\s*\(\s*orders\s+\[\]Order\s*,\s*vehicles\s+\[\]Vehicle\s*,"
+            r"\s*workHours\s+float64\s*\)\s*\[\]SubOrder\s*\{[\s\S]*?\n\}"
+        ),
+        replace_regex_template=(
+            r"func SplitOrders\(orders \[\]Order, vehicles \[\]Vehicle, workHours float64\) "
+            r"\[\]SubOrder \{\s*\n%s\n\}"
+        ),
+        seed_path="eoh_go_workspace/problems/mixer_split/mixer_split_solver.go",
+        rag_api_context=(
+            "Return []SubOrder. Preserve each original order volume exactly. Each suborder volume "
+            "must be <= chosen vehicle capacity. Use largest-capacity fallback splitting."
+        ),
+        guard_checks=[
+            "mixer_order_volume_preserved",
+            "mixer_suborder_capacity_not_exceeded",
+            "mixer_known_order_ids_only",
+        ],
+    ),
 }
 
 
@@ -101,6 +130,17 @@ PROBLEM_SPECS: dict[str, ProblemSpec] = {
         ],
         default_metrics={"primary": "value", "secondary": "valid_rate"},
     ),
+    "mixer_split": ProblemSpec(
+        name="mixer_split",
+        language="go",
+        source_files=["eoh_go_workspace/problems/mixer_split/mixer_split_solver.go"],
+        main_binary="mixer_split_solver",
+        objective_direction="minimize",
+        benchmark_data=[
+            {"path": "eoh_go_workspace/problems/mixer_split/testdata/testdata_01.json", "label": "mixer_day_01"},
+        ],
+        default_metrics={"primary": "final_cost", "secondary": "valid_rate"},
+    ),
 }
 
 
@@ -116,4 +156,3 @@ def get_problem_spec(name: str) -> ProblemSpec:
         return PROBLEM_SPECS[name]
     except KeyError as exc:
         raise ValueError(f"Unknown problem spec: {name}") from exc
-
