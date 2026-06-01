@@ -1,16 +1,8 @@
-/goal: OBP 修正实验 —— 先提高生成有效率，再验证 Literature-RAG 是否优于 vanilla EoH
+/goal: OBP RAG arm 稳定性修复 - 先做真 API-only，再跑 Residual-RAG
 
-目标：在已经跑通的 Online Bin Packing (OBP) / `ScoreBin` harness 上，修正上一轮最小对照暴露的问题，再做一组更干净的 vanilla vs Literature-RAG 对照。核心不是扩大矩阵，而是先证明 EOH 能稳定产生接近 `pop_size` 的合法候选，并且 RAG context 完整、选卡有差异性。
+目标：在已经修好的 Online Bin Packing (OBP) / `ScoreBin` harness 上，继续推进 RAG 对照实验。当前重点不是扩大矩阵，而是先把 RAG arm 的候选生成稳定性修好：API 规则可以帮助模型写合法代码，但 failure warnings 和 strategy cards 不能继续挤占 `ScoreBin` 的生成预算。
 
-当前结论必须保持克制：
-
-```text
-OBP 最小闭环已跑通；Literature-RAG trace 生效。
-本轮未观察到提升，主要受候选生成失败和 context 截断影响。
-当前结果不能证明 RAG 无效。
-```
-
-报告一律写中文。实验产物不入 git，汇总和关键 best code 入报告。API key 不读取、不打印、不 echo。
+报告一律写中文。实验产物不入 git，汇总报告和关键 best code 入 git。API key 不读取、不打印、不 echo；如需确认，只输出 `DEEPSEEK_API_KEY_PRESENT=true/false` 或同类布尔值。
 
 ---
 
@@ -19,9 +11,9 @@ OBP 最小闭环已跑通；Literature-RAG trace 生效。
 已完成并推送：
 
 ```text
-当前 goal 文档提交 = 3fa673d docs(goal): refocus weekly showcase on OBP repair experiment
+当前代码/报告提交 = e6590e3 fix(obp): support ScoreBin Go extraction and record repair smoke
 OBP harness 提交 = 59fe783 feat(obp): add online bin packing showcase harness
-origin/main = 3fa673d
+origin/main = e6590e3
 ```
 
 工程状态：
@@ -34,237 +26,212 @@ origin/main = 3fa673d
 | OBP literature cards | 已接入 |
 | `obp_api_skeleton` | 已接入 |
 | target-specific RAG filtering | 已生效 |
-| tests | `57 tests OK` |
+| non-InsertShips Go extraction | 已修复 |
+| tests | `58 tests OK` |
 
-本地未跟踪目录里有实验产物和 `.DS_Store`，默认不提交。
+本地未跟踪目录里有 raw 实验产物、`.DS_Store`、PPT/HTML 临时文件，默认不提交。
 
 ---
 
-## 复核发现
+## 已验证事实
 
-### P1: 实际 population 太小
+### 1. Go extraction 根因已修复
 
-上一轮命令设置 `pop_size=8`，但最终 population 只有 2 条：
+上一轮 OBP population 只有 seed + failed candidate 的根因不是 OBP evaluator，而是 `Agent_EOH` 的 Go 函数提取逻辑只识别 `func InsertShips(`。`ScoreBin` 被误当成 Python 输出解析，导致候选变成 `code=None`。
+
+已修复：
 
 ```text
-1 条 seed
-1 条 None / failed candidate
+Agent_EOH/eoh/src/eoh/methods/eoh/eoh_evolution.py
+Agent_EOH/eoh/src/eoh/examples/user_bin_packing_go/prompts_bin_packing_go.py
+tests/test_eoh_runner_specs.py
 ```
 
-这说明上一轮不是“8 个候选都没有提升”，而是 EOH 实际只留下了 seed + 一个失败候选。vanilla 和 RAG 都没有统计意义。
-
-优先排查：
-
-- LLM 输出是否为空、非 Go code、markdown 包裹、函数签名不匹配。
-- EOH parser 是否只保留了少量解析成功候选。
-- generated candidate build/run 失败原因。
-- `ScoreBin` prompt 是否让模型写出复杂但不合法的函数。
-
-验收目标：
+验证结果：
 
 ```text
-population_size >= 5
-valid_candidates >= 3
+PYTHONPATH=. python3 -m unittest discover -s tests -q        -> 58 tests OK
+python3 -m compileall -q eoh_go Agent_EOH/...                -> OK
+go build -o /tmp/eoh_go_mainbin .                            -> OK
+go build -o /tmp/eoh_go_obp_solver .../bin_packing_solver.go -> OK
+go run .../bin_packing_solver.go .../obp_5x60_c100.json      -> final cost 0.05903030
 ```
 
-如果做不到，不扩大实验。
+### 2. Vanilla 已恢复稳定
 
-### P1: Literature-RAG context 被截断
-
-上一轮 trace：
+修复后 vanilla OBP smoke：
 
 ```text
-rag_context_chars = 2500
-rag_context_truncated = true
-selected = obp_best_fit, obp_worst_fit, obp_first_fit
+summary = eoh_go_workspace/reports/tables/eoh_obp_repair_20260601/vanilla/run_20260601_114904/eoh_obp_smoke_summary.json
+population_size = 6
+valid_candidates = 5
+best_gap_to_lb = 0.05903
+seed_objective = 0.0590303
+best code = best-fit seed 等价实现
 ```
 
-实际 prompt 中 `obp_first_fit` 只剩开头，`Do/Fallback/Safety` 没完整进入。这会削弱 RAG 的可执行性。
+结论：EOH 对 `ScoreBin` 已能稳定生成/解析合法 Go 候选。
 
-下一轮参数：
+### 3. API+Warning-only 仍不稳定
 
-```text
-rag_top_k = 1 或 2
-rag_max_chars = 1200 到 1800
-```
-
-验收目标：
+修复后 API+Warning-only smoke：
 
 ```text
+summary = eoh_go_workspace/reports/tables/eoh_obp_repair_20260601/api_warning/run_20260601_114956/eoh_obp_smoke_summary.json
+population_size = 2
+valid_candidates = 2
+best_gap_to_lb = 0.05903
+seed_objective = 0.0590303
+rag_context_chars = 894
 rag_context_truncated = false
-selected card 的 Skill/When/Do/Fallback/Safety 完整出现在 context
+rag_selected_items = []
+best code = best-fit seed 等价实现
 ```
 
-### P1: top-3 选卡太保守
-
-当前 top-3：
-
-```text
-obp_best_fit
-obp_worst_fit
-obp_first_fit
-```
-
-其中 `obp_best_fit` 基本就是 seed，同类知识不太可能带来提升。更可能产生差异的是：
-
-```text
-obp_harmonic
-obp_funsearch_residual_poly
-obp_eoh_util_sqrt_exp
-```
-
-下一步不要只依赖默认 query。至少跑一个指定 query，让 residual/poly/utilization 进入 top-k。
-
-建议 query：
-
-```text
-online bin packing ScoreBin residual polynomial utilization sqrt exp gap penalty tiny unusable residual gaps
-```
-
-验收目标：
-
-```text
-rag_selected_items 包含 obp_funsearch_residual_poly 或 obp_eoh_util_sqrt_exp
-```
-
-### P2: trace global items 语义不精确
-
-trace 中 `rag_global_items` 显示 3 个 failure_case，但 `prompt_context.py` 实际只注入第一个 warning。后续分析容易误判“模型看到了 3 个 warning”。
-
-后续可改：
-
-```text
-rag_global_items_available
-rag_global_items_injected
-```
-
-这不是当前阻塞项。若改，必须补测试。
+结论：RAG 链路没有截断，但当前所谓 API-only 不是“真 API-only”。它仍注入 failure warnings，可能对小函数目标造成额外约束噪声。Residual-RAG 被跳过是正确的，因为停损条件已经触发。
 
 ---
 
-## 当前最佳判断
+## 当前判断
 
 工程质量：PASS。
 
-实验结论：未验证。
+实验结论：未验证 RAG 是否有效。
+
+允许说：
+
+```text
+OBP 最小闭环和 ScoreBin Go extraction 已修复；vanilla 生成稳定性恢复。
+RAG arm 仍不稳定，当前瓶颈从解析错误转移到 context 路由/注入策略。
+```
 
 不能说：
 
 ```text
-Literature-RAG 对 OBP 无效
+Literature-RAG 对 OBP 无效。
 ```
 
-只能说：
+原因：RAG arm 尚未形成可比较的 population。
+
+---
+
+## Phase A: 实现 true API-only / warning gate
+
+目标：让 OBP 可以跑真正的 API-only arm，只注入 `api_constraint`，不注入 `failure_case`，也不检索 strategy card。
+
+建议改动：
 
 ```text
-当前 gen=1 pop=8 smoke 中，vanilla 和 Literature-RAG 都只保住 seed；
-主要瓶颈是候选生成/解析失败和 RAG context 截断；
-需要先修实验设置，再比较性能。
+eoh_go/eoh_runner/config.py
+eoh_go/eoh_runner/runner.py
+eoh_go/experiments/eoh_obp_smoke.py
+tests/test_rag_runner_integration.py
+tests/test_eoh_obp_smoke.py 或相邻测试文件
+```
+
+实现要求：
+
+1. 在 `EOHConfig` 增加：
+
+```python
+rag_include_warnings: bool = True
+```
+
+2. 在 OBP smoke CLI 增加：
+
+```text
+--no-rag-warnings
+```
+
+传入：
+
+```python
+rag_include_warnings=False
+```
+
+3. 在 `_build_retrieved_rag_context()` 中拆分 global items：
+
+```text
+api_constraint: always injected
+failure_case: injected only when config.rag_include_warnings is True
+algorithm_card: strategy retrieval pool only
+```
+
+4. trace 语义要精确：
+
+```text
+rag_global_items_available
+rag_global_items_injected
+rag_selected_items
+rag_context_chars
+rag_context_truncated
+```
+
+如果为了兼容旧报告保留 `rag_global_items`，它必须表示实际注入项，不表示 available 项。
+
+5. 测试必须覆盖：
+
+```text
+rag_include_warnings=True  -> failure_case 出现在 injected globals
+rag_include_warnings=False -> failure_case 不出现在 injected globals
+rag_top_k=0                -> rag_selected_items=[]
+api_constraint             -> 仍然出现在 context 前部
+```
+
+禁止改动：
+
+```text
+Go solver 正常路径
+OBP evaluator 语义
+raw experiment output 入仓库
 ```
 
 ---
 
-## Phase A: 只读排查上一轮失败候选
+## Phase B: 本地验证 true API-only context
 
-目标：解释为什么 `pop_size=8` 最后只有 2 条 population。
+不跑真实 LLM 前，先用本地 trace 验证 context。
 
-只读检查：
+验收点：
 
 ```text
-eoh_go_workspace/reports/tables/eoh_obp_showcase_20260601/vanilla/run_*/agent_eoh_results/
-eoh_go_workspace/reports/tables/eoh_obp_showcase_20260601/literature/run_*/agent_eoh_results/
+rag_selected_items = []
+rag_global_items_injected 只含 obp_api_skeleton / api_constraint
+context 不含 WARNINGS
+context 不含 failure_case summary/content
+context 不含 package main / func ScoreBin 外的 Go 源码
+context chars <= 700
+rag_context_truncated = false
 ```
 
-检查内容：
+必须运行：
 
-- `results/pops/population_generation_1.json`
-- 是否有 `pops_best/`
-- 是否有 raw response / generated code 临时文件
-- failed candidate 的 code/error/traceback
-- EOH 是否实际请求 8 个 LLM candidates，还是 operator/population 逻辑只产生 1 个 mutation
-
-输出到中文报告：
-
-```text
-eoh_go_workspace/reports/eoh_obp_research_plan.md
-```
-
-记录：
-
-- population 为什么只有 2 条。
-- invalid candidate 的具体失败原因。
-- 是否需要改 prompt、EOH operator、还是 evaluator。
-
----
-
-## Phase B: prompt 稳定性修正
-
-目标：让模型更容易生成合法 `ScoreBin`。
-
-修改范围优先限于：
-
-```text
-Agent_EOH/eoh/src/eoh/examples/user_bin_packing_go/prompts_bin_packing_go.py
-Agent_EOH/eoh/src/eoh/examples/user_bin_packing_go/seeds_bin_packing_go.json
-tests/test_eoh_runner_specs.py
-```
-
-建议 prompt 增补：
-
-```text
-Use a simple formula-only scoring function.
-Do not create structs, helper functions, goroutines, maps, file/env/network calls, or random logic.
-Do not check infeasible bins; remaining already contains only feasible bins.
-Always allocate scores := make([]float64, len(remaining)).
-Fill every scores[i].
-Return scores.
-```
-
-本轮先不增加多 seed，只改 prompt，避免变量变多。若后续增加 best-fit / worst-fit / residual penalty 多 seed，必须同步更新 `eoh_obp_smoke.py` summary：
-
-- 记录 `seed_count`。
-- 记录每个 seed 的 objective。
-- 明确 population 初始 seed 来源。
-
-验收：
-
-```text
-PYTHONPATH=. python3 -m unittest tests.test_eoh_runner_specs -q
+```bash
+PYTHONPATH=. python3 -m unittest discover -s tests -q
+python3 -m compileall -q eoh_go Agent_EOH/eoh/src/eoh/examples/user_bin_packing_go Agent_EOH/eoh/src/eoh/methods/eoh/eoh_evolution.py
+go build -o /tmp/eoh_go_mainbin .
+go build -o /tmp/eoh_go_obp_solver eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go
 go run eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go eoh_go_workspace/problems/bin_packing_online/testdata/obp_5x60_c100.json
 ```
 
 ---
 
-## Phase C: RAG context 修正实验
+## Phase C: 修正后小实验
 
-目标：跑小而干净的三组，不扩大矩阵。
+目标：只跑足够判断 RAG arm 是否恢复稳定的小实验，不扩大矩阵。
 
-固定：
+固定设置：
 
 ```text
 problem = bin_packing_online
 target = ScoreBin
-model = JoyAI-LLM-Pro
+model = JoyAI-LLM-Pro 或当前已授权公司 API 模型
 generations = 1
 pop_size = 8
 dataset = obp_5x60_c100
 ```
 
-三组：
-
-| Arm | RAG | 参数 | 目的 |
-|---|---|---|---|
-| Vanilla | off | - | 基线 |
-| API+Warning-only | literature | `rag_top_k=0`, `rag_max_chars=900` | 只看 API skeleton + 1 条 warning 是否提升有效率 |
-| Residual-RAG | literature | `rag_top_k=2`, `rag_max_chars=1800`, custom query | 强制非 seed 策略进入 context |
-
-Residual-RAG query：
-
-```text
-online bin packing ScoreBin residual polynomial utilization sqrt exp gap penalty tiny unusable residual gaps
-```
-
-运行命令必须使用：
+运行规则：
 
 ```bash
 set -a
@@ -273,20 +240,75 @@ set +a
 caffeinate -i -m -s python3 -m eoh_go.experiments.eoh_obp_smoke ...
 ```
 
-禁止打印 API key、key 前缀、Authorization header。
+熄屏运行默认使用 `caffeinate -i -m -s`。后台运行时保留日志文件，避免频繁轮询。到模型/API 额度上限时允许暂停，额度恢复后从未完成 arm 继续，不重跑已完成且 summary 完整的 arm。
+
+### Arm 1: true API-only
+
+只跑这一组作为下一步 gate。
+
+```text
+--use-rag-context
+--rag-mode literature
+--rag-top-k 0
+--rag-max-chars 700
+--no-rag-warnings
+```
+
+停损条件：
+
+```text
+population_size < 5 或 valid_candidates < 3 -> 停止，不跑 Residual-RAG
+```
+
+通过条件：
+
+```text
+population_size >= 5
+valid_candidates >= 3
+rag_context_truncated = false
+rag_selected_items = []
+```
+
+### Arm 2: Residual-RAG
+
+仅当 Arm 1 通过才跑。
+
+```text
+--use-rag-context
+--rag-mode literature
+--rag-top-k 1
+--rag-max-chars 1800
+--no-rag-warnings
+--rag-query "online bin packing ScoreBin residual polynomial utilization sqrt exp gap penalty tiny unusable residual gaps"
+```
 
 验收：
 
-- 每组 summary 写出 `population_size`、`valid_candidates`、`best_gap_to_lb`。
-- RAG 组写出 `rag_context_truncated`、`rag_context_chars`、`rag_selected_items`。
-- Residual-RAG 必须选中 `obp_funsearch_residual_poly` 或 `obp_eoh_util_sqrt_exp`。
-- 如果 `population_size < 5` 或 `valid_candidates < 3`，停止，不再扩大实验。
+```text
+rag_selected_items 包含 obp_funsearch_residual_poly 或 obp_eoh_util_sqrt_exp
+rag_context_truncated = false
+population_size >= 5
+valid_candidates >= 3
+```
+
+### Arm 3: Vanilla repeat
+
+默认不重跑。只有在 Phase A/B 改动影响非 RAG 路径或报告需要同一天同模型对照时才跑。
+
+如果跑，参数：
+
+```text
+RAG off
+generations=1
+pop_size=8
+同 dataset / model
+```
 
 ---
 
 ## Phase D: 报告更新
 
-更新：
+更新中文报告：
 
 ```text
 eoh_go_workspace/reports/eoh_obp_research_plan.md
@@ -295,22 +317,22 @@ eoh_go_workspace/reports/clv_harness_weekly_showcase.md
 
 报告必须包含：
 
-1. 上一轮复核结论：工程 PASS，实验未验证。
-2. population 过小的实际证据。
-3. context 截断证据。
-4. top-k 选卡偏保守证据。
-5. 修正后三组实验结果。
-6. 每组 best code。不要只写策略描述。
-7. 下一步判断：继续 OBP、改 Python target 对齐官方 `score(item,bins)`，还是转 TSP/GLS。
+1. `e6590e3` 后的事实：Go extraction 已修复，vanilla stable。
+2. API+Warning-only 为何仍不能比较：population 只有 2。
+3. true API-only 的 trace：实际注入了什么，没注入什么。
+4. Residual-RAG 的 selected card、context chars、是否截断。
+5. 每组 metric：`population_size`、`valid_candidates`、`best_gap_to_lb`、`seed_objective`。
+6. 每组 best code。不能只写策略变化，必须贴出具体 `func ScoreBin(...) []float64`。
+7. 如果触发停损，明确写停损原因，不伪造对比结论。
 
 结论用词：
 
 | 情况 | 允许说法 |
 |---|---|
-| population 仍很小 | “OBP EOH 生成稳定性未解决，不能比较 RAG 性能” |
-| API+Warning-only 有效候选更多 | “API skeleton + warning 可能提升合法性，但还不是策略提升” |
-| Residual-RAG gap 更低 | “Literature-RAG 出现初步正信号，需要 repeats” |
-| Residual-RAG 无提升但有效率足够 | “本实例/当前 cards 未显示收益，可考虑更难 instance 或换官方 Python target” |
+| true API-only 仍不稳定 | “RAG arm 的 global context 注入仍影响候选生成，不能比较策略收益” |
+| true API-only 稳定、Residual-RAG 不稳定 | “策略卡对 OBP 小函数仍有干扰，需要进一步压缩或指定更简单公式卡” |
+| Residual-RAG 稳定但无提升 | “当前实例/卡片未显示收益，可换更难 instance 或官方 Python target” |
+| Residual-RAG 稳定且 gap 更低 | “Literature-RAG 出现初步正信号，需要 repeats 验证稳定性” |
 
 ---
 
@@ -320,22 +342,31 @@ eoh_go_workspace/reports/clv_harness_weekly_showcase.md
 
 提交范围：
 
-- goal 文档。
-- prompt/seed/test 代码改动。
-- 中文汇总报告。
+```text
+.codex/goals/weekly_showcase.md
+相关 Python 源码
+相关 tests
+中文汇总报告
+```
 
 不提交：
 
-- API key / env。
-- raw 大型实验产物。
-- `.DS_Store`。
-- ppt/html 临时产物。
+```text
+API key / env
+raw 大型实验目录
+.DS_Store
+PPT/HTML 临时产物
+```
 
 最终响应必须包含：
 
-- files changed
-- commands run
-- test results
-- experiment results
-- unresolved risks
-- merge recommendation
+```text
+files changed
+commands run
+test results
+experiment results
+unresolved risks
+merge recommendation
+git commit hash
+push status
+```
