@@ -62,6 +62,93 @@
 - 中期 generations：遍历所有 Assigns，比较 cost delta，显式 rollback。
 - 后期 generations：best-delta insertion + fallback new Assign + `RenewnTotalCost()`。
 
+代表代码片段如下。这里展示的是每代 `pops_best` 中的代表结构；性能结论仍只看最终 guarded evaluator 的 verified J。
+
+Gen 1：first feasible insertion，成功后立即 `break`：
+
+```go
+for jj := range oris {
+    for _, ii := range rand_range {
+        if !dispatch.Assigns[ii].AddShip(total_ship+jj, oris[jj], dess[jj]) {
+            dispatch.Assigns[ii].Cost = -1
+        } else {
+            dispatch.Assigns[ii].GenRoute()
+        }
+        if dispatch.Assigns[ii].Cost < 0 {
+            dispatch.Assigns[ii].RemoveShip(total_ship + jj)
+            dispatch.Assigns[ii].GenRoute()
+        } else {
+            if ii >= dispatch.AssignsLen {
+                dispatch.AssignsLen += 1
+            }
+            break
+        }
+    }
+}
+```
+
+Gen 4：trial all Assigns，计算 `deltaCost`，试插后 rollback：
+
+```go
+for _, idx := range assignIndices {
+    origCost := dispatch.Assigns[idx].Cost
+    ok := dispatch.Assigns[idx].AddShip(shipId, ori, des)
+    if ok {
+        dispatch.Assigns[idx].GenRoute()
+        newCost := dispatch.Assigns[idx].Cost
+        deltaCost := newCost - origCost
+        if deltaCost >= 0 || bestAssignIdx == -1 || deltaCost < bestDeltaCost {
+            bestDeltaCost = deltaCost
+            bestAssignIdx = idx
+        }
+        dispatch.Assigns[idx].RemoveShip(shipId)
+        dispatch.Assigns[idx].GenRoute()
+    }
+}
+if bestAssignIdx != -1 {
+    ok := dispatch.Assigns[bestAssignIdx].AddShip(shipId, ori, des)
+    if ok {
+        dispatch.Assigns[bestAssignIdx].GenRoute()
+        inserted = true
+    }
+}
+```
+
+Gen 8：best-delta commit + new Assign fallback，最后更新总成本：
+
+```go
+for aIdx := 0; aIdx < dispatch.AssignsLen; aIdx++ {
+    assign := &dispatch.Assigns[aIdx]
+    origCost := assign.Cost
+    trialOk := assign.AddShip(shipId, ori, des)
+    if trialOk {
+        assign.GenRoute()
+        deltaCost := assign.Cost - origCost
+        if deltaCost < bestDeltaCost {
+            bestDeltaCost = deltaCost
+            bestAssignIdx = aIdx
+        }
+        assign.RemoveShip(shipId)
+        assign.GenRoute()
+    }
+}
+if bestAssignIdx != -1 {
+    finalAssign := &dispatch.Assigns[bestAssignIdx]
+    if finalAssign.AddShip(shipId, ori, des) {
+        finalAssign.GenRoute()
+        inserted = true
+    }
+}
+if !inserted && dispatch.AssignsLen < MAXASSIGNS {
+    nextIdx := dispatch.AssignsLen
+    if dispatch.Assigns[nextIdx].AddShip(shipId, ori, des) {
+        dispatch.Assigns[nextIdx].GenRoute()
+        dispatch.AssignsLen++
+    }
+}
+dispatch.RenewnTotalCost()
+```
+
 ## Optimization Target Smoke
 
 证据等级：feasibility-only smoke。当前还没有实现 runtime ship-id multiset guard，所以这些结果只能证明目标管线能跑通，不能证明所有语义保持检查已经完整。
@@ -380,3 +467,121 @@ API 连通恢复后，优先执行：
 3. Mixer SplitOrders API-only smoke，确认 `rag_global_items` 包含 `mixer_split_api_skeleton`。
 
 建议先只跑一组实例，不追求性能提升；下周展示的重点是“同一 C+L+V harness 能迁移到多个组合优化问题，并且每个 target 都有正确的 evaluator 与 context 注入链路”。
+
+---
+
+## 2026-06-01 续跑：Knapsack 和 Mixer LLM smoke
+
+本节记录 API 连通恢复后的真实 LLM smoke。按用户要求，本节除了写策略/指标，也列出最终 `pops_best` 中被选中的具体代码。注意：这些都是 gen=1 smoke，不是论文级稳定性结果。
+
+### API 连通与运行约束
+
+- 只检查连通性，未读取或打印 API key。
+- 连通性结果：`API_CONNECT_OK 200`。
+- 所有 EOH smoke 都使用 `caffeinate -i -m -s`，每次只跑一个实验进程。
+
+### Knapsack: baseline vs API-only
+
+| Arm | Run | RAG global | Population | Valid | Best objective | Best value | 结论 |
+|---|---|---|---:|---:|---:|---:|---|
+| Baseline | `weekly_knapsack_proper_20260601/baseline/run_20260601_100231` | none | 2 | 1 | -283.0 | 283.0 | 跑通，best 为 seed |
+| API-only | `weekly_knapsack_proper_20260601/api_only/run_20260601_100907` | `knapsack_api_skeleton` + failure cases | 2 | 1 | -283.0 | 283.0 | RAG context 生效，best 仍为 seed |
+
+API-only trace 证明：
+
+```text
+rag_context_chars = 870
+rag_global_items = knapsack_api_skeleton, suspicious_low_objective, negative_or_missing_result, timeout_or_unbounded_search
+rag_selected_items = []
+```
+
+最终 best code（Baseline 与 API-only 相同，来自 `pops_best/population_generation_1.json`）：
+
+```go
+func SelectItems(items []Item, capacity int) []bool {
+    selected := make([]bool, len(items))
+    remaining := capacity
+    for i, item := range items {
+        if item.Weight <= remaining {
+            selected[i] = true
+            remaining -= item.Weight
+        }
+    }
+    return selected
+}
+```
+
+解读：Knapsack 的链路已经跑通，API skeleton 确实进入 prompt；但 gen=1 只生成 2 个候选，其中 mutated candidate 均无效，最终仍选择 seed。这个结果证明 harness portability，不证明 RAG 能提升 Knapsack。
+
+### Mixer SplitOrders: baseline vs API-only
+
+| Arm | Run | RAG global | Population | Valid | Best objective | 结论 |
+|---|---|---|---:|---:|---:|---|
+| Baseline | `weekly_mixer_split_smoke_20260601/baseline/run_20260601_101704` | none | 2 | 1 | 175.01468 | 跑通，best 为 seed |
+| API-only | `weekly_mixer_split_smoke_20260601/api_only/run_20260601_102257` | `mixer_split_api_skeleton` + failure cases | 2 | 1 | 175.01468 | RAG context 生效，best 仍为 seed |
+
+API-only trace 证明：
+
+```text
+rag_context_chars = 949
+rag_global_items = mixer_split_api_skeleton, suspicious_low_objective, negative_or_missing_result, timeout_or_unbounded_search
+rag_selected_items = []
+```
+
+最终 best code（Baseline 与 API-only 相同，来自 `pops_best/population_generation_1.json`）：
+
+```go
+func SplitOrders(orders []Order, vehicles []Vehicle, workHours float64) []SubOrder {
+    caps := make([]float64, 0)
+    for _, vehicle := range vehicles {
+        if vehicle.Capacity > 0 && vehicle.Count > 0 {
+            caps = append(caps, vehicle.Capacity)
+        }
+    }
+    for i := 0; i < len(caps); i++ {
+        for j := i + 1; j < len(caps); j++ {
+            if caps[j] > caps[i] {
+                caps[i], caps[j] = caps[j], caps[i]
+            }
+        }
+    }
+    if len(caps) == 0 {
+        return []SubOrder{}
+    }
+
+    result := make([]SubOrder, 0)
+    largest := caps[0]
+    for _, order := range orders {
+        remaining := order.Volume
+        for remaining > 1e-9 {
+            chosen := largest
+            for _, cap := range caps {
+                if remaining <= cap+1e-9 {
+                    chosen = cap
+                }
+            }
+            volume := math.Min(remaining, chosen)
+            result = append(result, SubOrder{
+                OrderID:         order.ID,
+                Volume:          volume,
+                VehicleCapacity: chosen,
+            })
+            remaining -= volume
+        }
+    }
+    return result
+}
+```
+
+解读：搅拌车 `SplitOrders` 已经从导师项目材料抽象成可演化 target，并完成真实 LLM smoke。当前 gen=1 结果仍为 seed，原因和 Knapsack 一样：只有 seed 有效，mutated candidate 未通过 evaluator。下一步如果要追求性能，需要增加实例数、提高 generations，或者提供 SplitOrders 专属 skill cards，而不是只给 API skeleton。
+
+### 续跑后的总判断
+
+| Target | Problem | Evidence | RAG/API context | Performance |
+|---|---|---|---|---|
+| `InsertShips` | VRP dynamic insertion | 正式多轮实验 + 代码演化 | 已验证 | 有稳定提升分支 |
+| `Optimization` | VRP route/order improvement | smoke | 已验证 | 未超过 seed |
+| `SelectItems` | Knapsack | LLM smoke | `knapsack_api_skeleton` 已验证 | 未超过 seed |
+| `SplitOrders` | Mixer/concrete truck order split | LLM smoke | `mixer_split_api_skeleton` 已验证 | 未超过 seed |
+
+结论：本周展示可以诚实表达为“C+L+V harness 已经能跨 target 和跨组合优化问题运行；目前只有 InsertShips 有性能证据，Knapsack/Mixer 先作为跑通证据。下一阶段要补的是每个新问题的 domain skill cards 和多实例 evaluator，而不是再证明框架能不能跑。”

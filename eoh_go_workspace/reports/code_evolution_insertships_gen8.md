@@ -54,3 +54,104 @@ Verified final result from grid row: seed_J=549.48, best_EOH_J=393.30, selected 
 ## Interpretation
 
 The d50 trajectory converges toward a compact trial-all/best-delta insertion operator with explicit rollback and fallback. The d75 trajectory introduces heavier weighted scoring, which matches the existing observation that denser instances require richer route-capacity/time-window context. This is L-layer evidence: deeper evolution changes code structure, not only objective values.
+
+## Representative Code Snippets
+
+These snippets are copied from the actual `pops_best/population_generation_N.json` files. They show the concrete code shape behind the strategy labels above.
+
+### rc101 d50 Gen 1: first feasible insertion
+
+```go
+for jj := range oris {
+    for _, ii := range rand_range {
+        if !dispatch.Assigns[ii].AddShip(total_ship+jj, oris[jj], dess[jj]) {
+            dispatch.Assigns[ii].Cost = -1
+        } else {
+            dispatch.Assigns[ii].GenRoute()
+        }
+        if dispatch.Assigns[ii].Cost < 0 {
+            dispatch.Assigns[ii].RemoveShip(total_ship + jj)
+            dispatch.Assigns[ii].GenRoute()
+        } else {
+            if ii >= dispatch.AssignsLen {
+                dispatch.AssignsLen += 1
+            }
+            break
+        }
+    }
+}
+```
+
+### rc101 d50 Gen 4: trial all Assigns and rollback
+
+```go
+for _, idx := range assignIndices {
+    origCost := dispatch.Assigns[idx].Cost
+    ok := dispatch.Assigns[idx].AddShip(shipId, ori, des)
+    if ok {
+        dispatch.Assigns[idx].GenRoute()
+        newCost := dispatch.Assigns[idx].Cost
+        deltaCost := newCost - origCost
+        if deltaCost >= 0 || bestAssignIdx == -1 || deltaCost < bestDeltaCost {
+            bestDeltaCost = deltaCost
+            bestAssignIdx = idx
+        }
+        dispatch.Assigns[idx].RemoveShip(shipId)
+        dispatch.Assigns[idx].GenRoute()
+    }
+}
+```
+
+### rc101 d50 Gen 8: best-delta commit and fallback
+
+```go
+for aIdx := 0; aIdx < dispatch.AssignsLen; aIdx++ {
+    assign := &dispatch.Assigns[aIdx]
+    origCost := assign.Cost
+    trialOk := assign.AddShip(shipId, ori, des)
+    if trialOk {
+        assign.GenRoute()
+        deltaCost := assign.Cost - origCost
+        if deltaCost < bestDeltaCost {
+            bestDeltaCost = deltaCost
+            bestAssignIdx = aIdx
+        }
+        assign.RemoveShip(shipId)
+        assign.GenRoute()
+    }
+}
+if bestAssignIdx != -1 {
+    finalAssign := &dispatch.Assigns[bestAssignIdx]
+    if finalAssign.AddShip(shipId, ori, des) {
+        finalAssign.GenRoute()
+        inserted = true
+    }
+}
+if !inserted && dispatch.AssignsLen < MAXASSIGNS {
+    nextIdx := dispatch.AssignsLen
+    if dispatch.Assigns[nextIdx].AddShip(shipId, ori, des) {
+        dispatch.Assigns[nextIdx].GenRoute()
+        dispatch.AssignsLen++
+    }
+}
+dispatch.RenewnTotalCost()
+```
+
+### rc101 d75 Gen 8: weighted best-delta
+
+```go
+delta := newCost - prevCost
+normDelta := delta / normalizeBase
+timeSlack := float64(des.TimeEnd - des.TimeStart)
+if timeSlack < minSlackThresh {
+    timeSlack = minSlackThresh
+}
+score := costWeight*normDelta + slackWeight*(normalizeBase/timeSlack)
+if score < bestScore {
+    bestScore = score
+    bestIdx = ii
+    bestDelta = delta
+}
+dispatch.Assigns[ii].RemoveShip(shipID)
+dispatch.Assigns[ii].GenRoute()
+```
