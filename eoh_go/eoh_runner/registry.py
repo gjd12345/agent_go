@@ -103,6 +103,22 @@ TARGET_SPECS: dict[str, TargetSpec] = {
             "mixer_known_order_ids_only",
         ],
     ),
+    "ScoreBin": TargetSpec(
+        name="ScoreBin",
+        function_name="ScoreBin",
+        signature="func ScoreBin(item int, remaining []int, capacity int) []float64",
+        inputs=["item", "remaining", "capacity"],
+        outputs=["[]float64"],
+        prompt_constraints=(
+            "Return exactly len(remaining) finite scores. Higher score wins among feasible bins. "
+            "Minimize used bins and gap to the lower bound."
+        ),
+        extract_regex=r"func\s+ScoreBin\s*\(\s*item\s+int\s*,\s*remaining\s+\[\]int\s*,\s*capacity\s+int\s*\)\s*\[\]float64\s*\{[\s\S]*?\n\}",
+        replace_regex_template=r"func ScoreBin\(item int, remaining \[\]int, capacity int\) \[\]float64 \{\s*\n%s\n\}",
+        seed_path="eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go",
+        rag_api_context="Score feasible bins only. Return len(remaining) finite scores. Highest score is selected.",
+        guard_checks=["obp_score_length", "obp_finite_scores", "obp_no_secret_io"],
+    ),
 }
 
 
@@ -140,6 +156,17 @@ PROBLEM_SPECS: dict[str, ProblemSpec] = {
             {"path": "eoh_go_workspace/problems/mixer_split/testdata/testdata_01.json", "label": "mixer_day_01"},
         ],
         default_metrics={"primary": "final_cost", "secondary": "valid_rate"},
+    ),
+    "bin_packing_online": ProblemSpec(
+        name="bin_packing_online",
+        language="go",
+        source_files=["eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go"],
+        main_binary="bin_packing_solver",
+        objective_direction="minimize",
+        benchmark_data=[
+            {"path": "eoh_go_workspace/problems/bin_packing_online/testdata/obp_5x60_c100.json", "label": "obp_5x60_c100"},
+        ],
+        default_metrics={"primary": "gap_to_lb", "secondary": "valid_rate"},
     ),
 }
 

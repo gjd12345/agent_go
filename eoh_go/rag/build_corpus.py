@@ -13,7 +13,16 @@ CORPUS_FILES = {
     "failure_case": "failure_cases.jsonl",
 }
 
-LITERATURE_IDS = {"nearest_insertion", "farthest_insertion", "solomon_i1", "regret2_insertion", "cw_savings"}
+VRP_LITERATURE_IDS = {"nearest_insertion", "farthest_insertion", "solomon_i1", "regret2_insertion", "cw_savings"}
+OBP_LITERATURE_IDS = {
+    "obp_first_fit",
+    "obp_best_fit",
+    "obp_worst_fit",
+    "obp_harmonic",
+    "obp_funsearch_residual_poly",
+    "obp_eoh_util_sqrt_exp",
+}
+LITERATURE_IDS = VRP_LITERATURE_IDS | OBP_LITERATURE_IDS
 
 _STANDARD_INSERTSHIPS_CONSTRAINTS = [
     "Never skip orders unless no feasible assignment exists.",
@@ -198,6 +207,27 @@ def build_api_constraints(project_root: str | Path) -> list[CorpusItem]:
                 "- Never invent unknown order IDs."
             ),
         ),
+        CorpusItem(
+            id="obp_api_skeleton",
+            kind="api_constraint",
+            title="Online Bin Packing ScoreBin API skeleton",
+            tags=["obp", "binpacking", "scorebin", "api", "safety"],
+            source_path="curated",
+            summary="Online bin packing: score feasible bins, return finite scores, minimize used bins.",
+            constraints=[
+                "Return exactly len(remaining) finite scores.",
+                "The evaluator opens a new bin when no existing bin is feasible.",
+            ],
+            content=(
+                "API: obp_scorebin_skeleton\n"
+                "Rules:\n"
+                "- func ScoreBin(item int, remaining []int, capacity int) []float64\n"
+                "- remaining contains only feasible bins.\n"
+                "- Return len(remaining) finite scores; highest score wins.\n"
+                "- Do not read files, env, network, or use randomness.\n"
+                "- Prefer fewer used bins and low gap to lower bound."
+            ),
+        ),
     ]
 
 
@@ -249,8 +279,8 @@ def build_all_corpora(project_root: str | Path, corpus_dir: str | Path | None = 
         existing_algorithm_cards = [item for item in load_corpus(algorithm_path) if item.id in LITERATURE_IDS]
         curated_algorithm_cards = existing_algorithm_cards
         lit_count = len({item.id for item in curated_algorithm_cards})
-        if lit_count < 5:
-            print("Warning: algorithm_cards.jsonl has fewer than 5 curated literature cards.")
+        if lit_count < len(LITERATURE_IDS):
+            print("Warning: algorithm_cards.jsonl has fewer than expected curated literature cards.")
     else:
         print("Warning: algorithm_cards.jsonl missing; writing empty curated algorithm card corpus.")
 

@@ -31,6 +31,8 @@
 | `InsertShips` | VRP dynamic insertion | 已有 | 保持向后兼容的默认目标。 |
 | `Optimization` | VRP route/order improvement | 已接入 | 复用 `InsertShips` 所在 Go simulator 和 evaluator 路径。 |
 | `SelectItems` | 0/1 knapsack | 已接入 | 使用独立的最小 Go evaluator 和 Agent_EOH example。 |
+| `SplitOrders` | Mixer/concrete truck split | 已接入 | 导师给的问题，作为跨问题 feasibility smoke。 |
+| `ScoreBin` | Online Bin Packing | 已接入 | EoH 原论文主例对齐，作为下一阶段 RAG 有效性主线。 |
 
 已注册 problems：
 
@@ -38,6 +40,8 @@
 |---|---|---|
 | `vrp_insertships` | Go | `main.go`, `routing.go` |
 | `knapsack` | Go | `eoh_go_workspace/problems/knapsack/knapsack_solver.go` |
+| `mixer_split` | Go | `eoh_go_workspace/problems/mixer_split/mixer_split_solver.go` |
+| `bin_packing_online` | Go | `eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go` |
 
 ## InsertShips 代码演化证据
 
@@ -208,14 +212,74 @@ python3 -m eoh_go.experiments.eoh_arrival_grid \
 
 ## 验证
 
+## Online Bin Packing / ScoreBin 更新
+
+证据等级：harness + one-cell smoke。OBP 是 EoH 原论文中最适合对齐的主例之一；当前实现用 Go evaluator 包装 `ScoreBin`，目标是最小化 `gap_to_lb = (used_bins - lower_bound) / lower_bound`。
+
+新增内容：
+
+- `eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go`
+- `eoh_go_workspace/problems/bin_packing_online/testdata/obp_5x60_c100.json`
+- `Agent_EOH/eoh/src/eoh/examples/user_bin_packing_go/prompts_bin_packing_go.py`
+- `Agent_EOH/eoh/src/eoh/examples/user_bin_packing_go/prob_bin_packing_go.py`
+- `Agent_EOH/eoh/src/eoh/examples/user_bin_packing_go/seeds_bin_packing_go.json`
+- `eoh_go/experiments/eoh_obp_smoke.py`
+- OBP RAG cards: `obp_first_fit`, `obp_best_fit`, `obp_worst_fit`, `obp_harmonic`, `obp_funsearch_residual_poly`, `obp_eoh_util_sqrt_exp`
+- OBP API global card: `obp_api_skeleton`
+
+本地 seed code：
+
+```go
+func ScoreBin(item int, remaining []int, capacity int) []float64 {
+    scores := make([]float64, len(remaining))
+    for i, rem := range remaining {
+        scores[i] = float64(capacity - (rem - item))
+    }
+    return scores
+}
+```
+
+本地 evaluator seed 结果：
+
+| Dataset | Avg used bins | Avg lower bound | Avg gap |
+|---|---:|---:|---:|
+| `obp_5x60_c100` | 28.8 | 27.4 | 0.0590303 |
+
+最小 EOH 对照：
+
+| Arm | Run | Population | Valid | Seed gap | Best verified gap | RAG selected |
+|---|---|---:|---:|---:|---:|---|
+| Vanilla | `eoh_obp_showcase_20260601/vanilla/run_20260601_112409` | 2 | 1 | 0.0590303 | 0.05903 | - |
+| Literature-RAG | `eoh_obp_showcase_20260601/literature/run_20260601_112555` | 2 | 1 | 0.0590303 | 0.05903 | `obp_best_fit`, `obp_worst_fit`, `obp_first_fit` |
+
+解读：
+
+- OBP harness、target-specific RAG filtering、API/global card 和 literature cards 都已跑通。
+- 这一组没有证明 RAG 性能提升；两边都只保住 seed，新候选全部 penalty。
+- 当前更像 prompt/变异稳定性问题：`ScoreBin` target 很小，但模型容易生成长度错误、非法 math 或不可编译代码。下一步应先缩短 context 或增加多 seed，而不是扩大实验矩阵。
+
+当前最佳代码就是 seed/best-fit 结构：
+
+```go
+func ScoreBin(item int, remaining []int, capacity int) []float64 {
+    scores := make([]float64, len(remaining))
+    for i, rem := range remaining {
+        scores[i] = float64(capacity - (rem - item))
+    }
+    return scores
+}
+```
+
 已运行命令：
 
 ```bash
 PYTHONPATH=. python3 -m unittest tests/test_eoh_runner_specs.py -q
 PYTHONPATH=. python3 -m unittest discover -s tests -q
-python3 -m compileall -q eoh_go Agent_EOH/eoh/src/eoh/examples/user_insertships_go Agent_EOH/eoh/src/eoh/examples/user_knapsack_go
+python3 -m compileall -q eoh_go Agent_EOH/eoh/src/eoh/examples/user_insertships_go Agent_EOH/eoh/src/eoh/examples/user_knapsack_go Agent_EOH/eoh/src/eoh/examples/user_bin_packing_go
 go build -o /tmp/eoh_go_mainbin .
+go build -o /tmp/eoh_go_obp_solver eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go
 go run eoh_go_workspace/problems/knapsack/knapsack_solver.go eoh_go_workspace/problems/knapsack/testdata/testdata_01.json
+go run eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go eoh_go_workspace/problems/bin_packing_online/testdata/obp_5x60_c100.json
 ```
 
 观察结果：
@@ -583,5 +647,6 @@ func SplitOrders(orders []Order, vehicles []Vehicle, workHours float64) []SubOrd
 | `Optimization` | VRP route/order improvement | smoke | 已验证 | 未超过 seed |
 | `SelectItems` | Knapsack | LLM smoke | `knapsack_api_skeleton` 已验证 | 未超过 seed |
 | `SplitOrders` | Mixer/concrete truck order split | LLM smoke | `mixer_split_api_skeleton` 已验证 | 未超过 seed |
+| `ScoreBin` | Online Bin Packing | LLM smoke | `obp_api_skeleton` + OBP skill cards 已验证 | 未超过 seed |
 
-结论：本周展示可以诚实表达为“C+L+V harness 已经能跨 target 和跨组合优化问题运行；目前只有 InsertShips 有性能证据，Knapsack/Mixer 先作为跑通证据。下一阶段要补的是每个新问题的 domain skill cards 和多实例 evaluator，而不是再证明框架能不能跑。”
+结论：本周展示可以诚实表达为“C+L+V harness 已经能跨 target 和跨组合优化问题运行；目前只有 InsertShips 有性能证据，Knapsack/Mixer/OBP 先作为跑通证据。下一阶段要补的是每个新问题的 domain skill cards、prompt 稳定性和多实例 evaluator，而不是再证明框架能不能跑。”

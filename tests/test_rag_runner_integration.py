@@ -114,6 +114,7 @@ class RagRunnerIntegrationTests(unittest.TestCase):
                 "optimization_api_skeleton",
                 "knapsack_api_skeleton",
                 "mixer_split_api_skeleton",
+                "obp_api_skeleton",
             },
             {item.id for item in api_items},
         )
@@ -125,6 +126,7 @@ class RagRunnerIntegrationTests(unittest.TestCase):
             ("Optimization", "vrp_insertships", "optimization_api_skeleton"),
             ("SelectItems", "knapsack", "knapsack_api_skeleton"),
             ("SplitOrders", "mixer_split", "mixer_split_api_skeleton"),
+            ("ScoreBin", "bin_packing_online", "obp_api_skeleton"),
         ]
 
         for target, problem, expected_id in cases:
@@ -157,7 +159,7 @@ class RagRunnerIntegrationTests(unittest.TestCase):
         self.assertTrue(LITERATURE_IDS.isdisjoint({item.id for item in history}))
         literature_items = [item for item in corpus if item.id in LITERATURE_IDS]
         self.assertEqual(LITERATURE_IDS, {item.id for item in literature_items})
-        self.assertEqual(5, len(literature_items))
+        self.assertEqual(len(LITERATURE_IDS), len(literature_items))
         for item in literature_items:
             self.assertLessEqual(len(item.content), 450, item.id)
 
@@ -282,6 +284,33 @@ class RagRunnerIntegrationTests(unittest.TestCase):
 
         for term in ["avoid", "safe", "rollback", "timeout", "skipped"]:
             self.assertNotIn(term, query.lower())
+
+    def test_scorebin_literature_retrieval_is_obp_only(self) -> None:
+        trace = _set_rag_context_env(
+            EOHConfig(
+                agent_eoh_root=str(ROOT / "Agent_EOH"),
+                problem_name="bin_packing_online",
+                target_function="ScoreBin",
+                use_rag_context=True,
+                rag_mode="literature",
+                rag_top_k=3,
+                rag_max_chars=2500,
+            ),
+            str(ROOT),
+        )
+
+        self.assertIn("obp_api_skeleton", [item["id"] for item in trace["rag_global_items"]])
+        self.assertEqual(3, len(trace["rag_selected_items"]))
+        self.assertEqual({"algorithm_card"}, {item["kind"] for item in trace["rag_selected_items"]})
+        self.assertTrue(all(item["id"].startswith("obp_") for item in trace["rag_selected_items"]))
+        self.assertEqual({item["id"] for item in trace["rag_all_scores"]}, {
+            "obp_first_fit",
+            "obp_best_fit",
+            "obp_worst_fit",
+            "obp_harmonic",
+            "obp_funsearch_residual_poly",
+            "obp_eoh_util_sqrt_exp",
+        })
 
     def _write_minimal_sources(self, root: Path) -> None:
         (root / "Agent_EOH").mkdir(parents=True)

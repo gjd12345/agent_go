@@ -28,6 +28,7 @@ _TARGET_RAG_TAGS = {
     "Optimization": {"optimization"},
     "SelectItems": {"knapsack", "selectitems"},
     "SplitOrders": {"mixer", "splitorders"},
+    "ScoreBin": {"obp", "binpacking", "scorebin"},
 }
 
 
@@ -109,6 +110,11 @@ def _automatic_rag_query(config: EOHConfig) -> str:
     query = config.rag_query.strip()
     if query:
         return query
+    if config.target_function == "ScoreBin" or config.problem_name == "bin_packing_online":
+        return (
+            "online bin packing ScoreBin feasible bins residual capacity "
+            "best fit worst fit harmonic used bins lower bound gap"
+        )
     return (
         f"dynamic {config.target_function} heuristic density={config.dataset_density} "
         f"arrival_scale={config.arrival_scale} medium density route capacity "
@@ -141,6 +147,9 @@ def _build_retrieved_rag_context(config: EOHConfig, project_root: str) -> tuple[
         strategy_pool = [item for item in filtered_corpus if item.kind == "algorithm_card"]
     else:
         strategy_pool = [item for item in filtered_corpus if item.kind in {"algorithm_card", "code_example"}]
+    target_relevant_strategy = [item for item in strategy_pool if target_tags.intersection(set(item.tags))]
+    if target_relevant_strategy:
+        strategy_pool = target_relevant_strategy
     query = _automatic_rag_query(config)
     retrieved = retrieve(query, strategy_pool, top_k=config.rag_top_k)
     all_scores = score_corpus(query, strategy_pool)
@@ -212,6 +221,9 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
     elif config.problem_name == "mixer_split":
         example_name = "user_mixer_split_go"
         problem_module_name = "prob_mixer_split_go"
+    elif config.problem_name == "bin_packing_online":
+        example_name = "user_bin_packing_go"
+        problem_module_name = "prob_bin_packing_go"
     else:
         example_name = "user_insertships_go"
         problem_module_name = "prob_insertships_go"
@@ -238,7 +250,7 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
         # 3. Setup Problem & Paras
         problem_module = importlib.reload(problem_module)
         rag_trace = _set_rag_context_env(config, project_root)
-        if config.problem_name in {"knapsack", "mixer_split"}:
+        if config.problem_name in {"knapsack", "mixer_split", "bin_packing_online"}:
             problem_instance = problem_module.Evaluation(run_timeout_s=config.run_timeout_s)
         else:
             problem_instance = problem_module.Evaluation(
@@ -260,6 +272,8 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
             seed_path = os.path.join(example_root, "seeds_knapsack_go.json")
         elif config.problem_name == "mixer_split":
             seed_path = os.path.join(example_root, "seeds_mixer_split_go.json")
+        elif config.problem_name == "bin_packing_online":
+            seed_path = os.path.join(example_root, "seeds_bin_packing_go.json")
         elif config.use_sa_seed_as_init:
             seed_path = _prepare_sa_seed(example_root, project_root, config.target_function)
         else:

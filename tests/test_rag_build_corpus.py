@@ -44,6 +44,7 @@ class RagBuildCorpusTests(unittest.TestCase):
                     "optimization_api_skeleton",
                     "knapsack_api_skeleton",
                     "mixer_split_api_skeleton",
+                    "obp_api_skeleton",
                 },
                 {item.id for item in api_items},
             )
@@ -125,7 +126,7 @@ class RagBuildCorpusTests(unittest.TestCase):
         cards = [item for item in corpus if item.kind == "algorithm_card"]
 
         self.assertEqual(LITERATURE_IDS, {item.id for item in cards})
-        self.assertEqual(5, len(cards))
+        self.assertEqual(len(LITERATURE_IDS), len(cards))
         self.assertNotIn("sa_seed_1", {item.id for item in cards})
         for item in cards:
             self.assertLessEqual(len(item.constraints), 2, item.id)
@@ -141,10 +142,13 @@ class RagBuildCorpusTests(unittest.TestCase):
         self.assertTrue({"d25", "low-density"}.issubset(by_id["nearest_insertion"].tags))
         self.assertTrue({"dispersed", "low-density"}.issubset(by_id["farthest_insertion"].tags))
         self.assertTrue({"merge", "pair-savings", "route-consolidation"}.issubset(by_id["cw_savings"].tags))
+        self.assertTrue({"obp", "binpacking", "scorebin", "best-fit"}.issubset(by_id["obp_best_fit"].tags))
+        self.assertTrue({"obp", "binpacking", "scorebin", "funsearch"}.issubset(by_id["obp_funsearch_residual_poly"].tags))
 
         literature = filter_corpus_by_mode(corpus, "literature")
         self.assertNotIn("sa_seed_1", {item.id for item in literature})
         self.assertTrue(any(item.id == "insertships_api_skeleton" for item in literature))
+        self.assertTrue(any(item.id == "obp_api_skeleton" for item in literature))
 
 
 if __name__ == "__main__":

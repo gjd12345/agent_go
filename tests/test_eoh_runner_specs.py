@@ -11,7 +11,7 @@ from eoh_go.eoh_runner.registry import PROBLEM_SPECS, TARGET_SPECS, get_problem_
 
 class TestEOHRunnerSpecs(unittest.TestCase):
     def test_registered_targets_exist(self) -> None:
-        self.assertEqual({"InsertShips", "Optimization", "SelectItems", "SplitOrders"}, set(TARGET_SPECS))
+        self.assertEqual({"InsertShips", "Optimization", "SelectItems", "SplitOrders", "ScoreBin"}, set(TARGET_SPECS))
         self.assertEqual("vrp_insertships", get_problem_spec("vrp_insertships").name)
         self.assertEqual("Optimization", get_target_spec("Optimization").function_name)
 
@@ -26,6 +26,9 @@ class TestEOHRunnerSpecs(unittest.TestCase):
         mixer = PROBLEM_SPECS["mixer_split"]
         mixer_paths = mixer.resolve_source_files(root)
         self.assertTrue(all(path.exists() for path in mixer_paths), mixer_paths)
+        obp = PROBLEM_SPECS["bin_packing_online"]
+        obp_paths = obp.resolve_source_files(root)
+        self.assertTrue(all(path.exists() for path in obp_paths), obp_paths)
 
     def test_go_regexes_match_current_sources(self) -> None:
         root = Path(__file__).resolve().parents[1]
@@ -40,6 +43,10 @@ class TestEOHRunnerSpecs(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIsNotNone(re.search(TARGET_SPECS["SplitOrders"].extract_regex, mixer_text))
+        obp_text = (root / "eoh_go_workspace" / "problems" / "bin_packing_online" / "bin_packing_solver.go").read_text(
+            encoding="utf-8"
+        )
+        self.assertIsNotNone(re.search(TARGET_SPECS["ScoreBin"].extract_regex, obp_text))
 
     def test_unknown_specs_raise_value_error(self) -> None:
         with self.assertRaises(ValueError):
@@ -75,6 +82,41 @@ class TestEOHRunnerSpecs(unittest.TestCase):
             seed = json.loads((example_root / "seeds_mixer_split_go.json").read_text(encoding="utf-8"))[0]["code"]
             objective = Evaluation().evaluate(seed)
             self.assertLess(objective, 1e8)
+        finally:
+            try:
+                sys.path.remove(str(example_root))
+            except ValueError:
+                pass
+
+    def test_bin_packing_seed_evaluator_runs(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        example_root = root / "Agent_EOH" / "eoh" / "src" / "eoh" / "examples" / "user_bin_packing_go"
+        sys.path.insert(0, str(example_root))
+        try:
+            import json
+            from prob_bin_packing_go import Evaluation
+
+            seed = json.loads((example_root / "seeds_bin_packing_go.json").read_text(encoding="utf-8"))[0]["code"]
+            objective = Evaluation().evaluate(seed)
+            self.assertLess(objective, 1e8)
+        finally:
+            try:
+                sys.path.remove(str(example_root))
+            except ValueError:
+                pass
+
+    def test_bin_packing_rejects_invalid_score_length(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        example_root = root / "Agent_EOH" / "eoh" / "src" / "eoh" / "examples" / "user_bin_packing_go"
+        sys.path.insert(0, str(example_root))
+        try:
+            from prob_bin_packing_go import Evaluation
+
+            code = """func ScoreBin(item int, remaining []int, capacity int) []float64 {
+    return []float64{}
+}"""
+            objective = Evaluation().evaluate(code)
+            self.assertGreaterEqual(objective, 1e8)
         finally:
             try:
                 sys.path.remove(str(example_root))
