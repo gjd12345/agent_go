@@ -19,8 +19,9 @@ OBP 最小闭环已跑通；Literature-RAG trace 生效。
 已完成并推送：
 
 ```text
-HEAD = 59fe783 feat(obp): add online bin packing showcase harness
-origin/main = 59fe783
+当前 goal 文档提交 = 3fa673d docs(goal): refocus weekly showcase on OBP repair experiment
+OBP harness 提交 = 59fe783 feat(obp): add online bin packing showcase harness
+origin/main = 3fa673d
 ```
 
 工程状态：
@@ -117,7 +118,7 @@ obp_eoh_util_sqrt_exp
 建议 query：
 
 ```text
-online bin packing ScoreBin residual polynomial utilization sqrt exp gap penalty avoid tiny unusable residual gaps
+online bin packing ScoreBin residual polynomial utilization sqrt exp gap penalty tiny unusable residual gaps
 ```
 
 验收目标：
@@ -219,11 +220,11 @@ Fill every scores[i].
 Return scores.
 ```
 
-可选：增加 2 个 seed，但不要改变 evaluator：
+本轮先不增加多 seed，只改 prompt，避免变量变多。若后续增加 best-fit / worst-fit / residual penalty 多 seed，必须同步更新 `eoh_obp_smoke.py` summary：
 
-1. best-fit seed
-2. worst-fit seed
-3. residual penalty seed
+- 记录 `seed_count`。
+- 记录每个 seed 的 objective。
+- 明确 population 初始 seed 来源。
 
 验收：
 
@@ -254,13 +255,13 @@ dataset = obp_5x60_c100
 | Arm | RAG | 参数 | 目的 |
 |---|---|---|---|
 | Vanilla | off | - | 基线 |
-| API-only | literature | `rag_top_k=0`, `rag_max_chars=900` | 只看 API skeleton 是否提升有效率 |
+| API+Warning-only | literature | `rag_top_k=0`, `rag_max_chars=900` | 只看 API skeleton + 1 条 warning 是否提升有效率 |
 | Residual-RAG | literature | `rag_top_k=2`, `rag_max_chars=1800`, custom query | 强制非 seed 策略进入 context |
 
 Residual-RAG query：
 
 ```text
-online bin packing ScoreBin residual polynomial utilization sqrt exp gap penalty avoid tiny unusable residual gaps
+online bin packing ScoreBin residual polynomial utilization sqrt exp gap penalty tiny unusable residual gaps
 ```
 
 运行命令必须使用：
@@ -279,7 +280,7 @@ caffeinate -i -m -s python3 -m eoh_go.experiments.eoh_obp_smoke ...
 - 每组 summary 写出 `population_size`、`valid_candidates`、`best_gap_to_lb`。
 - RAG 组写出 `rag_context_truncated`、`rag_context_chars`、`rag_selected_items`。
 - Residual-RAG 必须选中 `obp_funsearch_residual_poly` 或 `obp_eoh_util_sqrt_exp`。
-- 如果 population 仍然只有 2 条，停止，不再扩大实验。
+- 如果 `population_size < 5` 或 `valid_candidates < 3`，停止，不再扩大实验。
 
 ---
 
@@ -307,7 +308,7 @@ eoh_go_workspace/reports/clv_harness_weekly_showcase.md
 | 情况 | 允许说法 |
 |---|---|
 | population 仍很小 | “OBP EOH 生成稳定性未解决，不能比较 RAG 性能” |
-| API-only 有效候选更多 | “API skeleton 可能提升合法性，但还不是策略提升” |
+| API+Warning-only 有效候选更多 | “API skeleton + warning 可能提升合法性，但还不是策略提升” |
 | Residual-RAG gap 更低 | “Literature-RAG 出现初步正信号，需要 repeats” |
 | Residual-RAG 无提升但有效率足够 | “本实例/当前 cards 未显示收益，可考虑更难 instance 或换官方 Python target” |
 
