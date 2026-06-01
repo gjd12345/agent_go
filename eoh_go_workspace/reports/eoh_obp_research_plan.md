@@ -216,3 +216,71 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
 1. API+Warning-only 改成真正 API-only：允许禁用 failure_case warning，避免 global warning 干扰。
 2. 或缩短 global block，只保留 `obp_api_skeleton` 的 Rules，不重复 Summary/Constraints。
 3. Residual-RAG 用 `rag_top_k=1, rag_max_chars=1800`，因为本地 trace 显示 top-1 可做到 `rag_context_truncated=false`，top-2 在 1800 字符下仍截断。
+
+## 2026-06-01 true API-only 修正实验
+
+### 改动目的
+
+上一轮 API+Warning-only 仍然把 3 条 `failure_case` 放进 global context。对 `ScoreBin` 这种很小的公式函数来说，这些 warning 可能让模型过度关注 guard，而不是生成简单 scoring formula。本轮实现了真正的 API-only 路径：
+
+- 新增 `EOHConfig.rag_include_warnings`，默认 `True`，保持旧行为。
+- `eoh_obp_smoke.py` 新增 `--no-rag-warnings`。
+- trace 拆分为 `rag_global_items_available` 和 `rag_global_items_injected`。
+- 当 `--no-rag-warnings` 生效时，`failure_case` 只在 available trace 中出现，不进入 prompt。
+
+本地 context 验收：
+
+```text
+rag_selected_items = []
+rag_global_items_available = obp_api_skeleton + 3 failure_case
+rag_global_items_injected = obp_api_skeleton
+rag_context_chars = 598
+rag_context_truncated = false
+WARNINGS in context = false
+failure_case id in context = false
+```
+
+### true API-only smoke
+
+命令参数：
+
+```text
+model = JoyAI-LLM-Pro
+generations = 1
+pop_size = 8
+rag_mode = literature
+rag_top_k = 0
+rag_max_chars = 700
+no_rag_warnings = true
+```
+
+结果：
+
+| Arm | Run | Population | Valid | Seed gap | Best gap | Context | Verdict |
+|---|---|---:|---:|---:|---:|---|---|
+| True API-only | `eoh_obp_true_api_only_20260601/run_20260601_124045` | 3 | 3 | 0.0590303 | 0.05903 | 598 chars, not truncated | STOP: `population_size < 5` |
+
+best code 仍是 best-fit 等价公式：
+
+```go
+func ScoreBin(item int, remaining []int, capacity int) []float64 {
+    scores := make([]float64, len(remaining))
+    for i, rem := range remaining {
+        scores[i] = float64(capacity - (rem - item))
+    }
+    return scores
+}
+```
+
+### 当前判断
+
+- true API-only 比 API+Warning-only 的 trace 更干净：只注入 `obp_api_skeleton`，没有 warning，也没有 strategy card。
+- 但是最终 population 仍只有 3，低于 goal 设定的 `population_size >= 5` gate。
+- 因此本轮按停损规则没有继续跑 Residual-RAG。现在仍不能比较 OBP Literature-RAG 的性能收益。
+- 现象更像 EOH 的 final population 去重/选择压力问题：日志中多个候选 objective 都是 `0.05903`，最终只保留 3 个不同 objective 个体，而不是 8 个候选全部失败。
+
+下一步建议：
+
+1. 复核 `pop_greedy` 或 EOH survivor selection 是否按 objective 去重，导致同分候选被压缩。
+2. OBP 报告里同时记录 raw generated count 和 final population size，避免把“候选生成成功但被去重”误判为“候选生成失败”。
+3. 如果目标是比较 RAG 策略收益，可以把 gate 改成 `raw_valid_candidates >= 5`，或暂时接受 final population 较小但要求 raw responses 完整。

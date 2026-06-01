@@ -135,11 +135,15 @@ def _build_retrieved_rag_context(config: EOHConfig, project_root: str) -> tuple[
     corpus = load_all_corpora(project_root, corpus_dir)
     corpus_size_before = len(corpus)
     filtered_corpus = filter_corpus_by_mode(corpus, config.rag_mode)
-    global_items = [item for item in filtered_corpus if item.kind in {"api_constraint", "failure_case"}]
+    global_items_available = [item for item in filtered_corpus if item.kind in {"api_constraint", "failure_case"}]
     target_tags = _target_rag_tags(config.target_function if hasattr(config, "target_function") else "InsertShips")
-    global_items = [
-        item for item in global_items
+    global_items_available = [
+        item for item in global_items_available
         if "all" in item.tags or target_tags.intersection(set(item.tags))
+    ]
+    global_items = [
+        item for item in global_items_available
+        if item.kind == "api_constraint" or (item.kind == "failure_case" and config.rag_include_warnings)
     ]
     if config.rag_mode == "history":
         strategy_pool = [item for item in filtered_corpus if item.kind == "code_example"]
@@ -166,6 +170,12 @@ def _build_retrieved_rag_context(config: EOHConfig, project_root: str) -> tuple[
         "rag_top_k": config.rag_top_k,
         "rag_corpus_size_before_filter": corpus_size_before,
         "rag_corpus_size_after_filter": len(filtered_corpus),
+        "rag_global_items_available": [
+            {"id": item.id, "kind": item.kind, "title": item.title} for item in global_items_available
+        ],
+        "rag_global_items_injected": [
+            {"id": item.id, "kind": item.kind, "title": item.title} for item in global_items
+        ],
         "rag_global_items": [{"id": item.id, "kind": item.kind, "title": item.title} for item in global_items],
         "rag_all_scores": [{"id": item.id, "kind": item.kind, "score": score} for score, item in all_scores],
         "rag_selected_items": [
@@ -192,6 +202,8 @@ def _set_rag_context_env(config: EOHConfig, project_root: str) -> dict[str, Any]
             "rag_top_k": config.rag_top_k,
             "rag_corpus_size_before_filter": None,
             "rag_corpus_size_after_filter": None,
+            "rag_global_items_available": [],
+            "rag_global_items_injected": [],
             "rag_global_items": [],
             "rag_all_scores": [],
             "rag_selected_items": [],

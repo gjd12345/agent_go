@@ -63,6 +63,10 @@ class RagRunnerIntegrationTests(unittest.TestCase):
             ["insertships_api_skeleton", "suspicious_low_objective", "negative_or_missing_result", "timeout_or_unbounded_search"],
             [item["id"] for item in result["rag_trace"]["rag_global_items"]],
         )
+        self.assertEqual(
+            [item["id"] for item in result["rag_trace"]["rag_global_items_injected"]],
+            [item["id"] for item in result["rag_trace"]["rag_global_items"]],
+        )
         self.assertEqual(["topk_delta"], [item["id"] for item in result["rag_trace"]["rag_selected_items"][:1]])
         self.assertNotIn("insertships_api_skeleton", [item["id"] for item in result["rag_trace"]["rag_selected_items"]])
 
@@ -150,6 +154,35 @@ class RagRunnerIntegrationTests(unittest.TestCase):
                 self.assertIn("timeout_or_unbounded_search", global_ids)
                 self.assertGreater(len(context), 0)
 
+    def test_rag_warning_gate_excludes_failure_cases_from_injected_globals(self) -> None:
+        context, trace = _build_retrieved_rag_context(
+            EOHConfig(
+                agent_eoh_root=str(ROOT / "Agent_EOH"),
+                problem_name="bin_packing_online",
+                target_function="ScoreBin",
+                use_rag_context=True,
+                rag_mode="literature",
+                rag_top_k=0,
+                rag_max_chars=700,
+                rag_include_warnings=False,
+            ),
+            str(ROOT),
+        )
+
+        available_ids = [item["id"] for item in trace["rag_global_items_available"]]
+        injected = trace["rag_global_items_injected"]
+        injected_ids = [item["id"] for item in injected]
+        self.assertIn("obp_api_skeleton", available_ids)
+        self.assertIn("timeout_or_unbounded_search", available_ids)
+        self.assertEqual(["obp_api_skeleton"], injected_ids)
+        self.assertEqual(injected, trace["rag_global_items"])
+        self.assertEqual([], trace["rag_selected_items"])
+        self.assertIn("API RULES", context)
+        self.assertIn("[API Rule: obp_api_skeleton]", context)
+        self.assertNotIn("WARNINGS", context)
+        self.assertNotIn("timeout_or_unbounded_search", context)
+        self.assertLessEqual(len(context), 700)
+
     def test_full_corpus_mode_filters_and_literature_compression(self) -> None:
         corpus = load_all_corpora(ROOT)
         literature = filter_corpus_by_mode(corpus, "literature")
@@ -190,6 +223,8 @@ class RagRunnerIntegrationTests(unittest.TestCase):
             self.assertEqual("mixed", manual_trace["rag_mode"])
             self.assertEqual(str((manual_dir / "manual.txt").resolve()), manual_trace["rag_context_path"])
             self.assertEqual([], manual_trace["rag_selected_items"])
+            self.assertEqual([], manual_trace["rag_global_items_available"])
+            self.assertEqual([], manual_trace["rag_global_items_injected"])
             self.assertEqual([], manual_trace["rag_global_items"])
             self.assertEqual(len("manual context"), manual_trace["rag_context_chars"])
 
@@ -211,6 +246,10 @@ class RagRunnerIntegrationTests(unittest.TestCase):
             self.assertTrue(auto_trace["rag_selected_items"])
             self.assertEqual(
                 ["insertships_api_skeleton", "suspicious_low_objective", "negative_or_missing_result", "timeout_or_unbounded_search"],
+                [item["id"] for item in auto_trace["rag_global_items"]],
+            )
+            self.assertEqual(
+                [item["id"] for item in auto_trace["rag_global_items_injected"]],
                 [item["id"] for item in auto_trace["rag_global_items"]],
             )
             self.assertNotIn("insertships_api_skeleton", [item["id"] for item in auto_trace["rag_selected_items"]])
@@ -300,6 +339,7 @@ class RagRunnerIntegrationTests(unittest.TestCase):
         )
 
         self.assertIn("obp_api_skeleton", [item["id"] for item in trace["rag_global_items"]])
+        self.assertIn("obp_api_skeleton", [item["id"] for item in trace["rag_global_items_injected"]])
         self.assertEqual(3, len(trace["rag_selected_items"]))
         self.assertEqual({"algorithm_card"}, {item["kind"] for item in trace["rag_selected_items"]})
         self.assertTrue(all(item["id"].startswith("obp_") for item in trace["rag_selected_items"]))

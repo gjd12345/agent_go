@@ -68,7 +68,9 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         rag_context_path=args.rag_context_path or "",
         rag_mode=args.rag_mode,
         rag_top_k=args.rag_top_k,
+        rag_query=args.rag_query,
         rag_max_chars=args.rag_max_chars,
+        rag_include_warnings=not args.no_rag_warnings,
     )
     result = run_v0_eoh(cfg)
     population = result.get("population", []) if isinstance(result, dict) else []
@@ -99,6 +101,9 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     }
     rag_trace = summary["rag_trace"] if isinstance(summary["rag_trace"], dict) else None
     summary["rag_context_chars"] = rag_trace.get("rag_context_chars") if rag_trace else None
+    summary["rag_context_truncated"] = rag_trace.get("rag_context_truncated") if rag_trace else None
+    summary["rag_global_items_available"] = rag_trace.get("rag_global_items_available") if rag_trace else []
+    summary["rag_global_items_injected"] = rag_trace.get("rag_global_items_injected") if rag_trace else []
     summary["rag_global_items"] = rag_trace.get("rag_global_items") if rag_trace else []
     summary["rag_selected_items"] = rag_trace.get("rag_selected_items") if rag_trace else []
     (out_dir / "eoh_obp_smoke_summary.json").write_text(
@@ -122,7 +127,9 @@ def main() -> None:
     parser.add_argument("--rag-context-path", default="")
     parser.add_argument("--rag-mode", choices=["history", "literature", "mixed"], default="literature")
     parser.add_argument("--rag-top-k", type=int, default=3)
+    parser.add_argument("--rag-query", default="")
     parser.add_argument("--rag-max-chars", type=int, default=2500)
+    parser.add_argument("--no-rag-warnings", action="store_true")
     run_smoke(parser.parse_args())
 
 

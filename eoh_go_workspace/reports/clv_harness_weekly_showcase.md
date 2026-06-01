@@ -699,3 +699,99 @@ func SplitOrders(orders []Order, vehicles []Vehicle, workHours float64) []SubOrd
 | `ScoreBin` | Online Bin Packing | 修正 smoke | `obp_api_skeleton` 已验证；Residual-RAG 按停止条件未跑 | vanilla 生成稳定性恢复，RAG arm 未达比较门槛 |
 
 结论：本周展示可以诚实表达为“C+L+V harness 已经能跨 target 和跨组合优化问题运行；目前只有 InsertShips 有性能证据，Knapsack/Mixer/OBP 先作为跑通证据。下一阶段要补的是每个新问题的 domain skill cards、prompt 稳定性和多实例 evaluator，而不是再证明框架能不能跑。”
+
+## 2026-06-01 补充：OBP true API-only warning gate
+
+本节记录 `e6590e3` 之后的 OBP RAG arm 修正。目标不是继续扩大实验，而是先把 RAG context 路由做干净：API rules 固定前置，failure warnings 可关闭，strategy cards 只在 Residual-RAG arm 里进入 top-k。
+
+### Infrastructure 改动
+
+新增 true API-only 开关：
+
+- `EOHConfig.rag_include_warnings: bool = True`
+- `eoh_obp_smoke.py --no-rag-warnings`
+- `runner.py` trace 拆分：
+  - `rag_global_items_available`
+  - `rag_global_items_injected`
+  - `rag_global_items` 保持为 injected alias，兼容旧报告
+
+语义：
+
+| 类型 | true API-only 行为 |
+|---|---|
+| `api_constraint` | 固定注入 |
+| `failure_case` | available trace 中保留，但不注入 |
+| `algorithm_card` | `rag_top_k=0` 时不检索 |
+
+本地 context 验收：
+
+```text
+rag_selected_items = []
+rag_global_items_available = obp_api_skeleton + 3 failure_case
+rag_global_items_injected = obp_api_skeleton
+rag_context_chars = 598
+rag_context_truncated = false
+WARNINGS in context = false
+failure_case id in context = false
+```
+
+### true API-only smoke
+
+配置：
+
+```text
+model = JoyAI-LLM-Pro
+generations = 1
+pop_size = 8
+rag_mode = literature
+rag_top_k = 0
+rag_max_chars = 700
+no_rag_warnings = true
+```
+
+结果：
+
+| Arm | Run | Population | Valid | Seed gap | Best gap | Context | Verdict |
+|---|---|---:|---:|---:|---:|---|---|
+| True API-only | `eoh_obp_true_api_only_20260601/run_20260601_124045` | 3 | 3 | 0.0590303 | 0.05903 | 598 chars, not truncated | STOP: `population_size < 5` |
+
+best code：
+
+```go
+func ScoreBin(item int, remaining []int, capacity int) []float64 {
+    scores := make([]float64, len(remaining))
+    for i, rem := range remaining {
+        scores[i] = float64(capacity - (rem - item))
+    }
+    return scores
+}
+```
+
+解读：
+
+- true API-only 已经确认：prompt 中只有 `obp_api_skeleton`，没有 warning，也没有 strategy card。
+- 但 final population 仍只有 3，未达到本轮 goal 的 `population_size >= 5` gate。
+- 因此 Residual-RAG 没有继续跑；这不是实验失败，而是按停损条件避免制造无统计意义的对比。
+- 日志显示多个候选 objective 都是 `0.05903`，最终 population 只有 3 个不同 objective。下一步应区分 raw generated candidate count 与 final survivor population，判断是否被 EOH 去重/选择机制压缩。
+
+### 本轮验证
+
+```bash
+PYTHONPATH=. python3 -m unittest discover -s tests -q
+python3 -m compileall -q eoh_go Agent_EOH/eoh/src/eoh/examples/user_bin_packing_go Agent_EOH/eoh/src/eoh/methods/eoh/eoh_evolution.py
+go build -o /tmp/eoh_go_mainbin .
+go build -o /tmp/eoh_go_obp_solver eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go
+go run eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go eoh_go_workspace/problems/bin_packing_online/testdata/obp_5x60_c100.json
+```
+
+结果：
+
+| 验证 | 结果 |
+|---|---|
+| full unit suite | 59 tests OK |
+| compileall | OK |
+| top-level Go build | OK |
+| OBP solver build | OK |
+| OBP direct seed run | `final cost 0.05903030` |
+
+当前结论：OBP 工程链路继续保持 PASS；RAG arm 的 prompt 路由已经变干净，但 final population 仍偏小。下一步不应直接声称 RAG 无效，而应先复核 EOH survivor selection / objective 去重是否导致同分合法候选被压缩。

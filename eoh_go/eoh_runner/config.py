@@ -40,3 +40,4 @@ class EOHConfig:
     rag_query: str = ""
     rag_corpus_dir: str = ""
     rag_max_chars: int = 6000
+    rag_include_warnings: bool = True
