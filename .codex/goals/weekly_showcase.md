@@ -1,334 +1,280 @@
-/goal: OBP raw-to-survivor 审计 + 修正后重启 LLM 实验
+/goal: 官方 EoH benchmark 对齐 + RAG/History-RAG 小矩阵验证
 
-目标：解释 Online Bin Packing (OBP) / `ScoreBin` 在 true API-only arm 中 `final population=3` 的真实原因，并在补齐 raw-to-survivor 审计后重启最小 LLM 实验。核心顺序是：先确认 raw candidate 是否足够，再判断 final survivor 是否被 EOH 去重/选择压缩，最后才跑 Residual-RAG 验证策略卡是否有效。
+目标：先接入/复现 EoH 官方 benchmark，再比较 `pure EOH`、`API-only`、`Literature-RAG`、`History-RAG` 是否优于单纯 EOH。当前不再把自定义 OBP 小例子或 InsertShips 作为主要证明对象；它们只作为本地 harness 工程经验。
 
 报告一律写中文。实验产物不入 git，汇总报告和关键 best code 入 git。API key 不读取、不打印、不 echo；如需确认，只输出布尔值。
 
 ---
 
-## 当前事实
+## 核心判断
 
-已完成并推送：
+EoH 原论文有效的关键不是“任意业务函数都能被 LLM 改好”，而是选择了小而清晰的官方 benchmark target：
+
+| 对齐项 | 目标函数形态 | 为什么适合验证 RAG |
+|---|---|---|
+| `bp_online` | bin scoring function | 与当前 `ScoreBin` 最接近，能直接比较 best-fit / residual / utilization 类策略 |
+| `tsp_construct` | next-node selection heuristic | 经典 TSP 知识丰富，nearest / insertion / regret / 2-opt 等卡片容易映射 |
+| `cvrp_construct` | CVRP constructive heuristic | 候选官方/近官方对齐项；待 Phase A 确认官方实现和数据是否稳定可用 |
+
+本地现状：
 
 ```text
-当前代码/报告提交 = ad88436 fix(obp): add true API-only warning gate
-OBP harness 提交 = 59fe783 feat(obp): add online bin packing showcase harness
-origin/main = ad88436
+Agent_EOH/eoh/src/eoh/problems/problems.py 仍引用 tsp_construct 和 bp_online。
+但 Agent_EOH/eoh/src/eoh/problems/optimization/ 目录当前不存在。
+cvrp_construct 在本地未发现完整注册、代码、数据或 runner；先作为候选项，不强行承诺完成。
+当前 Go OBP wrapper 已跑通，但不是官方 bp_online 完整复现。
 ```
 
-已验证：
+因此下一阶段首要任务是“官方资产对齐”，不是继续调自定义 problem 的 prompt。
 
-| 项 | 结果 |
+---
+
+## Phase A: 官方资产审计
+
+只读优先，不跑 LLM。目标是产出官方 benchmark 映射表。
+
+检查来源：
+
+```text
+官方 EoH 仓库：FeiLiu36/EoH
+本地 Agent_EOH/eoh/src/eoh/problems/problems.py
+本地 Agent_EOH/eoh/src/eoh/examples/
+本地 eoh_go/experiments/
+本地 eoh_go_workspace/problems/
+```
+
+必须确认每个 problem 的状态：
+
+| problem | 必查项 |
 |---|---|
-| non-InsertShips Go extraction | 已修复 |
-| vanilla OBP | `population=6`, `valid=5`, `best_gap=0.05903` |
-| true API-only OBP | `population=3`, `valid=3`, `best_gap=0.05903` |
-| true API-only context | `598 chars`, `truncated=false` |
-| true API-only injected globals | 仅 `obp_api_skeleton` |
-| true API-only selected strategy | `[]` |
-| Residual-RAG | 未跑，因 true API-only 未过旧 `population_size >= 5` gate |
-| tests | `59 tests OK` |
+| `bp_online` | 官方 prompt、evaluator、数据、seed、objective、是否与本地 Go `ScoreBin` wrapper 兼容 |
+| `tsp_construct` | 官方 problem 包、数据、target function、seed、evaluation runner |
+| `cvrp_construct` | 是否存在稳定官方/近官方 problem 包、CVRP data、target function、objective、是否能在 1 天内最小跑通 |
 
-当前不能说：
+Phase A 输出：
 
 ```text
-Literature-RAG 对 OBP 无效。
+eoh_go_workspace/reports/official_eoh_benchmark_alignment.md
 ```
 
-只能说：
+报告必须写清楚：
 
 ```text
-OBP 工程链路 PASS；true API-only prompt 路由已干净；
-但 final population 仍偏小，尚未形成可比较的 RAG population。
+本地已有
+需要从官方补齐
+不采用或延期的原因
+每个 problem 的最小 smoke 命令
 ```
 
 ---
 
-## 当前关键怀疑
+## Phase B: 最小官方复现
 
-true API-only 的 `population=3` 不一定代表 LLM 只生成了 3 个合法候选。现有代码和 artifacts 显示：
+每个 problem 先只跑 seed/evaluator smoke，不比较 RAG。
+
+验收标准：
 
 ```text
-Agent_EOH/eoh/src/eoh/methods/management/pop_greedy.py 按 objective 去重。
-Agent_EOH/eoh/src/eoh/methods/eoh/eoh.py 只保存 survivor population。
-当前 true API-only 目录没有 raw offspring / raw response 文件。
-日志中多个 offspring objective 为 0.05903，final survivor 只剩 3 个 objective。
+seed evaluator 可运行
+objective 方向明确
+输出可解析
+失败原因可记录
+不需要真实 LLM
 ```
 
-因此下一步必须补 raw-to-survivor 审计，区分：
+优先级：
 
-1. LLM 是否生成了足够 raw responses。
-2. raw response 是否能抽取 `func ScoreBin(...) []float64`。
-3. raw code 是否能编译、评估、非 penalty。
-4. raw valid candidates 是否因 code/objective 去重被压缩。
-5. final survivor population 小是否真的表示生成不稳定。
+1. `bp_online`
+2. `tsp_construct`
+3. `cvrp_construct`
+
+降级规则：
+
+```text
+如果 cvrp_construct 在 1 天内无法稳定跑通，不阻塞主线。
+交付 bp_online + tsp_construct 完整 smoke，CVRP 作为接入风险报告。
+```
 
 ---
 
-## Phase A: 只读复核现有 true API-only artifact
+## Phase C: 统一 benchmark harness
 
-不跑 LLM，不改代码。读取：
+目标：已确认可用的官方/近官方 problem 使用同一种 summary schema，避免每题临时脚本拼结果。
 
-```text
-eoh_go_workspace/reports/tables/eoh_obp_true_api_only_20260601/run_20260601_124045/
-Agent_EOH/eoh/src/eoh/methods/eoh/eoh.py
-Agent_EOH/eoh/src/eoh/methods/eoh/eoh_interface_EC.py
-Agent_EOH/eoh/src/eoh/methods/management/pop_greedy.py
-```
-
-必须确认：
+每个 run summary 至少包含：
 
 ```text
-survivor population size = 3
-survivor objectives = 0.05903, 0.08945, 0.11879
-raw offsprings 当前没有落盘
-pop_greedy objective 去重确实存在
-```
-
-报告中禁止把 “final population 小” 直接写成 “候选生成失败”。
-
----
-
-## Phase B: 增加 raw offspring audit logging
-
-目标：不改变 evaluator 语义、不改变 EOH 选择逻辑，只增加可观察性。
-
-修改范围优先限于：
-
-```text
-Agent_EOH/eoh/src/eoh/methods/eoh/eoh.py
-eoh_go/experiments/eoh_obp_smoke.py
-tests/test_eoh_runner_specs.py 或相邻测试
-```
-
-实现要求：
-
-1. 每个 generation/operator 保存 raw offsprings：
-
-```text
-results/offsprings/pop_{generation}_{operator}.json
-```
-
-每条至少包含：
-
-```text
-operator
-index
-objective
-has_code
-code_hash
-code
-algorithm
-other_inf
-```
-
-2. 每个 generation 保存 audit summary：
-
-```text
-results/offsprings/offspring_audit_generation_{generation}.json
-```
-
-字段至少包含：
-
-```text
+problem
+official_problem_name
+arm
+model
+generations
+pop_size
+seed_objective
+best_objective
+delta_vs_seed
 raw_offspring_count
-raw_with_code_count
-raw_penalty_count
-raw_valid_candidate_count
-unique_code_count
-unique_objective_count
-survivor_population_size
-survivor_objectives
-```
-
-3. `eoh_obp_smoke.py` summary 增加：
-
-```text
-raw_offspring_count
-raw_with_code_count
 raw_valid_candidates
-unique_code_count
-unique_objective_count
 final_population_size
-survivor_objectives
-survivor_drop_reason
-offspring_audit_file
+unique_objective_count
+best_code
+rag_mode
+rag_selected_items
+rag_context_chars
+rag_context_truncated
+failure_reason
+runtime_seconds
 ```
 
-4. `survivor_drop_reason` 规则：
+明确区分：
 
 ```text
-raw_valid_candidates >= 5 且 final_population_size < 5 -> "objective_or_code_dedup"
-raw_valid_candidates < 5 -> "raw_generation_or_evaluation_shortfall"
-无 audit 文件 -> "missing_audit"
+raw objective
+survivor population objective
+外部 verified objective
 ```
 
-禁止：
-
-```text
-不改 pop_greedy 的选择语义
-不改 OBP evaluator 目标
-不把 raw 实验目录提交入 git
-```
+报告只使用 verified objective 做性能结论；raw/survivor 只用于诊断。
 
 ---
 
-## Phase C: 本地验证
+## Phase D: 四臂小矩阵
 
-必须运行：
+每个已跑通 problem 先跑最小矩阵：
 
-```bash
-PYTHONPATH=. python3 -m unittest discover -s tests -q
-python3 -m compileall -q eoh_go Agent_EOH/eoh/src/eoh/examples/user_bin_packing_go Agent_EOH/eoh/src/eoh/methods/eoh/eoh_evolution.py Agent_EOH/eoh/src/eoh/methods/eoh/eoh.py
-go build -o /tmp/eoh_go_mainbin .
-go build -o /tmp/eoh_go_obp_solver eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go
-go run eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go eoh_go_workspace/problems/bin_packing_online/testdata/obp_5x60_c100.json
-```
+| arm | 配置 |
+|---|---|
+| `pure_eoh` | 使用官方原始 problem prompt，不追加本项目 RAG/API cards |
+| `api_only` | 在官方原始 prompt 外，额外固定前置 problem API / signature / output contract |
+| `literature_rag` | 注入对应 problem 的短 skill cards |
+| `history_rag` | 只使用历史有效候选或官方/项目已有 code example |
 
-OBP direct seed run 必须保持：
-
-```text
-final cost 0.05903030
-```
-
----
-
-## Phase D: 重启 gated LLM 实验
-
-运行前规则：
-
-```bash
-set -a
-source ~/.config/agent_go/chatrhino.env
-set +a
-caffeinate -i -m -s python3 -m eoh_go.experiments.eoh_obp_smoke ...
-```
-
-禁止打印 API key、key 前缀、Authorization header。
-
-### Arm 1: true API-only rerun
-
-先跑：
+默认实验参数：
 
 ```text
---use-rag-context
---rag-mode literature
---rag-top-k 0
---rag-max-chars 700
---no-rag-warnings
---generations 1
---pop-size 8
+generations = 1
+pop_size = 8
+repeats = 1
 ```
 
-进入 Residual-RAG 的 gate：
+进入 repeat 的 gate：
 
 ```text
 raw_valid_candidates >= 5
 rag_context_truncated = false
+best_code 可通过外部 evaluator 复验
 ```
 
-如果不满足，停止，不跑 Residual-RAG，并在报告中写明：
+如果 gate 通过，再对最有信号的 problem/arm 跑：
 
 ```text
-true API-only raw valid 不足，不能比较 strategy card 收益。
+repeats = 3
+generations = 2 或 3
 ```
 
-如果满足但 final population 仍小于 5，允许继续跑 Residual-RAG，但报告必须说明：
+五天内优先交付：
 
 ```text
-final population 小来自 survivor 去重，性能比较以 raw valid + best verified objective 辅助判断。
+bp_online + tsp_construct 的 A/B/C/D 完整闭环。
+cvrp_construct 只在 Phase A/B 确认可稳定接入后进入四臂矩阵。
+Phase E/G/H 只做支撑上述闭环的最小必要范围。
 ```
-
-### Arm 2: Residual-RAG rerun
-
-仅当 Arm 1 gate 通过才跑：
-
-```text
---use-rag-context
---rag-mode literature
---rag-top-k 1
---rag-max-chars 1800
---no-rag-warnings
---rag-query "online bin packing ScoreBin residual polynomial utilization sqrt exp gap penalty tiny unusable residual gaps"
---generations 1
---pop-size 8
-```
-
-验收：
-
-```text
-rag_selected_items 包含 obp_funsearch_residual_poly 或 obp_eoh_util_sqrt_exp
-rag_context_truncated = false
-raw_valid_candidates >= 5
-```
-
-### Arm 3: Vanilla repeat
-
-默认不重跑。只有当报告需要同日同模型对照，或代码改动影响非 RAG 路径时才跑。
 
 ---
 
-## Phase E: 中文报告更新
+## Phase E: RAG corpus 对齐
 
-更新：
+每个官方 problem 都必须有自己的 target-specific RAG 条目。
+
+Skill card 规则保持不变：
 
 ```text
-eoh_go_workspace/reports/eoh_obp_research_plan.md
+content 使用 Skill / When / Do / Fallback / Safety 短指令格式
+长版文献或代码说明放 source_path，不直接塞 prompt
+api_constraint 固定前置，不进 retrieval pool
+failure_case 只输出 warning 摘要，不输出源码
+```
+
+初始 corpus 范围：
+
+| problem | literature cards | history cards |
+|---|---|---|
+| `bp_online` | best-fit, worst-fit, harmonic, residual penalty, utilization scoring | 官方/本地合法 ScoreBin 候选 |
+| `tsp_construct` | nearest neighbor, nearest insertion, farthest insertion, regret insertion, 2-opt awareness | 官方 seed / 有效候选 |
+| `cvrp_construct` | savings, sweep, nearest insertion, regret insertion, capacity-aware insertion | 待 Phase A 确认的官方/近官方 seed / 有效候选 |
+
+禁止把一个 problem 的 skill card 混入另一个 problem 的 top-k。
+
+---
+
+## Phase F: 多 agent 审查关口
+
+必须引入多 agent 审查，不允许单 agent 自说自话完成整条链路。
+
+| 关口 | agent | 审查内容 |
+|---|---|---|
+| A 后 | `scout` / `explorer` | 官方资产是否真实存在，是否把本地 wrapper 误写成官方 benchmark |
+| B 后 | `gatekeeper` | evaluator 目标方向、数据、seed、sandbox 是否正确 |
+| D 前 | `verifier` | 四臂命令、API key 安全、RAG trace 字段、context 长度 |
+| 结果后 | `gatekeeper + verifier` | 汇总表是否可比，是否混淆 raw/survivor/verified objective |
+
+P0/P1 必须修完再提交。
+
+---
+
+## Phase G: 中文报告与交付
+
+更新或新增：
+
+```text
+eoh_go_workspace/reports/official_eoh_benchmark_alignment.md
 eoh_go_workspace/reports/clv_harness_weekly_showcase.md
+eoh_go_workspace/reports/official_eoh_rag_ablation_summary.md
 ```
 
-必须包含：
-
-1. raw-to-survivor audit 字段表。
-2. true API-only rerun 的 raw count、raw valid、unique objective、final survivor。
-3. 是否触发 Residual-RAG，以及触发/停止原因。
-4. 每个已跑 arm 的 best `func ScoreBin(...) []float64`。
-5. 明确结论：
-   - raw valid 不足：生成/评估稳定性问题。
-   - raw valid 足够但 survivor 小：EOH 去重/选择压缩问题。
-   - Residual-RAG 改善 best gap：初步正信号，需要 repeats。
-   - Residual-RAG 无改善：当前 cards/instance 未显示收益。
-
----
-
-## Phase F: 子 agent 审核
-
-实现完成后 spawn 一个只读 `explorer` 审核。
-
-审核点：
+报告必须包含：
 
 ```text
-goal 是否引用最新事实 ad88436 和 true API-only population=3/valid=3
-代码是否只增加 audit，不改变 evaluator/selection 语义
-summary 是否区分 raw generated、raw valid、unique objective、final survivors
-Residual-RAG 是否只在 gate 通过后运行
-报告是否包含具体 best code
-是否没有把 final population 小误写成 RAG 无效
+每个 problem 的官方对齐状态
+每个 arm 的 objective 表
+每个 arm 的 valid/raw/survivor 诊断
+RAG selected items 和 context chars
+每个 problem 的 best code
+失败或降级原因
 ```
 
-P0/P1 必须修完后再提交。
+具体进化出来的代码必须列进去，不能只写“策略变化”。
 
 ---
 
-## Phase G: Git 和交付
+## Phase H: Git 和运行约束
 
-提交范围：
+允许提交：
 
 ```text
 .codex/goals/weekly_showcase.md
-Agent_EOH/eoh/src/eoh/methods/eoh/eoh.py
-eoh_go/experiments/eoh_obp_smoke.py
-tests
+必要的 runner / harness / tests
+RAG corpus 小文本
 中文汇总报告
 ```
 
-不提交：
+禁止提交：
 
 ```text
 API key / env
 raw 大型实验目录
 .DS_Store
 PPT/HTML 临时产物
+```
+
+运行 LLM 实验时：
+
+```text
+使用已确认授权的公司 API
+不打印 key
+使用 caffeinate，熄屏后继续运行
+同一时间只保留必要实验进程
+到额度上限后暂停，额度恢复后继续
 ```
 
 最终响应必须包含：
@@ -338,7 +284,7 @@ files changed
 commands run
 test results
 experiment results
-subagent review verdict
+subagent verdicts
 unresolved risks
 merge recommendation
 git commit hash
