@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 import sys
 import os
+import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -79,6 +81,52 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
                 sys.path.remove(str(src_path))
             except ValueError:
                 pass
+
+    def test_eoh_offspring_audit_summary_detects_survivor_dedup(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        src_path = root / "Agent_EOH" / "eoh" / "src"
+        sys.path.insert(0, str(src_path))
+        try:
+            from eoh.methods.eoh.eoh import _offspring_audit_entry, _offspring_audit_summary
+
+            offsprings = [
+                {"objective": 0.05903, "code": f"func ScoreBin() {{ return nil }} // {index}", "algorithm": "x"}
+                for index in range(6)
+            ]
+            entries = [_offspring_audit_entry("m1", index, off) for index, off in enumerate(offsprings)]
+            summary = _offspring_audit_summary(entries, [{"objective": 0.05903, "code": offsprings[0]["code"]}])
+
+            self.assertEqual(6, summary["raw_offspring_count"])
+            self.assertEqual(6, summary["raw_with_code_count"])
+            self.assertEqual(6, summary["raw_valid_candidate_count"])
+            self.assertEqual(6, summary["unique_code_count"])
+            self.assertEqual(1, summary["unique_objective_count"])
+            self.assertEqual(1, summary["survivor_population_size"])
+            self.assertEqual("objective_or_code_dedup", summary["survivor_drop_reason"])
+        finally:
+            try:
+                sys.path.remove(str(src_path))
+            except ValueError:
+                pass
+
+    def test_obp_smoke_loads_latest_offspring_audit(self) -> None:
+        from eoh_go.experiments.eoh_obp_smoke import _latest_offspring_audit
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            pops = root / "results" / "pops"
+            audit_dir = root / "results" / "offsprings"
+            pops.mkdir(parents=True)
+            audit_dir.mkdir(parents=True)
+            population_file = pops / "population_generation_1.json"
+            population_file.write_text("[]", encoding="utf-8")
+            audit_file = audit_dir / "offspring_audit_generation_1.json"
+            audit_file.write_text(json.dumps({"raw_offspring_count": 8}), encoding="utf-8")
+
+            audit, path = _latest_offspring_audit({"population_file": str(population_file)})
+
+        self.assertEqual({"raw_offspring_count": 8}, audit)
+        self.assertIsNotNone(path)
 
     def test_knapsack_seed_evaluator_runs(self) -> None:
         root = Path(__file__).resolve().parents[1]

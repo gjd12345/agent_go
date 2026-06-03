@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -48,6 +49,26 @@ def _seed_objective(root: Path) -> float | None:
             pass
 
 
+def _latest_offspring_audit(result: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
+    population_file = result.get("population_file") if isinstance(result, dict) else None
+    if not population_file:
+        return {}, None
+    results_dir = Path(population_file).resolve().parents[1]
+    def generation_index(path: Path) -> int:
+        matched = re.search(r"offspring_audit_generation_(\d+)\.json$", path.name)
+        return int(matched.group(1)) if matched else -1
+
+    audit_files = sorted((results_dir / "offsprings").glob("offspring_audit_generation_*.json"), key=generation_index)
+    if not audit_files:
+        return {}, None
+    audit_file = audit_files[-1]
+    try:
+        audit = json.loads(audit_file.read_text(encoding="utf-8"))
+    except Exception:
+        return {}, str(audit_file)
+    return audit if isinstance(audit, dict) else {}, str(audit_file)
+
+
 def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     root = Path(args.root).resolve()
     run_tag = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -78,6 +99,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         population = []
     best = _best_valid(population)
     best_objective = _safe_float(best.get("objective")) if best else None
+    offspring_audit, offspring_audit_file = _latest_offspring_audit(result if isinstance(result, dict) else {})
     summary = {
         "problem_name": "bin_packing_online",
         "target": "ScoreBin",
@@ -97,8 +119,21 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         "best_gap_to_lb": best_objective,
         "best_code": best.get("code") if best else None,
         "population_file": result.get("population_file") if isinstance(result, dict) else None,
+        "offspring_audit_file": offspring_audit_file,
         "rag_trace": result.get("rag_trace") if isinstance(result, dict) else None,
     }
+    summary["raw_offspring_count"] = offspring_audit.get("raw_offspring_count")
+    summary["raw_with_code_count"] = offspring_audit.get("raw_with_code_count")
+    summary["raw_penalty_count"] = offspring_audit.get("raw_penalty_count")
+    summary["raw_valid_candidates"] = offspring_audit.get("raw_valid_candidate_count")
+    summary["unique_code_count"] = offspring_audit.get("unique_code_count")
+    summary["unique_objective_count"] = offspring_audit.get("unique_objective_count")
+    summary["final_population_size"] = offspring_audit.get("survivor_population_size", len(population))
+    summary["survivor_objectives"] = offspring_audit.get("survivor_objectives", [])
+    summary["survivor_drop_reason"] = offspring_audit.get(
+        "survivor_drop_reason",
+        "missing_audit" if not offspring_audit else None,
+    )
     rag_trace = summary["rag_trace"] if isinstance(summary["rag_trace"], dict) else None
     summary["rag_context_chars"] = rag_trace.get("rag_context_chars") if rag_trace else None
     summary["rag_context_truncated"] = rag_trace.get("rag_context_truncated") if rag_trace else None

@@ -284,3 +284,122 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
 1. 复核 `pop_greedy` 或 EOH survivor selection 是否按 objective 去重，导致同分候选被压缩。
 2. OBP 报告里同时记录 raw generated count 和 final population size，避免把“候选生成成功但被去重”误判为“候选生成失败”。
 3. 如果目标是比较 RAG 策略收益，可以把 gate 改成 `raw_valid_candidates >= 5`，或暂时接受 final population 较小但要求 raw responses 完整。
+
+## 2026-06-03 raw-to-survivor 审计实验
+
+### 工程修正
+
+本轮只增加可观察性，不改变 evaluator 和 survivor selection 语义：
+
+- `Agent_EOH/eoh/src/eoh/methods/eoh/eoh.py` 在每个 generation/operator 后落盘 raw offsprings。
+- 新增 `results/offsprings/pop_{generation}_{operator}.json`。
+- 新增 `results/offsprings/offspring_audit_generation_{generation}.json`。
+- `eoh_obp_smoke.py` summary 读取 audit 文件，增加 raw/survivor 字段。
+
+这一步解决了之前的盲区：final population 小不能直接解释为 LLM 生成失败，必须看 raw candidate 到 survivor 的压缩链路。
+
+### 审计字段
+
+新增 summary 字段：
+
+```text
+raw_offspring_count
+raw_with_code_count
+raw_penalty_count
+raw_valid_candidates
+unique_code_count
+unique_objective_count
+final_population_size
+survivor_objectives
+survivor_drop_reason
+offspring_audit_file
+```
+
+`survivor_drop_reason` 当前规则：
+
+```text
+raw_valid_candidates >= 5 且 final_population_size < 5 -> objective_or_code_dedup
+raw_valid_candidates < 5 -> raw_generation_or_evaluation_shortfall
+否则 -> survivor_population_ok
+```
+
+### 重启 LLM 实验
+
+固定配置：
+
+```text
+model = JoyAI-LLM-Pro
+generations = 1
+pop_size = 8
+dataset = obp_5x60_c100
+```
+
+结果：
+
+| Arm | Run | Raw | Raw valid | Unique code | Unique objective | Final pop | Best gap | Context | Verdict |
+|---|---|---:|---:|---:|---:|---:|---:|---|---|
+| Vanilla | `eoh_obp_raw_audit_20260603/vanilla/run_20260603_125139` | 16 | 16 | 16 | 5 | 5 | 0.05903 | none | survivor OK |
+| True API-only | `eoh_obp_raw_audit_20260603/true_api_only/run_20260603_125009` | 16 | 16 | 16 | 1 | 1 | 0.05903 | 598 chars, not truncated | objective dedup |
+| Residual-RAG | `eoh_obp_raw_audit_20260603/residual_rag/run_20260603_125054` | 16 | 16 | 16 | 2 | 2 | 0.05903 | 1291 chars, not truncated | objective dedup |
+
+Residual-RAG trace：
+
+```text
+selected = obp_eoh_util_sqrt_exp
+rag_context_chars = 1291
+rag_context_truncated = false
+injected globals = obp_api_skeleton
+warnings injected = false
+```
+
+### best code
+
+三组 best code 都是 best-fit 等价公式：
+
+```go
+func ScoreBin(item int, remaining []int, capacity int) []float64 {
+    scores := make([]float64, len(remaining))
+    for i, rem := range remaining {
+        scores[i] = float64(capacity - (rem - item))
+    }
+    return scores
+}
+```
+
+### 当前判断
+
+本轮排除了一个重要误判：
+
+```text
+RAG arm final population 小，不是因为 LLM 无法生成合法 ScoreBin。
+```
+
+证据是 true API-only 和 Residual-RAG 都有：
+
+```text
+raw_offspring_count = 16
+raw_valid_candidates = 16
+raw_penalty_count = 0
+unique_code_count = 16
+```
+
+真正差异在 objective diversity：
+
+```text
+Vanilla unique_objective_count = 5
+True API-only unique_objective_count = 1
+Residual-RAG unique_objective_count = 2
+```
+
+`pop_greedy.py` 按 objective 去重，所以 RAG arm 的 final population 被压缩为 1 或 2。当前结论是：
+
+- OBP RAG 链路有效、context 干净、候选合法性充足。
+- 但 API-only 和 Residual-RAG 都没有超过 seed/best-fit。
+- 在该小实例上，RAG context 反而让模型更集中地产生 best-fit 等价公式，降低 objective diversity。
+- 不能说 RAG 无效，只能说当前 OBP cards + 当前实例没有显示性能收益。
+
+下一步：
+
+1. 如果继续 OBP，应换更难 instance，或采用官方 Python `score(item, bins)` 形式，降低 Go wrapper 和 evaluator 噪声。
+2. 如果继续当前 Go harness，应报告 raw valid 与 final survivor 两套指标，不能只看 final population。
+3. 若想测试策略卡有效性，应指定非 best-fit card，并检查 best code 是否真的使用 residual/poly/sqrt/exp 结构，而不只看 selected card。

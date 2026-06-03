@@ -2,8 +2,102 @@ import numpy as np
 import json
 import random
 import time
+import hashlib
+from pathlib import Path
 
 from .eoh_interface_EC import InterfaceEC
+
+
+def _code_hash(code):
+    if not isinstance(code, str):
+        return None
+    return hashlib.sha1(code.encode("utf-8", errors="replace")).hexdigest()[:12]
+
+
+def _offspring_audit_entry(operator, index, offspring):
+    if not isinstance(offspring, dict):
+        offspring = {}
+    code = offspring.get("code")
+    return {
+        "operator": operator,
+        "index": index,
+        "objective": offspring.get("objective"),
+        "has_code": isinstance(code, str) and bool(code.strip()),
+        "code_hash": _code_hash(code),
+        "code": code,
+        "algorithm": offspring.get("algorithm"),
+        "other_inf": offspring.get("other_inf"),
+    }
+
+
+def _is_raw_valid(entry):
+    try:
+        objective = float(entry.get("objective"))
+    except Exception:
+        return False
+    return entry.get("has_code") and objective < 1e8
+
+
+def _objective_float(value):
+    try:
+        return float(value)
+    except Exception:
+        return None
+
+
+def _offspring_audit_summary(entries, survivor_population):
+    code_hashes = {
+        entry.get("code_hash")
+        for entry in entries
+        if entry.get("code_hash")
+    }
+    objectives = [
+        entry.get("objective")
+        for entry in entries
+        if entry.get("objective") is not None
+    ]
+    unique_objectives = []
+    for objective in objectives:
+        if objective not in unique_objectives:
+            unique_objectives.append(objective)
+    survivor_objectives = [
+        item.get("objective")
+        for item in survivor_population
+        if isinstance(item, dict)
+    ]
+    raw_valid = sum(1 for entry in entries if _is_raw_valid(entry))
+    final_size = len(survivor_population)
+    if raw_valid >= 5 and final_size < 5:
+        survivor_drop_reason = "objective_or_code_dedup"
+    elif raw_valid < 5:
+        survivor_drop_reason = "raw_generation_or_evaluation_shortfall"
+    else:
+        survivor_drop_reason = "survivor_population_ok"
+    return {
+        "raw_offspring_count": len(entries),
+        "raw_with_code_count": sum(1 for entry in entries if entry.get("has_code")),
+        "raw_penalty_count": sum(
+            1
+            for entry in entries
+            if _objective_float(entry.get("objective")) is None
+            or not entry.get("has_code")
+            or _objective_float(entry.get("objective")) >= 1e8
+        ),
+        "raw_valid_candidate_count": raw_valid,
+        "unique_code_count": len(code_hashes),
+        "unique_objective_count": len(unique_objectives),
+        "survivor_population_size": final_size,
+        "survivor_objectives": survivor_objectives,
+        "survivor_drop_reason": survivor_drop_reason,
+    }
+
+
+def _write_json(path, payload):
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(payload, f, indent=5)
+
+
 # main class for eoh
 class EOH:
 
@@ -151,13 +245,24 @@ class EOH:
         n_op = len(self.operators)
 
         for pop in range(n_start, self.n_pop):  
+            generation_offspring_entries = []
             #print(f" [{na + 1} / {self.pop_size}] ", end="|")         
             for i in range(n_op):
                 op = self.operators[i]
                 print(f" OP: {op}, [{i + 1} / {n_op}] ", end="|") 
                 op_w = self.operator_weights[i]
+                parents, offsprings = [], []
                 if (np.random.rand() < op_w):
                     parents, offsprings = interface_ec.get_algorithm(population, op)
+                operator_entries = [
+                    _offspring_audit_entry(op, index, off)
+                    for index, off in enumerate(offsprings)
+                ]
+                generation_offspring_entries.extend(operator_entries)
+                _write_json(
+                    self.output_path + "/results/offsprings/pop_" + str(pop + 1) + "_" + op + ".json",
+                    operator_entries,
+                )
                 self.add2pop(population, offsprings)  # Check duplication, and add the new offspring
                 for off in offsprings:
                     print(" Obj: ", off['objective'], end="|")
@@ -180,6 +285,12 @@ class EOH:
             with open(filename, 'w') as f:
                 json.dump(population, f, indent=5)
 
+            audit_summary = _offspring_audit_summary(generation_offspring_entries, population)
+            _write_json(
+                self.output_path + "/results/offsprings/offspring_audit_generation_" + str(pop + 1) + ".json",
+                audit_summary,
+            )
+
             # Save the best one to a file
             filename = self.output_path + "/results/pops_best/population_generation_" + str(pop + 1) + ".json"
             with open(filename, 'w') as f:
@@ -191,4 +302,3 @@ class EOH:
             for i in range(len(population)):
                 print(str(population[i]['objective']) + " ", end="")
             print()
-

@@ -795,3 +795,87 @@ go run eoh_go_workspace/problems/bin_packing_online/bin_packing_solver.go eoh_go
 | OBP direct seed run | `final cost 0.05903030` |
 
 当前结论：OBP 工程链路继续保持 PASS；RAG arm 的 prompt 路由已经变干净，但 final population 仍偏小。下一步不应直接声称 RAG 无效，而应先复核 EOH survivor selection / objective 去重是否导致同分合法候选被压缩。
+
+## 2026-06-03 补充：OBP raw-to-survivor 审计与 Residual-RAG 重启
+
+本节记录 `ad88436` 之后的进一步修正。目标是解释 OBP RAG arm 的 final population 为什么偏小，并在补齐 audit 后重启 true API-only 和 Residual-RAG。
+
+### Raw audit instrumentation
+
+本轮只增加观察能力，不改变 evaluator 和 selection 语义：
+
+- 每个 generation/operator 保存 raw offsprings。
+- 每代保存 `offspring_audit_generation_N.json`。
+- OBP smoke summary 增加 raw/survivor 字段。
+
+新增关键字段：
+
+```text
+raw_offspring_count
+raw_valid_candidates
+unique_code_count
+unique_objective_count
+final_population_size
+survivor_objectives
+survivor_drop_reason
+```
+
+### 三组重跑结果
+
+固定配置：
+
+```text
+model = JoyAI-LLM-Pro
+generations = 1
+pop_size = 8
+dataset = obp_5x60_c100
+```
+
+| Arm | Run | Raw | Raw valid | Unique code | Unique objective | Final pop | Best gap | RAG selected | Verdict |
+|---|---|---:|---:|---:|---:|---:|---:|---|---|
+| Vanilla | `eoh_obp_raw_audit_20260603/vanilla/run_20260603_125139` | 16 | 16 | 16 | 5 | 5 | 0.05903 | - | survivor OK |
+| True API-only | `eoh_obp_raw_audit_20260603/true_api_only/run_20260603_125009` | 16 | 16 | 16 | 1 | 1 | 0.05903 | [] | objective dedup |
+| Residual-RAG | `eoh_obp_raw_audit_20260603/residual_rag/run_20260603_125054` | 16 | 16 | 16 | 2 | 2 | 0.05903 | `obp_eoh_util_sqrt_exp` | objective dedup |
+
+Residual-RAG context：
+
+```text
+rag_context_chars = 1291
+rag_context_truncated = false
+rag_global_items_injected = obp_api_skeleton
+rag_selected_items = obp_eoh_util_sqrt_exp
+```
+
+三组 best code 都是 best-fit 等价公式：
+
+```go
+func ScoreBin(item int, remaining []int, capacity int) []float64 {
+    scores := make([]float64, len(remaining))
+    for i, rem := range remaining {
+        scores[i] = float64(capacity - (rem - item))
+    }
+    return scores
+}
+```
+
+### 解读
+
+本轮修正了之前的判断：
+
+- RAG arm 不是“候选生成失败”。true API-only 和 Residual-RAG 都生成了 16 个 raw valid candidates，且没有 penalty。
+- final population 偏小来自 objective diversity 太低。`pop_greedy.py` 按 objective 去重，API-only 的 16 个有效代码全部是同一个 objective，Residual-RAG 只有 2 个不同 objective。
+- Residual-RAG 成功选中了目标 card `obp_eoh_util_sqrt_exp`，context 也未截断，但 best code 和 best gap 仍等同 best-fit seed。
+
+当前结论：
+
+```text
+OBP 上 RAG 链路、context 路由和候选合法性都已跑通。
+当前小实例上，RAG 没有带来性能提升；它更像把模型收敛到 best-fit 等价公式，降低了 objective diversity。
+这不是 RAG 无效的最终结论，而是“当前 OBP cards + 当前小实例未显示收益”。
+```
+
+对周展示的意义：
+
+- InsertShips 仍是唯一有稳定性能收益的 target。
+- OBP 现在提供的是更强的诊断证据：RAG context 可控、raw 候选合法，但策略收益没有出现。
+- 下一步若继续 OBP，应换更难 instance 或改为 EoH 官方 Python `score(item, bins)` 形态；否则可以把 OBP 定位为 harness 对齐与反例诊断，而不是正面收益主证据。
