@@ -12,15 +12,23 @@
 /private/tmp/EoH-main
 ```
 
+已新建官方 benchmark 临时 Python 环境：
+
+```text
+/private/tmp/eoh_official_venv
+Python 3.12.13
+Installed: numpy, joblib, matplotlib
+```
+
 当前本地 `Agent_EOH` vendor 不完整：`Agent_EOH/eoh/src/eoh/problems/problems.py` 引用了 `tsp_construct` 和 `bp_online`，但 `Agent_EOH/eoh/src/eoh/problems/optimization/` 目录不存在。因此后续不能继续把本地 vendor 当成完整官方 benchmark。
 
 官方 main 分支中，三项资产均存在：
 
 | 对齐项 | 官方路径 | 本地 vendor 状态 | 审计结论 |
 |---|---|---|---|
-| `bp_online` | `/private/tmp/EoH-main/examples/bp_online` | 本地只有自定义 Go `ScoreBin` wrapper | 官方资产存在，优先接入 |
-| `tsp_construct` | `/private/tmp/EoH-main/examples/tsp_construct` | 本地只有残缺引用 | 官方资产存在，优先接入 |
-| `cvrp_construct` | `/private/tmp/EoH-main/examples/cvrp_construct` | 本地无完整注册/代码/数据 | 官方资产存在，但排在第三 |
+| `bp_online` | `/private/tmp/EoH-main/examples/bp_online` | 本地只有自定义 Go `ScoreBin` wrapper | 官方 evaluation smoke PASS，优先接入 |
+| `tsp_construct` | `/private/tmp/EoH-main/examples/tsp_construct` | 本地只有残缺引用 | 官方 evaluation smoke PASS，优先接入 |
+| `cvrp_construct` | `/private/tmp/EoH-main/examples/cvrp_construct` | 本地无完整注册/代码/数据 | 官方 evaluation smoke PASS，排在第三 |
 
 ## 官方目标函数
 
@@ -61,7 +69,7 @@ Weibull 5k, 500, Excess: 0.50%
 
 注意：上述 smoke 使用的是官方 `evaluation/heuristic.py` 中的示例启发式 `score = item - bins`，不是 `prob.py` 中 EoH template 的 `return bins`。
 
-判断：PASS for evaluation。官方 BP `evaluation/runEval.py` 可在当前 Python 3.9 环境下直接运行；但如果 import `prob.py` 或运行 `runEoH.py`，仍会触发官方 EoH core 的 Python 3.10+ 要求。
+判断：PASS for evaluation。官方 BP `evaluation/runEval.py` 可在系统 Python 3.9 下直接运行，也已在 `/private/tmp/eoh_official_venv` 中复跑通过。
 
 ### `tsp_construct`
 
@@ -96,19 +104,22 @@ examples/tsp_construct/testingdata/instance_data_200.pkl
 seed/evaluation smoke：
 
 ```text
-python3 runEval.py
+/private/tmp/eoh_official_venv/bin/python runEval.py
+Start evaluation...
+Average dis on 64 instance with size 20 is:   4.490 timecost:   0.023
+Average dis on 64 instance with size 50 is:   7.007 timecost:   0.076
+Average dis on 64 instance with size 100 is:   9.836 timecost:   0.208
+```
+
+之前用系统 Python 3.9 运行时曾失败：
+
+```text
 ModuleNotFoundError: No module named 'matplotlib'
 ```
 
-进一步直接调用 `prob.py` 时，官方 main 分支触发 Python 3.10 语法需求：
+同时，官方 EoH core 使用 Python 3.10+ 语法；系统 Python 3.9 直接 import `prob.py` 会失败。因此后续官方 benchmark 应统一使用 `/private/tmp/eoh_official_venv` 或项目内独立 Python 3.10+ 环境。
 
-```text
-TypeError: unsupported operand type(s) for |: 'type' and 'NoneType'
-```
-
-原因：当前系统 `python3` 是 3.9.6，而官方 `eoh/setup.py` 声明 `python_requires=">=3.10"`。
-
-判断：WARNING。官方 TSP 资产完整，但当前环境需要 Python 3.10+，且 evaluation 需要补 `matplotlib` 或绕开 plotting import。
+判断：PASS for evaluation。官方 TSP 资产完整，使用 Python 3.12 venv 后 seed evaluation 可运行。
 
 ### `cvrp_construct`
 
@@ -147,6 +158,7 @@ Avg distance on 64 instances, 50 customers: 13.9964  time: 0.036s
 ```
 
 判断：PASS for evaluation。官方 CVRP evaluation 可在当前 Python 3.9 环境下运行；但 EoH evolution 入口仍受官方 core 的 Python 3.10+ 约束。
+已在 `/private/tmp/eoh_official_venv` 中复跑通过。
 
 ## 环境差距
 
@@ -157,18 +169,24 @@ python_requires >= 3.10
 install_requires = numpy, joblib
 ```
 
-当前本机：
+当前系统 Python：
 
 ```text
 python3 --version = Python 3.9.6
+```
+
+当前可用官方 benchmark venv：
+
+```text
+/private/tmp/eoh_official_venv/bin/python --version = Python 3.12.13
 ```
 
 已观察到的缺口：
 
 | 缺口 | 影响 | 建议 |
 |---|---|---|
-| Python 3.10+ 缺失 | 官方 EoH core 不能稳定 import | 新建 Python 3.11/3.12 venv |
-| `matplotlib` 缺失 | TSP `evaluation/runEval.py` 失败 | 加入官方 benchmark venv requirements |
+| 系统 Python 3.10+ 缺失 | 不能用系统 `python3` 跑官方 EoH core | 使用 `/private/tmp/eoh_official_venv` 或项目内 Python 3.10+ venv |
+| `matplotlib` 缺失 | 系统 Python 下 TSP `evaluation/runEval.py` 失败 | 已在官方 benchmark venv 中安装 |
 | 本地 `Agent_EOH` 是旧/残缺接口 | 不能直接跑官方 main examples | 官方 benchmark 单独走 external harness，不覆盖当前 `Agent_EOH` |
 
 ## 下一步建议
@@ -184,8 +202,8 @@ eoh_go_workspace/external/eoh_official/
 2. 先做 seed/evaluator wrapper：
 
 ```text
-bp_online: 已可跑，优先封装 summary parser
-tsp_construct: 先解决 Python 3.10+ 和 matplotlib
+bp_online: evaluation 已可跑，优先封装 summary parser
+tsp_construct: evaluation 已可跑，优先封装 summary parser
 cvrp_construct: evaluation 已可跑，优先封装 summary parser
 ```
 
@@ -201,13 +219,13 @@ history_rag: 官方 prompt + 历史有效候选/code examples
 4. 五天交付优先级：
 
 ```text
-第一优先：bp_online + cvrp_construct evaluation wrapper 和 smoke 表
-第二优先：tsp_construct 环境修复后 smoke
+第一优先：bp_online + tsp_construct + cvrp_construct evaluation wrapper 和 smoke 表
+第二优先：接入 pure EOH evolution smoke
 第三优先：四臂 gen=1/pop=8 LLM 小矩阵
 ```
 
 ## 当前裁决
 
-Verdict: WARNING
+Verdict: PASS for Phase A
 
-官方 assets 已确认存在，且 BP/CVRP evaluation smoke 可运行；但当前系统 Python 版本不足以直接运行官方 EoH main branch evolution。因此下一步应先准备 Python 3.10+ 独立环境和统一 wrapper，再启动 LLM 实验。
+官方 assets 已确认存在，且 BP/TSP/CVRP evaluation smoke 均可在 `/private/tmp/eoh_official_venv` 中运行。下一步应把这个临时环境和官方 examples 包装成受控 external harness，再启动 pure EOH 和 RAG 四臂实验。
