@@ -1,0 +1,111 @@
+{
+  "official_root": "/private/tmp/EoH-main",
+  "python_exe": "/private/tmp/eoh_official_venv/bin/python",
+  "generated_at": "2026-06-03 14:38:42",
+  "results": [
+    {
+      "problem": "bp_online",
+      "official_problem_name": "bp_online",
+      "target_function": "score",
+      "objective_direction": "minimize",
+      "metric_name": "avg_excess_percent",
+      "example_root": "/private/tmp/EoH-main/examples/bp_online",
+      "evaluation_root": "/private/tmp/EoH-main/examples/bp_online/evaluation",
+      "command": [
+        "/private/tmp/eoh_official_venv/bin/python",
+        "runEval.py"
+      ],
+      "ok": true,
+      "failure_reason": null,
+      "runtime_seconds": 0.918,
+      "stdout": "Weibull 5k, 100, Excess: 3.98%\nWeibull 5k, 300, Excess: 0.91%\nWeibull 5k, 500, Excess: 0.50%\n",
+      "stderr": "",
+      "heuristic_code": "# example heuristic\n# replace it with your own heuristic designed by EoH\n\ndef score(item, bins):\n    scores = item - bins\n    return scores",
+      "return_code": 0,
+      "objective": 1.7966666666666666,
+      "rows": [
+        {
+          "dataset": "Weibull 5k",
+          "capacity": 100,
+          "excess_percent": 3.98
+        },
+        {
+          "dataset": "Weibull 5k",
+          "capacity": 300,
+          "excess_percent": 0.91
+        },
+        {
+          "dataset": "Weibull 5k",
+          "capacity": 500,
+          "excess_percent": 0.5
+        }
+      ]
+    },
+    {
+      "problem": "tsp_construct",
+      "official_problem_name": "tsp_construct",
+      "target_function": "select_next_node",
+      "objective_direction": "minimize",
+      "metric_name": "avg_distance",
+      "example_root": "/private/tmp/EoH-main/examples/tsp_construct",
+      "evaluation_root": "/private/tmp/EoH-main/examples/tsp_construct/evaluation",
+      "command": [
+        "/private/tmp/eoh_official_venv/bin/python",
+        "runEval.py"
+      ],
+      "ok": true,
+      "failure_reason": null,
+      "runtime_seconds": 0.592,
+      "stdout": "Start evaluation...\nAverage dis on 64 instance with size 20 is:   4.490 timecost:   0.022\nAverage dis on 64 instance with size 50 is:   7.007 timecost:   0.073\nAverage dis on 64 instance with size 100 is:   9.836 timecost:   0.200\n",
+      "stderr": "",
+      "heuristic_code": "# example heuristic\n# replace it with your own heuristic designed by EoH\nimport numpy as np\ndef select_next_node(current_node, destination_node, unvisited_nodes, distance_matrix):\n    next_node_id = np.argmin([distance_matrix[current_node][i] for i in unvisited_nodes if i != current_node])\n    next_node = unvisited_nodes[next_node_id]\n    return next_node",
+      "return_code": 0,
+      "objective": 7.111,
+      "rows": [
+        {
+          "instances": 64,
+          "size": 20,
+          "avg_distance": 4.49
+        },
+        {
+          "instances": 64,
+          "size": 50,
+          "avg_distance": 7.007
+        },
+        {
+          "instances": 64,
+          "size": 100,
+          "avg_distance": 9.836
+        }
+      ]
+    },
+    {
+      "problem": "cvrp_construct",
+      "official_problem_name": "cvrp_construct",
+      "target_function": "select_next_node",
+      "objective_direction": "minimize",
+      "metric_name": "avg_distance",
+      "example_root": "/private/tmp/EoH-main/examples/cvrp_construct",
+      "evaluation_root": "/private/tmp/EoH-main/examples/cvrp_construct/evaluation",
+      "command": [
+        "/private/tmp/eoh_official_venv/bin/python",
+        "runEval.py"
+      ],
+      "ok": true,
+      "failure_reason": null,
+      "runtime_seconds": 0.103,
+      "stdout": "Start CVRP evaluation...\nAvg distance on 64 instances, 50 customers: 13.9964  time: 0.027s\n",
+      "stderr": "",
+      "heuristic_code": "import numpy as np\n\n\ndef select_next_node(current_node, depot, unvisited_nodes, rest_capacity, demands, distance_matrix):\n    \"\"\"Nearest-feasible-neighbour baseline \u2014 replace with an EoH-designed heuristic.\"\"\"\n    return unvisited_nodes[np.argmin(distance_matrix[current_node][unvisited_nodes])]\n",
+      "return_code": 0,
+      "objective": 13.9964,
+      "rows": [
+        {
+          "instances": 64,
+          "customers": 50,
+          "avg_distance": 13.9964
+        }
+      ]
+    }
+  ]
+}
