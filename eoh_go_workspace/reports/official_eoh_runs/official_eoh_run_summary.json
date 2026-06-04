@@ -1,0 +1,33 @@
+{
+  "problem": "bp_online",
+  "arm": "pure_eoh",
+  "official_root": "/private/tmp/EoH-main",
+  "python_exe": "/private/tmp/eoh_official_venv/bin/python",
+  "run_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/pure_eoh/run_20260604_101919",
+  "generated_at": "2026-06-04 10:19:19",
+  "pop_size": 2,
+  "generations": 1,
+  "operators": "i1",
+  "use_official_seed": false,
+  "api_key_present": true,
+  "api_endpoint_present": true,
+  "model_present": true,
+  "return_code": 0,
+  "runtime_seconds": 377.927,
+  "stdout_tail": "[2026-06-04 10:19:20] LLM: JoyAI-LLM-Pro @ [api-endpoint-redacted]\n[2026-06-04 10:19:45] LLM connection verified.\n[2026-06-04 10:19:45] ======================================================\n[2026-06-04 10:19:45]   EoH\n[2026-06-04 10:19:45]   LLM      : JoyAI-LLM-Pro @ [api-endpoint-redacted]\n[2026-06-04 10:19:45]   EC       : gen=1  pop=2  ops=[i1]\n[2026-06-04 10:19:45]   Sampling : init=4 (2\u00d7pop)  per_gen=2  parallel=1\n[2026-06-04 10:19:45]   Timeout  : llm=180s  eval=40s\n[2026-06-04 10:19:45] ======================================================\n[2026-06-04 10:19:45] \n[Init]  (4 samples \u2192 pop=2)\n[2026-06-04 10:20:56]   #1    [i1]  0.03984           best=0.03984  *\n[2026-06-04 10:20:56]   #2    [i1]  0.03984           best=0.03984\n[2026-06-04 10:23:33]   #3    [i1]  0.03984           best=0.03984\n[2026-06-04 10:23:33]   #4    [i1]  0.04699           best=0.03984\n[2026-06-04 10:23:33]   Init done: 4/4 evaluated  pop=2  best=0.03984  elapsed=3.8m\n[2026-06-04 10:23:33] \n[Gen 1/1]\n[2026-06-04 10:25:37]   #5    [i1]  0.05433           best=0.03984\n[2026-06-04 10:25:37]   #6    [i1]  0.03984           best=0.03984\n[2026-06-04 10:25:37]   --- gen 1 done  pop=2  best=0.03984  elapsed=5.9m\n[2026-06-04 10:25:37] ======================================================\n[2026-06-04 10:25:37]   Evolution finished.  best=0.03984  samples=6  time=5.9m\n[2026-06-04 10:25:37] ======================================================\n",
+  "stderr_tail": "",
+  "run_summary": {
+    "run_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/pure_eoh/run_20260604_101919",
+    "ok": true,
+    "failure_reason": null,
+    "latest_population_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/pure_eoh/run_20260604_101919/results/pops/population_generation_1.json",
+    "latest_generation": 1,
+    "population_size": 2,
+    "valid_candidates": 2,
+    "best_objective": 0.03984,
+    "best_algorithm": "Assign the item to the bin whose remaining capacity after placement is closest to zero without going negative, prioritizing tighter fits to reduce wasted space and thus the total number of bins needed.",
+    "best_code": "import numpy as np\n\ndef score(item: int, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Score each bin for assigning the current item. Higher score = preferred bin.\n\n    Args:\n        item: size of the current item to assign\n        bins: remaining capacities of feasible bins (all >= item size)\n    Returns:\n        scores: priority scores for each bin\n    \"\"\"\n    # Remaining capacity if item is placed in each bin\n    remaining_after_placement = bins - item\n    # We want smaller remaining capacities to have higher scores.\n    # Use negative remaining capacity so that max score picks smallest remainder.\n    # Add 1/(bins+1) term to break ties in favor of larger original bin capacity,\n    # which helps utilize partially filled bins more effectively.\n    tie_breaker = 1.0 / (bins + 1)\n    scores = -remaining_after_placement + tie_breaker\n    return scores",
+    "sample_file_count": 2,
+    "best_sample_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/pure_eoh/run_20260604_101919/results/samples/samples_best.json"
+  }
+}

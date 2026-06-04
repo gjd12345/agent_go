@@ -9,7 +9,13 @@ from argparse import Namespace
 from pathlib import Path
 from unittest.mock import patch
 
-from eoh_go.experiments.official_eoh_run import normalize_api_endpoint, run_official_eoh, summarize_run
+from eoh_go.experiments.official_eoh_run import (
+    _runner_script,
+    normalize_api_endpoint,
+    redact_log_tail,
+    run_official_eoh,
+    summarize_run,
+)
 
 
 class OfficialEohRunTests(unittest.TestCase):
@@ -17,6 +23,20 @@ class OfficialEohRunTests(unittest.TestCase):
         self.assertEqual(normalize_api_endpoint("https://api.example.com/v1/chat/completions"), "api.example.com")
         self.assertEqual(normalize_api_endpoint("http://api.example.com"), "api.example.com")
         self.assertEqual(normalize_api_endpoint("api.example.com/v1"), "api.example.com")
+
+    def test_generated_runner_script_compiles(self) -> None:
+        script = _runner_script()
+        compile(script, "_run_official_eoh.py", "exec")
+        self.assertIn("install_api_url_patch", script)
+        self.assertIn("api_url(self.api_endpoint)", script)
+
+    def test_redact_log_tail_removes_endpoint_and_bearer_token(self) -> None:
+        text = "LLM @ https://api.example.com/v1/chat endpoint=api.example.com Bearer SECRET_TOKEN"
+        redacted = redact_log_tail(text)
+        self.assertNotIn("api.example.com", redacted)
+        self.assertNotIn("SECRET_TOKEN", redacted)
+        self.assertIn("[api-endpoint-redacted]", redacted)
+        self.assertIn("[api-key-redacted]", redacted)
 
     def test_summarize_run_reads_latest_population_and_best_code(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

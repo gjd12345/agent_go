@@ -33,6 +33,13 @@ def _load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def redact_log_tail(text: str) -> str:
+    redacted = re.sub(r"https?://\S+", "[api-endpoint-redacted]", text or "")
+    redacted = re.sub(r"(endpoint=)[^,\s)]+", r"\1[api-endpoint-redacted]", redacted)
+    redacted = re.sub(r"(Bearer\s+)[A-Za-z0-9._~+/=-]+", r"\1[api-key-redacted]", redacted)
+    return redacted
+
+
 def summarize_run(run_dir: Path) -> dict[str, Any]:
     pop_dir = run_dir / "results" / "pops"
     populations = sorted(pop_dir.glob("population_generation_*.json"), key=_natural_generation)
@@ -104,9 +111,12 @@ def _runner_script() -> str:
         from __future__ import annotations
 
         import argparse
+        import json
         import os
         import re
         import sys
+        import time
+        import urllib.request
         from pathlib import Path
 
 
@@ -115,6 +125,55 @@ def _runner_script() -> str:
             value = re.sub(r"^https?://", "", value)
             value = value.split("/", 1)[0]
             return value.strip()
+
+
+        def api_url(endpoint: str) -> str:
+            value = (endpoint or "").strip()
+            if value.startswith(("http://", "https://")):
+                if "/" in value.removeprefix("https://").removeprefix("http://"):
+                    return value
+                return value.rstrip("/") + "/v1/chat/completions"
+            if "/" in value:
+                return "https://" + value
+            return "https://" + value.rstrip("/") + "/v1/chat/completions"
+
+
+        def install_api_url_patch() -> None:
+            from eoh.llm import api_general
+
+            def get_response(self, prompt_content: str, max_retries: int = 5):
+                payload = json.dumps({
+                    "model": self.model_LLM,
+                    "messages": [{"role": "user", "content": prompt_content}],
+                }).encode("utf-8")
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json",
+                }
+                url = api_url(self.api_endpoint)
+                for attempt in range(max_retries):
+                    try:
+                        req = urllib.request.Request(url, data=payload, headers=headers, method="POST")
+                        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                            parsed = json.loads(resp.read().decode("utf-8", "replace"))
+                        choices = parsed.get("choices")
+                        if not choices:
+                            error_msg = parsed.get("error", {}).get("message", str(parsed))
+                            raise ValueError(f"API returned no choices: {error_msg}")
+                        return choices[0]["message"]["content"]
+                    except Exception as exc:
+                        api_general.logger.debug("API error (attempt %d/%d): %s", attempt + 1, max_retries, exc)
+                        if attempt < max_retries - 1:
+                            time.sleep(2 ** attempt)
+                api_general.logger.warning(
+                    "API call failed after %d attempts (endpoint=%s, model=%s).",
+                    max_retries,
+                    self.api_endpoint,
+                    self.model_LLM,
+                )
+                return None
+
+            api_general.InterfaceAPI.get_response = get_response
 
 
         def api_context(problem: str) -> str:
@@ -193,7 +252,7 @@ def _runner_script() -> str:
             from eoh import EoH, LLMConfig
 
             api_key = os.environ.get(args.api_key_env, "")
-            endpoint = normalize_api_endpoint(os.environ.get(args.api_endpoint_env, ""))
+            endpoint = os.environ.get(args.api_endpoint_env, "").strip()
             model = args.llm_model or os.environ.get(args.model_env, "")
             if not api_key:
                 raise RuntimeError(f"Missing API key env: {args.api_key_env}")
@@ -205,6 +264,7 @@ def _runner_script() -> str:
             task = load_problem(args.problem, official_root, args.eval_timeout_s, args.n_processes)
             apply_arm_context(task, args.problem, args.arm, args.context_file)
             operators = [item.strip() for item in args.operators.split(",") if item.strip()]
+            install_api_url_patch()
             llm = LLMConfig(api_endpoint=endpoint, api_key=api_key, model=model, timeout=args.llm_timeout_s)
             seed_path = official_root / "examples" / args.problem / "results" / "pops" / "population_generation_0.json"
             eoh = EoH(
@@ -320,13 +380,13 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
         )
         return_code = proc.returncode
         payload["return_code"] = return_code
-        payload["stdout_tail"] = "\n".join(proc.stdout.splitlines()[-80:])
-        payload["stderr_tail"] = "\n".join(proc.stderr.splitlines()[-80:])
+        payload["stdout_tail"] = redact_log_tail("\n".join(proc.stdout.splitlines()[-80:]))
+        payload["stderr_tail"] = redact_log_tail("\n".join(proc.stderr.splitlines()[-80:]))
     except subprocess.TimeoutExpired as exc:
         payload["return_code"] = None
         payload["failure_reason"] = "timeout"
-        payload["stdout_tail"] = "\n".join((exc.stdout or "").splitlines()[-80:])
-        payload["stderr_tail"] = "\n".join((exc.stderr or "").splitlines()[-80:])
+        payload["stdout_tail"] = redact_log_tail("\n".join((exc.stdout or "").splitlines()[-80:]))
+        payload["stderr_tail"] = redact_log_tail("\n".join((exc.stderr or "").splitlines()[-80:]))
     payload["runtime_seconds"] = round(time.time() - started, 3)
 
     summary = summarize_run(run_dir)
