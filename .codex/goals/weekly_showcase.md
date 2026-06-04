@@ -172,6 +172,51 @@ repeats = 3
 generations = 2 或 3
 ```
 
+### Phase D0: `bp_online` 无提升原因复盘
+
+当前 `bp_online` 最小对比结果：
+
+| arm | 状态 | best objective | 诊断 |
+|---|---|---:|---|
+| `pure_eoh` | completed gen=1 | 0.03984 | 模型不加 RAG 已自发生成 best-fit / tight-fit 公式 |
+| `api_only` | completed gen=1 | 0.03984 | API 约束没有改变策略族，仍是 best-fit 变体 |
+| `literature_rag_default` | completed gen=1 | 0.03984 | 检索到 `obp_best_fit`, `obp_first_fit`，与 pure EOH 生成策略重复 |
+| `literature_rag_targeted_residual` | init completed, gen=1 timeout | 0.03984 | 成功检索 `obp_eoh_util_sqrt_exp`, `obp_funsearch_residual_poly`，但 context 仍截断且完整进化超时 |
+
+结论：
+
+```text
+这不是 RAG 链路没生效，也不能写成 RAG 无效。
+它说明 bp_online 在当前小预算/当前 runner 下没有拉开差距。
+当前有效最优解都回到 best-fit/tight-fit 强基线策略族，因此 objective 暂时没有拉开。
+```
+
+具体原因：
+
+1. **强基线快速占优**：`score(item, bins)` 目标很小，LLM 在 pure prompt 下已经能直接写出 best-fit/tight-fit。当前小预算结果里，RAG 给出的默认知识没有超出这个策略族。
+2. **默认检索冗余**：默认 query 选中 `obp_best_fit` 和 `obp_first_fit`，等于把模型已经会写的策略再说一遍，没有引入新搜索方向。
+3. **context 截断**：targeted residual run 虽然选中了 `obp_eoh_util_sqrt_exp` 和 `obp_funsearch_residual_poly`，但 1800 chars 仍截断第二张卡，说明 top_k=2 对 BP 仍偏大。
+4. **objective 去重压缩 population**：default Literature-RAG 生成 `samples=6`，但当前摘要只证明 survivor/final population 为 `1/1`。这说明 survivor 去重压缩明显；若要断言“6 个样本都有效且 objective 完全重复”，必须补 `raw_valid_candidates` 和 `unique_objective_count`。
+5. **预算/延迟限制**：targeted residual、TSP、CVRP 的 Gen 1 都在 20 分钟总预算附近超时。继续做 full generation 矩阵会浪费额度，短期应改成 init-only 或更长 timeout。
+6. **验证口径不可混用**：官方 evaluation smoke 和 EoH training objective 的 instance 数、problem size 可能不同。报告中只能比较同一 runner、同一 problem、同一 arm 矩阵内的 objective。
+
+修正后的执行策略：
+
+| problem | 定位 | 下一步 |
+|---|---|---|
+| `bp_online` | 官方对齐 + RAG 检索诊断，不作为正向收益主证据 | 只再跑 `targeted residual top_k=1, max_chars<=1000, generations=0/init-only`；若仍无提升，停止扩 BP |
+| `tsp_construct` | 更适合作为 RAG 正向收益候选 | 先补 TSP skill cards，再跑 `pure_eoh` vs `api_only` vs `literature_rag` 的 init-only 对照 |
+| `cvrp_construct` | 更贴近 VRP 知识库，适合作为导师关心的迁移证据 | 先补 CVRP skill cards，再跑 init-only 对照 |
+
+新的 gate：
+
+```text
+若 official runner 对 generations=0 的 summary 输出还不稳定，先补 init-only summary，再跑 init-only 对照。
+bp_online 不再进入 repeat=3，除非 targeted residual top_k=1 明确优于 0.03984。
+TSP/CVRP 在 gen=1 超时前，先统一采用 generations=0（只跑 init population）比较 arm。
+所有 arm 必须报告 selected cards、context_chars、context_truncated、valid/raw/survivor。
+```
+
 五天内优先交付：
 
 ```text
