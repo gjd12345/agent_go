@@ -1,10 +1,10 @@
 {
   "problem": "bp_online",
-  "arm": "pure_eoh",
+  "arm": "api_only",
   "official_root": "/private/tmp/EoH-main",
   "python_exe": "/private/tmp/eoh_official_venv/bin/python",
-  "run_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/pure_eoh/run_20260604_101919",
-  "generated_at": "2026-06-04 10:19:19",
+  "run_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/api_only/run_20260604_102757",
+  "generated_at": "2026-06-04 10:27:57",
   "pop_size": 2,
   "generations": 1,
   "operators": "i1",
@@ -13,21 +13,21 @@
   "api_endpoint_present": true,
   "model_present": true,
   "return_code": 0,
-  "runtime_seconds": 377.927,
-  "stdout_tail": "[2026-06-04 10:19:20] LLM: JoyAI-LLM-Pro @ [api-endpoint-redacted]\n[2026-06-04 10:19:45] LLM connection verified.\n[2026-06-04 10:19:45] ======================================================\n[2026-06-04 10:19:45]   EoH\n[2026-06-04 10:19:45]   LLM      : JoyAI-LLM-Pro @ [api-endpoint-redacted]\n[2026-06-04 10:19:45]   EC       : gen=1  pop=2  ops=[i1]\n[2026-06-04 10:19:45]   Sampling : init=4 (2\u00d7pop)  per_gen=2  parallel=1\n[2026-06-04 10:19:45]   Timeout  : llm=180s  eval=40s\n[2026-06-04 10:19:45] ======================================================\n[2026-06-04 10:19:45] \n[Init]  (4 samples \u2192 pop=2)\n[2026-06-04 10:20:56]   #1    [i1]  0.03984           best=0.03984  *\n[2026-06-04 10:20:56]   #2    [i1]  0.03984           best=0.03984\n[2026-06-04 10:23:33]   #3    [i1]  0.03984           best=0.03984\n[2026-06-04 10:23:33]   #4    [i1]  0.04699           best=0.03984\n[2026-06-04 10:23:33]   Init done: 4/4 evaluated  pop=2  best=0.03984  elapsed=3.8m\n[2026-06-04 10:23:33] \n[Gen 1/1]\n[2026-06-04 10:25:37]   #5    [i1]  0.05433           best=0.03984\n[2026-06-04 10:25:37]   #6    [i1]  0.03984           best=0.03984\n[2026-06-04 10:25:37]   --- gen 1 done  pop=2  best=0.03984  elapsed=5.9m\n[2026-06-04 10:25:37] ======================================================\n[2026-06-04 10:25:37]   Evolution finished.  best=0.03984  samples=6  time=5.9m\n[2026-06-04 10:25:37] ======================================================\n",
+  "runtime_seconds": 1133.805,
+  "stdout_tail": "[2026-06-04 10:27:57] LLM: JoyAI-LLM-Pro @ [api-endpoint-redacted]\n[2026-06-04 10:28:25] LLM connection verified.\n[2026-06-04 10:28:25] ======================================================\n[2026-06-04 10:28:25]   EoH\n[2026-06-04 10:28:25]   LLM      : JoyAI-LLM-Pro @ [api-endpoint-redacted]\n[2026-06-04 10:28:25]   EC       : gen=1  pop=2  ops=[i1]\n[2026-06-04 10:28:25]   Sampling : init=4 (2\u00d7pop)  per_gen=2  parallel=1\n[2026-06-04 10:28:25]   Timeout  : llm=180s  eval=40s\n[2026-06-04 10:28:25] ======================================================\n[2026-06-04 10:28:25] \n[Init]  (4 samples \u2192 pop=2)\n[2026-06-04 10:30:08]   #1    [i1]  1.51504           best=1.51504  *\n[2026-06-04 10:30:08]   #2    [i1]  0.03984           best=0.03984  *\n[2026-06-04 10:39:51]   #3    [i1]  0.03984           best=0.03984\n[2026-06-04 10:39:51]   #4    [i1]  0.03984           best=0.03984\n[2026-06-04 10:39:51]   Init done: 4/4 evaluated  pop=2  best=0.03984  elapsed=11.4m\n[2026-06-04 10:39:51] \n[Gen 1/1]\n[2026-06-04 10:46:51]   #5    [i1]  0.03994           best=0.03984\n[2026-06-04 10:46:51]   #6    [i1]  0.03984           best=0.03984\n[2026-06-04 10:46:51]   --- gen 1 done  pop=2  best=0.03984  elapsed=18.4m\n[2026-06-04 10:46:51] ======================================================\n[2026-06-04 10:46:51]   Evolution finished.  best=0.03984  samples=6  time=18.4m\n[2026-06-04 10:46:51] ======================================================\n",
   "stderr_tail": "",
   "run_summary": {
-    "run_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/pure_eoh/run_20260604_101919",
+    "run_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/api_only/run_20260604_102757",
     "ok": true,
     "failure_reason": null,
-    "latest_population_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/pure_eoh/run_20260604_101919/results/pops/population_generation_1.json",
+    "latest_population_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/api_only/run_20260604_102757/results/pops/population_generation_1.json",
     "latest_generation": 1,
     "population_size": 2,
     "valid_candidates": 2,
     "best_objective": 0.03984,
-    "best_algorithm": "Assign the item to the bin whose remaining capacity after placement is closest to zero without going negative, prioritizing tighter fits to reduce wasted space and thus the total number of bins needed.",
-    "best_code": "import numpy as np\n\ndef score(item: int, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Score each bin for assigning the current item. Higher score = preferred bin.\n\n    Args:\n        item: size of the current item to assign\n        bins: remaining capacities of feasible bins (all >= item size)\n    Returns:\n        scores: priority scores for each bin\n    \"\"\"\n    # Remaining capacity if item is placed in each bin\n    remaining_after_placement = bins - item\n    # We want smaller remaining capacities to have higher scores.\n    # Use negative remaining capacity so that max score picks smallest remainder.\n    # Add 1/(bins+1) term to break ties in favor of larger original bin capacity,\n    # which helps utilize partially filled bins more effectively.\n    tie_breaker = 1.0 / (bins + 1)\n    scores = -remaining_after_placement + tie_breaker\n    return scores",
+    "best_algorithm": "Maximize utilization by scoring bins based on how close their remaining capacity is to the item size after placement, preferring bins where the leftover space is minimized but still non-negative, while also prioritizing tighter fits to reduce fragmentation and thus total bins used.",
+    "best_code": "import numpy as np\n\ndef score(item: int, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Score each bin for assigning the current item. Higher score = preferred bin.\n\n    Args:\n        item: size of the current item to assign\n        bins: remaining capacities of feasible bins (all >= item size)\n    Returns:\n        scores: priority scores for each bin\n    \"\"\"\n    # After placing the item, the leftover space is (bins - item).\n    # We want to maximize the negative of leftover space (i.e., minimize leftover),\n    # so we can use (bins - item) directly but invert sign because higher leftover means lower preference.\n    # However, to strictly prefer smaller leftovers, we take negative of leftover.\n    # To handle exact fits best (leftover = 0), we add a small bonus for exact fits.\n    # But simpler: score = -(bins - item) = item - bins? Wait, that's negative if bins > item.\n    # Actually, we want larger score when leftover is smaller, so score = - (bins - item) = item - bins.\n    # That gives highest score when bins == item (score = 0?), let's check:\n    # If bins == item: leftover = 0, score = item - bins = 0.\n    # If bins > item: leftover positive, score negative \u2192 worse than exact fit.\n    # But all bins have bins >= item, so smallest leftover gives least negative (or zero).\n    # So we can just use negative leftover: score = - (bins - item) = item - bins.\n    # Since item is constant across bins, this is equivalent to using -bins.\n    # But using -bins alone would rank same as minimizing bins, which isn't exactly our goal.\n    # Better: score = 1 / (bins - item + epsilon) to heavily favor smaller leftover.\n    # This gives huge scores for near-exact fits.\n    \n    # Add tiny epsilon to avoid division by zero when bins == item.\n    eps = 1e-9\n    leftover = bins - item\n    # Use reciprocal to strongly prioritize smaller leftover.\n    scores = 1.0 / (leftover + eps)\n    return scores",
     "sample_file_count": 2,
-    "best_sample_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/pure_eoh/run_20260604_101919/results/samples/samples_best.json"
+    "best_sample_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/api_only/run_20260604_102757/results/samples/samples_best.json"
   }
 }
