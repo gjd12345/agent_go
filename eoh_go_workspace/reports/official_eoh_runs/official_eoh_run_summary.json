@@ -1,10 +1,10 @@
 {
-  "problem": "bp_online",
-  "arm": "literature_rag",
+  "problem": "cvrp_construct",
+  "arm": "pure_eoh",
   "official_root": "/private/tmp/EoH-main",
   "python_exe": "/private/tmp/eoh_official_venv/bin/python",
-  "run_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/literature_rag/run_20260604_105012",
-  "generated_at": "2026-06-04 10:50:12",
+  "run_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/cvrp_construct/pure_eoh/run_20260604_114042",
+  "generated_at": "2026-06-04 11:40:42",
   "pop_size": 2,
   "generations": 1,
   "operators": "i1",
@@ -12,83 +12,24 @@
   "api_key_present": true,
   "api_endpoint_present": true,
   "model_present": true,
-  "return_code": 0,
-  "runtime_seconds": 424.002,
-  "stdout_tail": "[2026-06-04 10:50:12] LLM: JoyAI-LLM-Pro @ [api-endpoint-redacted]\n[2026-06-04 10:51:13] LLM connection verified.\n[2026-06-04 10:51:13] ======================================================\n[2026-06-04 10:51:13]   EoH\n[2026-06-04 10:51:13]   LLM      : JoyAI-LLM-Pro @ [api-endpoint-redacted]\n[2026-06-04 10:51:13]   EC       : gen=1  pop=2  ops=[i1]\n[2026-06-04 10:51:13]   Sampling : init=4 (2\u00d7pop)  per_gen=2  parallel=1\n[2026-06-04 10:51:13]   Timeout  : llm=180s  eval=40s\n[2026-06-04 10:51:13] ======================================================\n[2026-06-04 10:51:13] \n[Init]  (4 samples \u2192 pop=2)\n[2026-06-04 10:54:19]   #1    [i1]  0.03984           best=0.03984  *\n[2026-06-04 10:54:19]   #2    [i1]  0.03984           best=0.03984\n[2026-06-04 10:55:48]   #3    [i1]  0.03984           best=0.03984\n[2026-06-04 10:55:48]   #4    [i1]  0.03984           best=0.03984\n[2026-06-04 10:55:48]   Init done: 4/4 evaluated  pop=1  best=0.03984  elapsed=4.6m\n[2026-06-04 10:55:48] \n[Gen 1/1]\n[2026-06-04 10:57:16]   #5    [i1]  0.03984           best=0.03984\n[2026-06-04 10:57:16]   #6    [i1]  0.03984           best=0.03984\n[2026-06-04 10:57:16]   --- gen 1 done  pop=1  best=0.03984  elapsed=6.0m\n[2026-06-04 10:57:16] ======================================================\n[2026-06-04 10:57:16]   Evolution finished.  best=0.03984  samples=6  time=6.0m\n[2026-06-04 10:57:16] ======================================================\n",
+  "return_code": null,
+  "runtime_seconds": 1200.173,
+  "stdout_tail": "[2026-06-04 11:40:42] LLM: JoyAI-LLM-Pro @ [api-endpoint-redacted]\n[2026-06-04 11:40:48] LLM connection verified.\n[2026-06-04 11:40:48] ======================================================\n[2026-06-04 11:40:48]   EoH\n[2026-06-04 11:40:48]   LLM      : JoyAI-LLM-Pro @ [api-endpoint-redacted]\n[2026-06-04 11:40:48]   EC       : gen=1  pop=2  ops=[i1]\n[2026-06-04 11:40:48]   Sampling : init=4 (2\u00d7pop)  per_gen=2  parallel=1\n[2026-06-04 11:40:48]   Timeout  : llm=180s  eval=40s\n[2026-06-04 11:40:48] ======================================================\n[2026-06-04 11:40:48] \n[Init]  (4 samples \u2192 pop=2)\n[2026-06-04 11:50:23]   #1    [i1]  13.05982          best=13.05982  *\n[2026-06-04 11:50:23]   #2    [i1]  13.64926          best=13.05982\n[2026-06-04 11:57:02]   #3    [i1]  13.61078          best=13.05982\n[2026-06-04 11:57:02]   #4    [i1]  15.03801          best=13.05982\n[2026-06-04 11:57:02]   Init done: 4/4 evaluated  pop=2  best=13.05982  elapsed=16.2m\n[2026-06-04 11:57:02] \n[Gen 1/1]",
   "stderr_tail": "",
-  "rag_trace": {
-    "rag_mode": "literature_rag",
-    "rag_query": "online bin packing score feasible bins residual capacity best fit harmonic utilization polynomial minimize used bins",
-    "rag_top_k": 2,
-    "rag_max_chars": 1800,
-    "rag_corpus_size": 32,
-    "rag_strategy_pool_size": 6,
-    "rag_global_items": [
-      {
-        "id": "obp_api_skeleton",
-        "kind": "api_constraint",
-        "title": "Online Bin Packing ScoreBin API skeleton"
-      }
-    ],
-    "rag_selected_items": [
-      {
-        "id": "obp_best_fit",
-        "kind": "algorithm_card",
-        "title": "OBP Best Fit Skill Card"
-      },
-      {
-        "id": "obp_first_fit",
-        "kind": "algorithm_card",
-        "title": "OBP First Fit Skill Card"
-      }
-    ],
-    "rag_all_scores": [
-      {
-        "id": "obp_best_fit",
-        "kind": "algorithm_card",
-        "score": 36
-      },
-      {
-        "id": "obp_first_fit",
-        "kind": "algorithm_card",
-        "score": 26
-      },
-      {
-        "id": "obp_funsearch_residual_poly",
-        "kind": "algorithm_card",
-        "score": 20
-      },
-      {
-        "id": "obp_eoh_util_sqrt_exp",
-        "kind": "algorithm_card",
-        "score": 16
-      },
-      {
-        "id": "obp_worst_fit",
-        "kind": "algorithm_card",
-        "score": 16
-      },
-      {
-        "id": "obp_harmonic",
-        "kind": "algorithm_card",
-        "score": 14
-      }
-    ],
-    "rag_context_chars": 1800,
-    "rag_context_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/literature_rag/run_20260604_105012/rag_context.txt"
-  },
+  "rag_trace": null,
+  "failure_reason": "timeout",
   "run_summary": {
-    "run_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/literature_rag/run_20260604_105012",
+    "run_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/cvrp_construct/pure_eoh/run_20260604_114042",
     "ok": true,
     "failure_reason": null,
-    "latest_population_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/literature_rag/run_20260604_105012/results/pops/population_generation_1.json",
-    "latest_generation": 1,
-    "population_size": 1,
-    "valid_candidates": 1,
-    "best_objective": 0.03984,
-    "best_algorithm": "New algorithm: Hybrid Residual-Aware Gap Minimization (HRAGM) \u2014 prioritize bins whose post-assignment residual creates the smallest potential future waste relative to both their absolute residual and their contribution to lowering the global lower-bound gap, while strongly favoring tighter fits on larger items to delay new-bin openings.",
-    "best_code": "import numpy as np\n\ndef score(item: int, bins: np.ndarray) -> np.ndarray:\n    \"\"\"Score each bin for assigning the current item. Higher score = preferred bin.\"\"\"\n    # Post-assignment residual for each feasible bin\n    residuals = bins - item\n    \n    # Absolute tightness: smaller residual is better \u2192 invert for scoring\n    tightness = 1.0 / (residuals + 1e-9)\n    \n    # Global incentive: penalize bins whose residual is far from zero but also far from being useless\n    # Use normalized residual to avoid scale bias\n    max_residual = np.max(residuals) if len(residuals) > 0 else 1\n    norm_residuals = residuals / (max_residual + 1e-9)\n    # Prefer small normalized residuals (tighter fit)\n    fit_quality = 1.0 - norm_residuals\n    \n    # Item-size awareness: for larger items, prioritize even more aggressive tightness\n    # because wasting space on big items is costly\n    item_factor = 1.0 + (item / (np.mean(bins) + 1e-9)) * 0.5\n    \n    # Combine: primary weight on tightness, secondary on fit_quality, modulated by item factor\n    scores = tightness * (1.0 + fit_quality * 0.3) * item_factor\n    \n    # Fallback deterministic tie-break via tiny index-based perturbation\n    indices = np.arange(len(bins))\n    epsilon = 1e-12\n    scores += indices * epsilon\n    \n    return scores.astype(np.float64)",
-    "sample_file_count": 2,
-    "best_sample_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/literature_rag/run_20260604_105012/results/samples/samples_best.json"
+    "latest_population_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/cvrp_construct/pure_eoh/run_20260604_114042/results/pops/population_generation_0.json",
+    "latest_generation": 0,
+    "population_size": 2,
+    "valid_candidates": 2,
+    "best_objective": 13.05982,
+    "best_algorithm": "A nearest-neighbor heuristic that prioritizes closest feasible customers but switches to a farthest-first criterion when the remaining capacity drops below a threshold, otherwise returning to depot if no feasible nodes remain.",
+    "best_code": "import numpy as np\n\ndef select_next_node(current_node: int, depot: int, unvisited_nodes: np.ndarray,\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n    \"\"\"Select the next node to visit in a CVRP greedy construction.\n\n    Args:\n        current_node:    index of the current node (0 = depot)\n        depot:           index of the depot (always 0)\n        unvisited_nodes: array of feasible unvisited customer indices\n                         (already filtered to satisfy remaining capacity)\n        rest_capacity:   remaining vehicle capacity\n        demands:         demand of every node (index 0 = depot demand = 0)\n        distance_matrix: pairwise Euclidean distance matrix\n    Returns:\n        Index of the next node to visit, or 0 to return to the depot early.\n    \"\"\"\n    if len(unvisited_nodes) == 0:\n        return depot\n    \n    # Calculate distances from current node to all feasible unvisited nodes\n    dists = distance_matrix[current_node][unvisited_nodes]\n    \n    # Compute savings based on proximity to depot vs current location\n    depot_dists = distance_matrix[depot][unvisited_nodes]\n    # Preference metric: closer to current but penalize if very far from depot\n    # This balances route compactness with future accessibility\n    scores = dists - 0.3 * depot_dists\n    \n    # Also consider demand density: prefer higher demand within remaining capacity\n    # Normalize by max demand among feasible nodes\n    max_demand_feasible = np.max(demands[unvisited_nodes])\n    if max_demand_feasible > 0:\n        normalized_demands = demands[unvisited_nodes] / max_demand_feasible\n        # Add small penalty for picking low-demand nodes when capacity is limited\n        scores += 0.1 * (1 - normalized_demands) * (rest_capacity < 0.5 * np.sum(demands[unvisited_nodes]))\n    \n    # If current node is depot, use farthest insertion among feasible to seed routes better\n    if current_node == depot:\n        # Choose farthest feasible node from depot to start new route\n        chosen_idx = np.argmax(depot_dists)\n    else:\n        chosen_idx = np.argmin(scores)\n    \n    return unvisited_nodes[chosen_idx]",
+    "sample_file_count": 1,
+    "best_sample_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/cvrp_construct/pure_eoh/run_20260604_114042/results/samples/samples_best.json"
   }
 }

@@ -4,62 +4,78 @@
 
 ## 配置
 
-- problem: `bp_online`
-- arm: `literature_rag`
+- problem: `cvrp_construct`
+- arm: `pure_eoh`
 - pop_size: `2`
 - generations: `1`
 - operators: `i1`
 - use_official_seed: `False`
-- run_dir: `/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/literature_rag/run_20260604_105012`
+- run_dir: `/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/cvrp_construct/pure_eoh/run_20260604_114042`
 - api_key_present: `True`
 - api_endpoint_present: `True`
 - model_present: `True`
 
 ## 结果
 
-- return_code: `0`
-- failure_reason: `-`
-- runtime_seconds: `424.002`
-- latest_generation: `1`
-- population_size: `1`
-- valid_candidates: `1`
-- best_objective: `0.03984`
+- return_code: `None`
+- failure_reason: `timeout`
+- runtime_seconds: `1200.173`
+- latest_generation: `0`
+- population_size: `2`
+- valid_candidates: `2`
+- best_objective: `13.05982`
 
 ## 最优代码
 
 ```python
 import numpy as np
 
-def score(item: int, bins: np.ndarray) -> np.ndarray:
-    """Score each bin for assigning the current item. Higher score = preferred bin."""
-    # Post-assignment residual for each feasible bin
-    residuals = bins - item
+def select_next_node(current_node: int, depot: int, unvisited_nodes: np.ndarray,
+                     rest_capacity: float, demands: np.ndarray,
+                     distance_matrix: np.ndarray) -> int:
+    """Select the next node to visit in a CVRP greedy construction.
+
+    Args:
+        current_node:    index of the current node (0 = depot)
+        depot:           index of the depot (always 0)
+        unvisited_nodes: array of feasible unvisited customer indices
+                         (already filtered to satisfy remaining capacity)
+        rest_capacity:   remaining vehicle capacity
+        demands:         demand of every node (index 0 = depot demand = 0)
+        distance_matrix: pairwise Euclidean distance matrix
+    Returns:
+        Index of the next node to visit, or 0 to return to the depot early.
+    """
+    if len(unvisited_nodes) == 0:
+        return depot
     
-    # Absolute tightness: smaller residual is better → invert for scoring
-    tightness = 1.0 / (residuals + 1e-9)
+    # Calculate distances from current node to all feasible unvisited nodes
+    dists = distance_matrix[current_node][unvisited_nodes]
     
-    # Global incentive: penalize bins whose residual is far from zero but also far from being useless
-    # Use normalized residual to avoid scale bias
-    max_residual = np.max(residuals) if len(residuals) > 0 else 1
-    norm_residuals = residuals / (max_residual + 1e-9)
-    # Prefer small normalized residuals (tighter fit)
-    fit_quality = 1.0 - norm_residuals
+    # Compute savings based on proximity to depot vs current location
+    depot_dists = distance_matrix[depot][unvisited_nodes]
+    # Preference metric: closer to current but penalize if very far from depot
+    # This balances route compactness with future accessibility
+    scores = dists - 0.3 * depot_dists
     
-    # Item-size awareness: for larger items, prioritize even more aggressive tightness
-    # because wasting space on big items is costly
-    item_factor = 1.0 + (item / (np.mean(bins) + 1e-9)) * 0.5
+    # Also consider demand density: prefer higher demand within remaining capacity
+    # Normalize by max demand among feasible nodes
+    max_demand_feasible = np.max(demands[unvisited_nodes])
+    if max_demand_feasible > 0:
+        normalized_demands = demands[unvisited_nodes] / max_demand_feasible
+        # Add small penalty for picking low-demand nodes when capacity is limited
+        scores += 0.1 * (1 - normalized_demands) * (rest_capacity < 0.5 * np.sum(demands[unvisited_nodes]))
     
-    # Combine: primary weight on tightness, secondary on fit_quality, modulated by item factor
-    scores = tightness * (1.0 + fit_quality * 0.3) * item_factor
+    # If current node is depot, use farthest insertion among feasible to seed routes better
+    if current_node == depot:
+        # Choose farthest feasible node from depot to start new route
+        chosen_idx = np.argmax(depot_dists)
+    else:
+        chosen_idx = np.argmin(scores)
     
-    # Fallback deterministic tie-break via tiny index-based perturbation
-    indices = np.arange(len(bins))
-    epsilon = 1e-12
-    scores += indices * epsilon
-    
-    return scores.astype(np.float64)
+    return unvisited_nodes[chosen_idx]
 ```
 
 ## 最优算法描述
 
-New algorithm: Hybrid Residual-Aware Gap Minimization (HRAGM) — prioritize bins whose post-assignment residual creates the smallest potential future waste relative to both their absolute residual and their contribution to lowering the global lower-bound gap, while strongly favoring tighter fits on larger items to delay new-bin openings.
+A nearest-neighbor heuristic that prioritizes closest feasible customers but switches to a farthest-first criterion when the remaining capacity drops below a threshold, otherwise returning to depot if no feasible nodes remain.
