@@ -11,10 +11,36 @@ from pathlib import Path
 from typing import Any
 
 from eoh_go.experiments.official_eoh_smoke import PROBLEMS
+from eoh_go.rag.build_corpus import load_all_corpora
+from eoh_go.rag.prompt_context import format_prompt_context
+from eoh_go.rag.retriever import retrieve, score_corpus
+from eoh_go.rag.schemas import CorpusItem
 
 
 DEFAULT_OFFICIAL_ROOT = "/private/tmp/EoH-main"
 DEFAULT_OFFICIAL_PYTHON = "/private/tmp/eoh_official_venv/bin/python"
+
+
+OFFICIAL_RAG_PROBLEM_CONFIG = {
+    "bp_online": {
+        "api_ids": {"obp_api_skeleton"},
+        "strategy_prefixes": ("obp_",),
+        "query": (
+            "online bin packing score feasible bins residual capacity best fit "
+            "harmonic utilization polynomial minimize used bins"
+        ),
+    },
+    "tsp_construct": {
+        "api_ids": set(),
+        "strategy_prefixes": ("tsp_",),
+        "query": "tsp construct select next node distance nearest insertion regret route length",
+    },
+    "cvrp_construct": {
+        "api_ids": set(),
+        "strategy_prefixes": ("cvrp_",),
+        "query": "cvrp construct select next customer capacity demand distance route depot",
+    },
+}
 
 
 def normalize_api_endpoint(endpoint: str) -> str:
@@ -38,6 +64,69 @@ def redact_log_tail(text: str) -> str:
     redacted = re.sub(r"(endpoint=)[^,\s)]+", r"\1[api-endpoint-redacted]", redacted)
     redacted = re.sub(r"(Bearer\s+)[A-Za-z0-9._~+/=-]+", r"\1[api-key-redacted]", redacted)
     return redacted
+
+
+def _tail_text(value: str | bytes | None, max_lines: int = 80) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        text = value.decode("utf-8", "replace")
+    else:
+        text = value
+    return "\n".join(text.splitlines()[-max_lines:])
+
+
+def _matches_problem_strategy(item: CorpusItem, problem: str) -> bool:
+    prefixes = OFFICIAL_RAG_PROBLEM_CONFIG[problem]["strategy_prefixes"]
+    return item.kind == "algorithm_card" and item.id.startswith(prefixes)
+
+
+def build_official_rag_context(
+    project_root: Path,
+    problem: str,
+    mode: str,
+    top_k: int,
+    max_chars: int,
+    query: str | None = None,
+) -> tuple[str, dict[str, Any]]:
+    if problem not in OFFICIAL_RAG_PROBLEM_CONFIG:
+        raise ValueError(f"Unsupported official RAG problem: {problem}")
+    if mode not in {"literature_rag", "history_rag"}:
+        raise ValueError(f"Unsupported official RAG mode: {mode}")
+
+    config = OFFICIAL_RAG_PROBLEM_CONFIG[problem]
+    corpus = load_all_corpora(project_root)
+    api_ids = set(config["api_ids"])
+    global_items = [item for item in corpus if item.kind == "api_constraint" and item.id in api_ids]
+    query_text = query or str(config["query"])
+    if mode == "literature_rag":
+        strategy_pool = [item for item in corpus if _matches_problem_strategy(item, problem)]
+    else:
+        strategy_pool = [
+            item
+            for item in corpus
+            if item.kind == "code_example" and any(tag in {"obp", "bp_online", "binpacking"} for tag in item.tags)
+        ]
+    scored = score_corpus(query_text, strategy_pool)
+    retrieved = retrieve(query_text, strategy_pool, top_k=top_k)
+    context = format_prompt_context(retrieved, max_chars=max_chars, global_items=global_items).strip()
+    trace = {
+        "rag_mode": mode,
+        "rag_query": query_text,
+        "rag_top_k": top_k,
+        "rag_max_chars": max_chars,
+        "rag_corpus_size": len(corpus),
+        "rag_strategy_pool_size": len(strategy_pool),
+        "rag_global_items": [{"id": item.id, "kind": item.kind, "title": item.title} for item in global_items],
+        "rag_selected_items": [
+            {"id": item.id, "kind": item.kind, "title": item.title} for item in retrieved
+        ],
+        "rag_all_scores": [
+            {"id": item.id, "kind": item.kind, "score": score} for score, item in scored
+        ],
+        "rag_context_chars": len(context),
+    }
+    return context, trace
 
 
 def summarize_run(run_dir: Path) -> dict[str, Any]:
@@ -295,6 +384,21 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
     run_dir.mkdir(parents=True, exist_ok=True)
     runner_path = run_dir / "_run_official_eoh.py"
     runner_path.write_text(_runner_script(), encoding="utf-8")
+    context_file = args.context_file
+    rag_trace: dict[str, Any] | None = None
+    if args.arm in {"literature_rag", "history_rag"}:
+        context, rag_trace = build_official_rag_context(
+            Path.cwd().resolve(),
+            args.problem,
+            args.arm,
+            args.rag_top_k,
+            args.rag_max_chars,
+            args.rag_query or None,
+        )
+        context_path = run_dir / "rag_context.txt"
+        context_path.write_text(context, encoding="utf-8")
+        context_file = str(context_path)
+        rag_trace["rag_context_path"] = str(context_path)
     endpoint_present = bool(normalize_api_endpoint(os.environ.get(args.api_endpoint_env, "")))
     model_present = bool(args.llm_model or os.environ.get(args.model_env, ""))
     api_key_present = bool(os.environ.get(args.api_key_env, ""))
@@ -316,6 +420,7 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
         "runtime_seconds": None,
         "stdout_tail": "",
         "stderr_tail": "",
+        "rag_trace": rag_trace,
     }
     if not api_key_present:
         payload["failure_reason"] = f"missing_env_{args.api_key_env}"
@@ -338,7 +443,7 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
         "--problem",
         args.problem,
         "--arm",
-        args.arm,
+        "context_file" if args.arm in {"literature_rag", "history_rag"} else args.arm,
         "--output-dir",
         str(run_dir),
         "--pop-size",
@@ -362,8 +467,8 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
     ]
     if args.llm_model:
         cmd.extend(["--llm-model", args.llm_model])
-    if args.context_file:
-        cmd.extend(["--context-file", args.context_file])
+    if context_file:
+        cmd.extend(["--context-file", context_file])
     if args.use_official_seed:
         cmd.append("--use-official-seed")
 
@@ -380,13 +485,13 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
         )
         return_code = proc.returncode
         payload["return_code"] = return_code
-        payload["stdout_tail"] = redact_log_tail("\n".join(proc.stdout.splitlines()[-80:]))
-        payload["stderr_tail"] = redact_log_tail("\n".join(proc.stderr.splitlines()[-80:]))
+        payload["stdout_tail"] = redact_log_tail(_tail_text(proc.stdout))
+        payload["stderr_tail"] = redact_log_tail(_tail_text(proc.stderr))
     except subprocess.TimeoutExpired as exc:
         payload["return_code"] = None
         payload["failure_reason"] = "timeout"
-        payload["stdout_tail"] = redact_log_tail("\n".join((exc.stdout or "").splitlines()[-80:]))
-        payload["stderr_tail"] = redact_log_tail("\n".join((exc.stderr or "").splitlines()[-80:]))
+        payload["stdout_tail"] = redact_log_tail(_tail_text(exc.stdout))
+        payload["stderr_tail"] = redact_log_tail(_tail_text(exc.stderr))
     payload["runtime_seconds"] = round(time.time() - started, 3)
 
     summary = summarize_run(run_dir)
@@ -457,8 +562,15 @@ def main() -> None:
     parser.add_argument("--python", default=os.environ.get("EOH_OFFICIAL_PYTHON", DEFAULT_OFFICIAL_PYTHON))
     parser.add_argument("--output-dir", default="eoh_go_workspace/reports/official_eoh_runs")
     parser.add_argument("--problem", choices=sorted(PROBLEMS), default="bp_online")
-    parser.add_argument("--arm", choices=["pure_eoh", "api_only", "context_file"], default="pure_eoh")
+    parser.add_argument(
+        "--arm",
+        choices=["pure_eoh", "api_only", "literature_rag", "history_rag", "context_file"],
+        default="pure_eoh",
+    )
     parser.add_argument("--context-file", default="")
+    parser.add_argument("--rag-top-k", type=int, default=2)
+    parser.add_argument("--rag-max-chars", type=int, default=1800)
+    parser.add_argument("--rag-query", default="")
     parser.add_argument("--pop-size", type=int, default=2)
     parser.add_argument("--generations", type=int, default=1)
     parser.add_argument("--operators", default="i1")

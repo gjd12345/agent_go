@@ -1,19 +1,23 @@
 # 官方 EoH bp_online 最小对比实验
 
-本文记录官方 EoH `bp_online` 上的最小 LLM evolution 对比。两组均为 `pop_size=2`, `generations=1`, `operators=i1`，不提交 raw run 目录。
+本文记录官方 EoH `bp_online` 上的最小 LLM evolution 对比。实验使用官方 EoH core 和官方 `bp_online` evaluator；不提交 raw run 目录。
 
 ## 结果概览
 
-| Arm | Best objective | Valid | Samples | 结论 |
-|---|---:|---:|---:|---|
-| `pure_eoh` | 0.03984 | 2/2 | 6 | 最小 pure EOH 闭环跑通 |
-| `api_only` | 0.03984 | 2/2 | 6 | 未优于 pure EOH，主要生成同类 best-fit 公式 |
+| Arm | Status | Latest gen | Best objective | Valid | Samples | Context | 结论 |
+|---|---|---:|---:|---:|---:|---|---|
+| `pure_eoh` | completed | 1 | 0.03984 | 2/2 | 6 | - | 官方 pure EOH 闭环跑通，生成 best-fit/tight-fit。 |
+| `api_only` | completed | 1 | 0.03984 | 2/2 | 6 | - | 未优于 pure EOH，仍生成同类 best-fit 公式。 |
+| `literature_rag_default` | completed | 1 | 0.03984 | 1/1 | 6 | 1800 chars; obp_best_fit, obp_first_fit | 检索偏向 best_fit/first_fit，未带来新行为；objective 去重后 pop=1。 |
+| `literature_rag_targeted_residual` | timeout_after_init | 0 | 0.03984 | 2/2 | 4 | 1800 chars; obp_eoh_util_sqrt_exp, obp_funsearch_residual_poly | 成功选中 residual/eoh 卡，但 context 截断且 Gen 1 超时；init best 仍未提升。 |
 
 ## 初步判断
 
-- 官方 `bp_online` benchmark 已经能通过本项目 wrapper 调用官方 EoH core 完成 LLM evolution。
-- `api_only` 约束没有在这一组最小预算中带来提升；两个 arm 都收敛到 best-fit/tight-fit 风格。
-- 下一步不要扩大全矩阵，先在同等预算下跑 `literature_rag`/`history_rag`，并加入更有区分度的 bin packing strategy cards。
+- 官方 `bp_online` benchmark 已确认可通过本项目 wrapper 调用官方 EoH core 完成 LLM evolution。
+- 这组最小预算下，`api_only` 和 `literature_rag` 都没有优于 pure EOH；所有有效最优解本质上都回到 best-fit/tight-fit。
+- 默认 RAG 的检索问题很清楚：`obp_best_fit`/`obp_first_fit` 分数最高，给出的知识和 pure EOH 自发生成的策略重复。
+- targeted residual RAG 能选中 `obp_eoh_util_sqrt_exp` 和 `obp_funsearch_residual_poly`，但 context 仍有截断，且完整 Gen 1 超时。下一步应改为 top_k=1 或更短卡片，再跑一组。
+- 如果目标是展示正向收益，`bp_online` 可能不是最适合的第一正例：官方评价上 best-fit 已经很强，建议同步推进 `tsp_construct` / `cvrp_construct` 的官方小闭环。
 
 ## pure_eoh 最优算法
 
@@ -81,4 +85,71 @@ def score(item: int, bins: np.ndarray) -> np.ndarray:
     # Use reciprocal to strongly prioritize smaller leftover.
     scores = 1.0 / (leftover + eps)
     return scores
+```
+
+## literature_rag_default 最优算法
+
+New algorithm: Hybrid Residual-Aware Gap Minimization (HRAGM) — prioritize bins whose post-assignment residual creates the smallest potential future waste relative to both their absolute residual and their contribution to lowering the global lower-bound gap, while strongly favoring tighter fits on larger items to delay new-bin openings.
+
+```python
+import numpy as np
+
+def score(item: int, bins: np.ndarray) -> np.ndarray:
+    """Score each bin for assigning the current item. Higher score = preferred bin."""
+    # Post-assignment residual for each feasible bin
+    residuals = bins - item
+    
+    # Absolute tightness: smaller residual is better → invert for scoring
+    tightness = 1.0 / (residuals + 1e-9)
+    
+    # Global incentive: penalize bins whose residual is far from zero but also far from being useless
+    # Use normalized residual to avoid scale bias
+    max_residual = np.max(residuals) if len(residuals) > 0 else 1
+    norm_residuals = residuals / (max_residual + 1e-9)
+    # Prefer small normalized residuals (tighter fit)
+    fit_quality = 1.0 - norm_residuals
+    
+    # Item-size awareness: for larger items, prioritize even more aggressive tightness
+    # because wasting space on big items is costly
+    item_factor = 1.0 + (item / (np.mean(bins) + 1e-9)) * 0.5
+    
+    # Combine: primary weight on tightness, secondary on fit_quality, modulated by item factor
+    scores = tightness * (1.0 + fit_quality * 0.3) * item_factor
+    
+    # Fallback deterministic tie-break via tiny index-based perturbation
+    indices = np.arange(len(bins))
+    epsilon = 1e-12
+    scores += indices * epsilon
+    
+    return scores.astype(np.float64)
+```
+
+## literature_rag_targeted_residual 最优算法
+
+Score bins by combining a strong preference for minimizing leftover space after placement with a secondary preference for using already highly-utilized bins, implemented via a normalized best-fit term and a utilization bonus that avoids extreme penalties to keep all scores finite.
+
+```python
+import numpy as np
+
+def score(item: int, bins: np.ndarray) -> np.ndarray:
+    residuals = bins - item
+    min_r = np.min(residuals)
+    max_r = np.max(residuals)
+    
+    # Primary term: best-fit preference (normalized, higher when residual is smaller)
+    if max_r > min_r:
+        primary = 1.0 - (residuals - min_r) / (max_r - min_r + 1e-12)
+    else:
+        primary = np.ones_like(residuals, dtype=float)
+    
+    # Secondary term: utilization bonus based on original remaining capacity before placing item
+    # We want to slightly favor bins that are more filled, but avoid extreme values.
+    # Use a gentle linear scaling from empty (bonus ~0) to full (bonus ~1).
+    capacity_approx = bins.max() + item  # rough estimate of bin capacity, works if at least one bin can hold item+something
+    util_bonus = 1.0 - bins / (capacity_approx + 1e-12)
+    
+    # Combine: primary dominates, secondary adds tie-breaking towards higher utilization.
+    scores = primary * 10.0 + util_bonus
+    
+    return scores.astype(float)
 ```

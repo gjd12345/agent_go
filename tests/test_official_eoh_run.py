@@ -11,6 +11,8 @@ from unittest.mock import patch
 
 from eoh_go.experiments.official_eoh_run import (
     _runner_script,
+    _tail_text,
+    build_official_rag_context,
     normalize_api_endpoint,
     redact_log_tail,
     run_official_eoh,
@@ -37,6 +39,9 @@ class OfficialEohRunTests(unittest.TestCase):
         self.assertNotIn("SECRET_TOKEN", redacted)
         self.assertIn("[api-endpoint-redacted]", redacted)
         self.assertIn("[api-key-redacted]", redacted)
+
+    def test_tail_text_accepts_bytes_from_timeout_expired(self) -> None:
+        self.assertEqual(_tail_text(b"a\nb\nc", max_lines=2), "b\nc")
 
     def test_summarize_run_reads_latest_population_and_best_code(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -72,6 +77,16 @@ class OfficialEohRunTests(unittest.TestCase):
         self.assertFalse(summary["ok"])
         self.assertEqual(summary["failure_reason"], "missing_population")
 
+    def test_build_bp_online_literature_rag_context_uses_obp_cards_only(self) -> None:
+        context, trace = build_official_rag_context(Path.cwd(), "bp_online", "literature_rag", top_k=2, max_chars=1800)
+        selected_ids = [item["id"] for item in trace["rag_selected_items"]]
+        self.assertTrue(selected_ids)
+        self.assertTrue(all(item_id.startswith("obp_") for item_id in selected_ids))
+        self.assertEqual(["obp_api_skeleton"], [item["id"] for item in trace["rag_global_items"]])
+        self.assertLessEqual(len(context), 1800)
+        self.assertIn("API RULES", context)
+        self.assertNotIn("InsertShips", context)
+
     def test_run_official_eoh_timeout_reports_without_key_value(self) -> None:
         old_key = os.environ.get("TEST_OFFICIAL_KEY")
         old_endpoint = os.environ.get("TEST_OFFICIAL_ENDPOINT")
@@ -100,10 +115,13 @@ class OfficialEohRunTests(unittest.TestCase):
                     api_endpoint_env="TEST_OFFICIAL_ENDPOINT",
                     model_env="TEST_OFFICIAL_MODEL",
                     llm_model="",
+                    rag_top_k=2,
+                    rag_max_chars=1800,
+                    rag_query="",
                 )
                 with patch(
                     "eoh_go.experiments.official_eoh_run.subprocess.run",
-                    side_effect=subprocess.TimeoutExpired(cmd=["python"], timeout=1, output="", stderr=""),
+                    side_effect=subprocess.TimeoutExpired(cmd=["python"], timeout=1, output=b"", stderr=b""),
                 ):
                     payload = run_official_eoh(args)
                 encoded = json.dumps(payload, ensure_ascii=True)

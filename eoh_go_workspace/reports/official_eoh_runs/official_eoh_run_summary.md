@@ -5,12 +5,12 @@
 ## 配置
 
 - problem: `bp_online`
-- arm: `api_only`
+- arm: `literature_rag`
 - pop_size: `2`
 - generations: `1`
 - operators: `i1`
 - use_official_seed: `False`
-- run_dir: `/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/api_only/run_20260604_102757`
+- run_dir: `/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/official_eoh_runs/bp_online/literature_rag/run_20260604_105012`
 - api_key_present: `True`
 - api_endpoint_present: `True`
 - model_present: `True`
@@ -19,10 +19,10 @@
 
 - return_code: `0`
 - failure_reason: `-`
-- runtime_seconds: `1133.805`
+- runtime_seconds: `424.002`
 - latest_generation: `1`
-- population_size: `2`
-- valid_candidates: `2`
+- population_size: `1`
+- valid_candidates: `1`
 - best_objective: `0.03984`
 
 ## 最优代码
@@ -31,39 +31,35 @@
 import numpy as np
 
 def score(item: int, bins: np.ndarray) -> np.ndarray:
-    """Score each bin for assigning the current item. Higher score = preferred bin.
-
-    Args:
-        item: size of the current item to assign
-        bins: remaining capacities of feasible bins (all >= item size)
-    Returns:
-        scores: priority scores for each bin
-    """
-    # After placing the item, the leftover space is (bins - item).
-    # We want to maximize the negative of leftover space (i.e., minimize leftover),
-    # so we can use (bins - item) directly but invert sign because higher leftover means lower preference.
-    # However, to strictly prefer smaller leftovers, we take negative of leftover.
-    # To handle exact fits best (leftover = 0), we add a small bonus for exact fits.
-    # But simpler: score = -(bins - item) = item - bins? Wait, that's negative if bins > item.
-    # Actually, we want larger score when leftover is smaller, so score = - (bins - item) = item - bins.
-    # That gives highest score when bins == item (score = 0?), let's check:
-    # If bins == item: leftover = 0, score = item - bins = 0.
-    # If bins > item: leftover positive, score negative → worse than exact fit.
-    # But all bins have bins >= item, so smallest leftover gives least negative (or zero).
-    # So we can just use negative leftover: score = - (bins - item) = item - bins.
-    # Since item is constant across bins, this is equivalent to using -bins.
-    # But using -bins alone would rank same as minimizing bins, which isn't exactly our goal.
-    # Better: score = 1 / (bins - item + epsilon) to heavily favor smaller leftover.
-    # This gives huge scores for near-exact fits.
+    """Score each bin for assigning the current item. Higher score = preferred bin."""
+    # Post-assignment residual for each feasible bin
+    residuals = bins - item
     
-    # Add tiny epsilon to avoid division by zero when bins == item.
-    eps = 1e-9
-    leftover = bins - item
-    # Use reciprocal to strongly prioritize smaller leftover.
-    scores = 1.0 / (leftover + eps)
-    return scores
+    # Absolute tightness: smaller residual is better → invert for scoring
+    tightness = 1.0 / (residuals + 1e-9)
+    
+    # Global incentive: penalize bins whose residual is far from zero but also far from being useless
+    # Use normalized residual to avoid scale bias
+    max_residual = np.max(residuals) if len(residuals) > 0 else 1
+    norm_residuals = residuals / (max_residual + 1e-9)
+    # Prefer small normalized residuals (tighter fit)
+    fit_quality = 1.0 - norm_residuals
+    
+    # Item-size awareness: for larger items, prioritize even more aggressive tightness
+    # because wasting space on big items is costly
+    item_factor = 1.0 + (item / (np.mean(bins) + 1e-9)) * 0.5
+    
+    # Combine: primary weight on tightness, secondary on fit_quality, modulated by item factor
+    scores = tightness * (1.0 + fit_quality * 0.3) * item_factor
+    
+    # Fallback deterministic tie-break via tiny index-based perturbation
+    indices = np.arange(len(bins))
+    epsilon = 1e-12
+    scores += indices * epsilon
+    
+    return scores.astype(np.float64)
 ```
 
 ## 最优算法描述
 
-Maximize utilization by scoring bins based on how close their remaining capacity is to the item size after placement, preferring bins where the leftover space is minimized but still non-negative, while also prioritizing tighter fits to reduce fragmentation and thus total bins used.
+New algorithm: Hybrid Residual-Aware Gap Minimization (HRAGM) — prioritize bins whose post-assignment residual creates the smallest potential future waste relative to both their absolute residual and their contribution to lowering the global lower-bound gap, while strongly favoring tighter fits on larger items to delay new-bin openings.
