@@ -217,6 +217,127 @@ TSP/CVRP 在 gen=1 超时前，先统一采用 generations=0（只跑 init popul
 所有 arm 必须报告 selected cards、context_chars、context_truncated、valid/raw/survivor。
 ```
 
+补充诊断（2026-06-04）：
+
+```text
+pure_eoh: best 0.03984
+api_only: best 0.03984
+literature_rag_default: best 0.03984
+literature_rag_targeted_residual: init 完成；Gen1 超时；best 0.03984
+```
+
+当前不提升的主要原因不是模型完全无法使用 RAG，而是 `bp_online` 在这个小预算设置下已经被强基线压住：
+
+1. **目标函数空间太小**：官方 `bp_online` 只要求 `score(item, bins) -> score array`。模型在 pure EOH prompt 下就能写出 best-fit / tight-fit 族公式，已经达到当前 runner 观察到的 best objective `0.03984`。
+2. **RAG 默认知识与 pure EOH 重复**：默认 Literature-RAG 主要选中 `obp_best_fit`、`obp_first_fit`，没有给模型带来新的策略族。
+3. **targeted residual 已生效但仍未越过强基线**：定向检索能选中 `obp_eoh_util_sqrt_exp` / `obp_funsearch_residual_poly`，说明检索链路有效；但 init-only 最好代码仍退回 tight-fit / best-fit 变体，objective 仍是 `0.03984`。
+4. **完整 Gen1 的预算不稳定**：targeted residual 在 Gen1 阶段超时，TSP/CVRP 的 Gen1 smoke 也接近 20 分钟预算上限。继续扩 `bp_online` repeat 会消耗额度但信息增量低。
+5. **不能把“无提升”写成 RAG 失败**：当前证据只能说明 `bp_online` 在当前 problem size、operator、pop_size、timeout 下没有拉开差距。它仍然证明了 official benchmark 接入、RAG trace、problem-specific filtering 能工作。
+
+因此执行策略调整为：
+
+```text
+停止扩大 bp_online。
+保留 bp_online 作为 official EOH 对齐和 RAG 检索诊断样例。
+把正向收益验证重心转向 tsp_construct / cvrp_construct。
+TSP/CVRP 先跑 generations=0 init-only 四臂对照，避免 Gen1 超时掩盖 signal。
+```
+
+### Phase D1: TSP/CVRP init-only 对照前置条件
+
+已补齐 problem-specific RAG 条目后，才能跑 TSP/CVRP 的 Literature-RAG，否则会出现 OBP cards 混入其他 problem 的错误结论。
+
+当前要求：
+
+```text
+tsp_construct:
+  global api = tsp_construct_api_skeleton
+  strategy_pool = 5 张 tsp_* algorithm_card
+  selected items 只能是 tsp_*，不得出现 obp_ / cvrp_
+
+cvrp_construct:
+  global api = cvrp_construct_api_skeleton
+  strategy_pool = 5 张 cvrp_* algorithm_card
+  selected items 只能是 cvrp_*，不得出现 obp_ / tsp_
+```
+
+通过后再跑：
+
+```text
+tsp_construct: pure_eoh / api_only / literature_rag, generations=0, pop_size=4
+cvrp_construct: pure_eoh / api_only / literature_rag, generations=0, pop_size=4
+```
+
+只有在 init-only 出现 `best_objective`、`valid_candidates` 或 best code 明显差异后，才进入 Gen1 或 repeats。
+
+2026-06-04 pop1/init-only 诊断结果：
+
+| problem | pure EOH | API-only | Literature-RAG | selected cards | 判断 |
+|---|---:|---:|---:|---|---|
+| `tsp_construct` | 6.83907 | 6.86186 | 6.83907 | `tsp_nearest_insertion`, `tsp_nearest_neighbor` | RAG 与 pure 打平；可作为下一步放大对象 |
+| `cvrp_construct` | 13.20696 | 13.41247 | 14.49387 | `cvrp_nearest_capacity`, `cvrp_capacity_slack` | RAG 变差；先复核 CVRP cards，不直接扩大 |
+
+该结果的使用边界：
+
+```text
+pop_size=1, generations=0，每臂只有 2 个 init samples，survivor population=1。
+只能作为链路诊断和下一步筛选，不作为最终性能结论。
+```
+
+修正后的下一步：
+
+```text
+优先：tsp_construct pop_size=4, generations=0 三臂对照。
+暂缓：cvrp_construct 扩大实验；先审查 cvrp_capacity_slack / nearest_capacity 是否过度保守。
+停止：bp_online repeat=3，除非更换 problem size 或 target。
+```
+
+TSP pop4 进展（2026-06-04）：
+
+| problem | arm | pop_size | generations | best objective | valid/pop | 状态 |
+|---|---|---:|---:|---:|---:|---|
+| `tsp_construct` | `pure_eoh` | 4 | 0 | 6.83907 | 4/4 | done |
+| `tsp_construct` | `api_only` | 4 | 0 | 6.78953 | 4/4 | done |
+| `tsp_construct` | `literature_rag` | 4 | 0 | 6.83954 | 4/4 | done |
+
+解释：
+
+```text
+api_only 相对 pure_eoh 改善 -0.04954，说明 API/signature/contract 约束在 TSP 上有轻微信号。
+默认 literature_rag 没有超过 pure_eoh；selected cards = tsp_nearest_insertion, tsp_nearest_neighbor。
+当前默认 RAG 问题不是链路失败，而是 top-2 过于保守，未把 tsp_regret_insertion / 更强 global scoring 纳入上下文。
+```
+
+下一步：
+
+```text
+不要直接扩大默认 literature_rag。
+先跑 targeted Literature-RAG：query 明确包含 regret / lookahead / second-best / global scoring，使 tsp_regret_insertion 进入 top-k。
+targeted TSP RAG 若低于 6.78953，才进入 Gen1 或 repeats。
+```
+
+targeted TSP RAG 结果（2026-06-04）：
+
+| problem | arm | pop_size | generations | best objective | delta vs pure | delta vs API-only | valid/pop | selected cards |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| `tsp_construct` | `literature_rag_targeted_regret_farthest` | 4 | 0 | 6.51118 | -0.32789 | -0.27835 | 4/4 | `tsp_regret_insertion`, `tsp_farthest_insertion` |
+
+结论：
+
+```text
+这是当前 official benchmark 上最清晰的正向 signal。
+默认 literature_rag 未提升，是因为 top-2 选卡过于保守；
+targeted query 让 regret/farthest 进入上下文后，明显超过 pure_eoh 和 api_only。
+```
+
+后续策略更新：
+
+```text
+TSP 不再讨论“是否加 RAG”这个粗粒度问题。
+改为比较 default nearest-RAG vs targeted regret/farthest-RAG。
+targeted TSP RAG 可进入 repeats=3 或 generations=1，但必须记录 selected cards 和具体 best code。
+```
+
 五天内优先交付：
 
 ```text
