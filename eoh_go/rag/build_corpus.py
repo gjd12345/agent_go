@@ -22,7 +22,21 @@ OBP_LITERATURE_IDS = {
     "obp_funsearch_residual_poly",
     "obp_eoh_util_sqrt_exp",
 }
-LITERATURE_IDS = VRP_LITERATURE_IDS | OBP_LITERATURE_IDS
+TSP_LITERATURE_IDS = {
+    "tsp_nearest_neighbor",
+    "tsp_nearest_insertion",
+    "tsp_farthest_insertion",
+    "tsp_regret_insertion",
+    "tsp_two_opt_awareness",
+}
+CVRP_LITERATURE_IDS = {
+    "cvrp_nearest_capacity",
+    "cvrp_savings",
+    "cvrp_sweep",
+    "cvrp_regret_insertion",
+    "cvrp_far_first",
+}
+LITERATURE_IDS = VRP_LITERATURE_IDS | OBP_LITERATURE_IDS | TSP_LITERATURE_IDS | CVRP_LITERATURE_IDS
 
 _STANDARD_INSERTSHIPS_CONSTRAINTS = [
     "Never skip orders unless no feasible assignment exists.",
@@ -226,6 +240,48 @@ def build_api_constraints(project_root: str | Path) -> list[CorpusItem]:
                 "- Return len(remaining) finite scores; highest score wins.\n"
                 "- Do not read files, env, network, or use randomness.\n"
                 "- Prefer fewer used bins and low gap to lower bound."
+            ),
+        ),
+        CorpusItem(
+            id="tsp_construct_api_skeleton",
+            kind="api_constraint",
+            title="Official TSP Construct select_next_node API skeleton",
+            tags=["tsp", "construct", "api", "safety"],
+            source_path="curated",
+            summary="TSP construct: return one unvisited node id from select_next_node.",
+            constraints=[
+                "Return exactly one int from unvisited_nodes.",
+                "Never return a visited node, destination_node, or a new array.",
+            ],
+            content=(
+                "API: tsp_select_next_node\n"
+                "Rules:\n"
+                "- def select_next_node(current_node, destination_node, unvisited_nodes, distance_matrix) -> int\n"
+                "- Return one int contained in unvisited_nodes.\n"
+                "- Use distance_matrix[current_node][unvisited_nodes] for distances.\n"
+                "- Do not mutate unvisited_nodes or distance_matrix.\n"
+                "- Keep computation bounded and deterministic."
+            ),
+        ),
+        CorpusItem(
+            id="cvrp_construct_api_skeleton",
+            kind="api_constraint",
+            title="Official CVRP Construct select_next_node API skeleton",
+            tags=["cvrp", "construct", "api", "safety"],
+            source_path="curated",
+            summary="CVRP construct: return one feasible customer, or depot only to end a route.",
+            constraints=[
+                "Return one int from unvisited_nodes, or depot only for voluntary return.",
+                "Respect rest_capacity; unvisited_nodes is already capacity-feasible.",
+            ],
+            content=(
+                "API: cvrp_select_next_node\n"
+                "Rules:\n"
+                "- def select_next_node(current_node, depot, unvisited_nodes, rest_capacity, demands, distance_matrix) -> int\n"
+                "- Return one int from unvisited_nodes, or depot to close route.\n"
+                "- Use demands and rest_capacity for capacity-aware choices.\n"
+                "- Do not mutate arrays.\n"
+                "- Keep deterministic and bounded."
             ),
         ),
     ]

@@ -80,7 +80,23 @@
 
 5. **BP 和 CVRP 不适合作为 RAG 正向证据**：
    - BP: 目标空间太小，pure EOH 已占优
-   - CVRP: skill cards 过度倾向 capacity，需要先修复
+   - CVRP: skill cards 过度倾向 capacity → 已修复为距离优先
+
+## 四·B、CVRP card 修复 (2026-06-05)
+
+| arm | best | vs pure | 选卡 | 策略 |
+|---|---:|---:|---|---|
+| `pure_eoh` | 13.20696 | baseline | — | distance-first, switch near depot to far clusters |
+| `lit_rag_old` | 14.49387 | +1.28691 | nearest_capacity, capacity_slack | capacity-first 加权 |
+| `lit_rag_fixed` | 13.28321 | +0.07625 | far_first, nearest_capacity | far-first → nearest switch |
+
+**修复内容**:
+- `cvrp_capacity_slack` → `cvrp_far_first`: 从 depot 出发时优先选远方 customer
+- `cvrp_nearest_capacity`: 去掉 demand/capacity 评分项，容量只做 feasibility
+- `cvrp_savings` / `cvrp_regret_insertion`: 去掉 capacity slack penalty
+- 默认 query: 去掉 "capacity demand"，加入 "farthest cluster"
+
+**结论**: 旧卡引导容量优先策略 (+1.29 worse)，修复后距离优先策略与 pure EOH 接近 (+0.08)，改善 **-1.21**。差 Pure 的 0.08 属于噪声范围。
 
 ---
 

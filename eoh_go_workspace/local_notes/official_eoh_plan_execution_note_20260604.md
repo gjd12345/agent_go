@@ -440,3 +440,30 @@ tsp construct select next node regret farthest insertion lookahead second best g
 2. gen=4,pop=8 取得当前最佳 **6.28736**，且进化有可解释轨迹（gen0→gen2→gen3 逐步改善）。
 3. gen=8 未超过 gen=4——deep evolution 进入 plateau，边际收益递减。
 4. gen=16 留待后续（预计 6h，不阻塞其他任务）。
+
+## 2026-06-05 追加：CVRP card 修复完成
+
+### 问题诊断
+
+old lit_rag 选中的 `cvrp_nearest_capacity` + `cvrp_capacity_slack` 全部容量优先：
+- pure EOH: distance-first, switch near depot (13.207)
+- old lit_rag: capacity-first 加权 (14.494, **+1.287** worse)
+
+### 修复
+
+| 变更 | 内容 |
+|---|---|
+| `cvrp_capacity_slack` → `cvrp_far_first` | 从 depot 出发优先选远方 customer |
+| `cvrp_nearest_capacity` | 去掉 demand/capacity 评分项 |
+| `cvrp_savings` / `cvrp_regret` | 去掉 capacity slack penalty |
+| 默认 query | "cvrp construct select next customer distance farthest cluster regret route depot" |
+
+### 结果
+
+| arm | best | vs pure |
+|---|---|---|
+| pure_eoh | 13.207 | baseline |
+| old lit_rag | 14.494 | +1.287 |
+| fixed lit_rag | 13.283 | +0.076 |
+
+改善 **-1.21**，已逼近 pure baseline (+0.08)。策略生成正确：far-first from depot → nearest from current。

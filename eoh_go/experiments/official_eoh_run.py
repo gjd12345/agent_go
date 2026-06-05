@@ -31,14 +31,14 @@ OFFICIAL_RAG_PROBLEM_CONFIG = {
         ),
     },
     "tsp_construct": {
-        "api_ids": set(),
+        "api_ids": {"tsp_construct_api_skeleton"},
         "strategy_prefixes": ("tsp_",),
         "query": "tsp construct select next node distance nearest insertion regret route length",
     },
     "cvrp_construct": {
-        "api_ids": set(),
+        "api_ids": {"cvrp_construct_api_skeleton"},
         "strategy_prefixes": ("cvrp_",),
-        "query": "cvrp construct select next customer capacity demand distance route depot",
+        "query": "cvrp construct select next customer distance farthest cluster regret route depot",
     },
 }
 
