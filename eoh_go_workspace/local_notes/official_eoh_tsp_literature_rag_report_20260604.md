@@ -74,7 +74,7 @@
 
 2. **Targeted RAG 明确有效**。只要把 regret/farthest 拉入上下文，LLM 就能生成超越 nearest 族的策略。repeat=3 验证了稳定性。
 
-3. **RAG 核心变量是 card selection，不是"是否加 RAG"**。同一套 RAG 基础设施，不同 query → 不同 cards → 不同结果。
+3. **RAG 核心变量是 card selection，不是"是否加 RAG"**。同一套 RAG 基础设施，不同 query → 不同 cards → 不同结果。**TSP 和 CVRP 都验证了这点**：默认选卡无效/退化，targeted query 选对卡后两者都出现正向 signal。
 
 4. **进化有帮助但不是无限的**。gen=0→gen=4 有改善 (6.51→6.29)，gen=4→gen=8 无改善。TSP 此规模的 sweet spot 在 gen=4 左右。
 
@@ -90,13 +90,24 @@
 | `lit_rag_old` | 14.49387 | +1.28691 | nearest_capacity, capacity_slack | capacity-first 加权 |
 | `lit_rag_fixed` | 13.28321 | +0.07625 | far_first, nearest_capacity | far-first → nearest switch |
 
+| `lit_rag_targeted_regret_farthest` | **13.03297** | **-0.17399** | 4/4 | cvrp_regret_insertion, cvrp_far_first | regret-based far-first |
+
+### CVRP targeted query 突破
+
+与 TSP 同模式：默认 card 组 (far_first + nearest_capacity = recipe) → 48 样本全部退化到同一 objective (13.283)。改用 targeted query 后：
+
+- **query**: `cvrp regret lookahead second best detour farthest cluster insertion route length`
+- **选卡**: `cvrp_regret_insertion` (26) + `cvrp_far_first` (16)
+- **结果**: **13.033 < pure 13.207**，改善 **-0.174**
+- **策略**: "hybrid regret-based farthest-first" — LLM 自行合成 regret + farthest，非简单 recipe
+
 **修复内容**:
 - `cvrp_capacity_slack` → `cvrp_far_first`: 从 depot 出发时优先选远方 customer
 - `cvrp_nearest_capacity`: 去掉 demand/capacity 评分项，容量只做 feasibility
 - `cvrp_savings` / `cvrp_regret_insertion`: 去掉 capacity slack penalty
 - 默认 query: 去掉 "capacity demand"，加入 "farthest cluster"
 
-**结论**: 旧卡引导容量优先策略 (+1.29 worse)，修复后距离优先策略与 pure EOH 接近 (+0.08)，改善 **-1.21**。差 Pure 的 0.08 属于噪声范围。
+**结论**: 旧卡引导容量优先策略 (+1.29 worse)。修复 cards + targeted query 后，CVRP 同样出现正向 signal（13.033 < 13.207 pure）。TSP 和 CVRP 共同验证：targeted card selection 是 RAG 有效性的关键变量。
 
 ---
 
