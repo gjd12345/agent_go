@@ -144,6 +144,10 @@ def run_v3_loop(
         ]
         proc = subprocess.run(run_cmd, text=True, capture_output=True, timeout=2100)
         history[-1]["run_status"] = "ok" if proc.returncode == 0 else f"exit_{proc.returncode}"
+        if proc.returncode != 0:
+            history[-1]["run_stderr"] = proc.stderr[-500:]
+            print(f"[FAILED] exit={proc.returncode}")
+            break
 
         # Step 4: Observe new trace
         suite_dir = Path(output_dir) / suite

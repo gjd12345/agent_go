@@ -19,6 +19,7 @@ VALID_DIAGNOSES = {
     "baseline_overlap", "wrong_bias", "low_diversity",
     "context_truncated", "valid_collapse", "api_failure",
     "budget_mismatch", "no_issue",
+    "weak_negative", "inconclusive",
 }
 
 VALID_ACTIONS = {

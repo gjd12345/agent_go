@@ -122,7 +122,7 @@ class ToccGatekeeperTests(unittest.TestCase):
     def test_diagnoses_enum_complete(self):
         self.assertIn("baseline_overlap", VALID_DIAGNOSES)
         self.assertIn("wrong_bias", VALID_DIAGNOSES)
-        self.assertEqual(len(VALID_DIAGNOSES), 8)
+        self.assertEqual(len(VALID_DIAGNOSES), 10)
 
     def test_actions_enum_complete(self):
         self.assertIn("run_init_only", VALID_ACTIONS)

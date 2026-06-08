@@ -6,3 +6,4 @@ max_depth = 1
 small = ["scout", "implementer", "verifier"]
 medium = ["scout", "implementer", "gatekeeper", "verifier"]
 large = ["scout", "rag_researcher", "implementer", "gatekeeper", "verifier"]
+experiment = ["scout", "exploration_analyst", "implementer", "gatekeeper", "verifier"]
