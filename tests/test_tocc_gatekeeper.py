@@ -1,0 +1,139 @@
+"""Tests for TOCC v2 gatekeeper."""
+
+import unittest
+
+from eoh_go.experiments.tocc_gatekeeper import (
+    VALID_DIAGNOSES,
+    VALID_ACTIONS,
+    PROBLEM_PREFIXES,
+    validate_proposal,
+)
+
+
+TSP_CARDS = ["tsp_regret_insertion", "tsp_farthest_insertion", "tsp_nearest_neighbor", "tsp_nearest_insertion", "tsp_two_opt_awareness"]
+CVRP_CARDS = ["cvrp_regret_insertion", "cvrp_far_first", "cvrp_nearest_capacity", "cvrp_savings", "cvrp_sweep"]
+
+
+class ToccGatekeeperTests(unittest.TestCase):
+
+    def _good_proposal(self, problem="tsp_construct"):
+        if problem == "tsp_construct":
+            cards = ["tsp_regret_insertion", "tsp_farthest_insertion"]
+            query = "tsp regret farthest lookahead route length"
+        else:
+            cards = ["cvrp_regret_insertion", "cvrp_far_first"]
+            query = "cvrp regret lookahead detour farthest cluster route length"
+        return {
+            "diagnosis": "baseline_overlap",
+            "cards": cards,
+            "query": query,
+            "why": ["default cards overlap baseline"],
+            "risk": "may overfit; run init-only first",
+            "next_action": "run_init_only",
+        }
+
+    def test_accepts_valid_proposal_tsp(self):
+        result = validate_proposal(self._good_proposal("tsp_construct"), problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertTrue(result["accepted"])
+        self.assertEqual(result["safe_arm"]["selected_card_ids"], ["tsp_regret_insertion", "tsp_farthest_insertion"])
+
+    def test_accepts_valid_proposal_cvrp(self):
+        result = validate_proposal(self._good_proposal("cvrp_construct"), problem="cvrp_construct", available_card_ids=CVRP_CARDS)
+        self.assertTrue(result["accepted"])
+
+    def test_r1_rejects_unknown_card(self):
+        p = self._good_proposal("tsp_construct")
+        p["cards"] = ["tsp_fake_card"]
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertFalse(result["accepted"])
+        self.assertIn("R1", str(result["violations"]))
+
+    def test_r2_rejects_wrong_prefix(self):
+        p = self._good_proposal("cvrp_construct")
+        p["cards"] = ["tsp_regret_insertion", "tsp_farthest_insertion"]  # tsp cards on cvrp
+        result = validate_proposal(p, problem="cvrp_construct", available_card_ids=TSP_CARDS + CVRP_CARDS)
+        self.assertFalse(result["accepted"])
+        self.assertIn("R2", str(result["violations"]))
+
+    def test_r3_rejects_empty_cards(self):
+        p = self._good_proposal()
+        p["cards"] = []
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertFalse(result["accepted"])
+
+    def test_r4_truncates_too_many_cards(self):
+        p = self._good_proposal()
+        p["cards"] = ["tsp_regret_insertion", "tsp_farthest_insertion", "tsp_nearest_neighbor", "tsp_nearest_insertion", "tsp_two_opt_awareness"]
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertTrue(result["accepted"])
+        self.assertEqual(len(result["safe_arm"]["selected_card_ids"]), 4)
+
+    def test_r5_fixes_unknown_diagnosis(self):
+        p = self._good_proposal()
+        p["diagnosis"] = "magic_wand"
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertTrue(result["accepted"])
+        self.assertIn("R5", str(result["warnings"]))
+
+    def test_r6_fixes_unknown_action(self):
+        p = self._good_proposal()
+        p["next_action"] = "deploy_to_production"
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertTrue(result["accepted"])
+        self.assertIn("R6", str(result["warnings"]))
+
+    def test_r7_rejects_empty_query(self):
+        p = self._good_proposal()
+        p["query"] = ""
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertFalse(result["accepted"])
+
+    def test_r8_warns_baseline_overlap(self):
+        p = self._good_proposal("tsp_construct")
+        p["diagnosis"] = "wrong_bias"
+        p["cards"] = ["tsp_nearest_neighbor"]  # baseline card
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertTrue(result["accepted"])
+        self.assertIn("R8", str(result["warnings"]))
+
+    def test_r8_allows_baseline_overlap_diagnosis(self):
+        p = self._good_proposal("tsp_construct")
+        p["diagnosis"] = "baseline_overlap"
+        p["cards"] = ["tsp_nearest_neighbor"]  # baseline card is OK when diagnosis matches
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertTrue(result["accepted"])
+
+    def test_r10_strips_forbidden_fields(self):
+        p = self._good_proposal()
+        p["pop_size"] = 999
+        p["api_key"] = "secret"
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertTrue(result["accepted"])
+        self.assertIn("R10", str(result["warnings"]))
+
+    def test_r11_checks_api_failure_consistency(self):
+        p = self._good_proposal()
+        p["diagnosis"] = "api_failure"
+        p["next_action"] = "maintain"
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertTrue(result["accepted"])
+        self.assertIn("R11", str(result["warnings"]))
+
+    def test_diagnoses_enum_complete(self):
+        self.assertIn("baseline_overlap", VALID_DIAGNOSES)
+        self.assertIn("wrong_bias", VALID_DIAGNOSES)
+        self.assertEqual(len(VALID_DIAGNOSES), 8)
+
+    def test_actions_enum_complete(self):
+        self.assertIn("run_init_only", VALID_ACTIONS)
+        self.assertIn("manual_review", VALID_ACTIONS)
+        self.assertEqual(len(VALID_ACTIONS), 6)
+
+    def test_prefixes_map_all_problems(self):
+        for p in ["tsp_construct", "cvrp_construct", "bp_online"]:
+            self.assertIn(p, PROBLEM_PREFIXES)
+            self.assertTrue(PROBLEM_PREFIXES[p].endswith("_"))
+
+
+if __name__ == "__main__":
+    unittest.main()

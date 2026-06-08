@@ -7,9 +7,24 @@
 
 | problem | arm | gen | pop | best | valid | cards | status |
 |---|---|---:|---:|---:|---|---|---|
+| cvrp_construct | targeted_cvrp | 0 | 4 | 13.07835 | 4/4 | cvrp_regret_insertion, cvrp_far_first | OK |
 | tsp_construct | targeted_tsp | 0 | 4 | 6.47488 | 4/4 | tsp_regret_insertion, tsp_farthest_insertion | OK |
 
 ## 代码片段
+
+### cvrp_construct
+
+**targeted_cvrp** (gen=0, best=13.07835):
+```python
+
+                     rest_capacity: float, demands: np.ndarray,
+                     distance_matrix: np.ndarray) -> int:
+    if len(unvisited_nodes) == 0:
+        return depot
+    
+    dist_from_current = distance_matrix[current_node][unvisited_nodes]
+    
+```
 
 ### tsp_construct
 

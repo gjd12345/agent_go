@@ -1,0 +1,41 @@
+{
+  "suite": "phase4_cvrp_targeted_repeat3",
+  "model": "JoyAI-LLM-Pro",
+  "problems": ["cvrp_construct"],
+  "arms": [
+    {
+      "name": "pure_eoh",
+      "runner_arm": "pure_eoh",
+      "context_strategy": "none",
+      "problems": ["cvrp_construct"]
+    },
+    {
+      "name": "default_rag",
+      "runner_arm": "literature_rag",
+      "context_strategy": "default_retrieval",
+      "rag_query": null,
+      "selected_card_ids": [],
+      "problems": ["cvrp_construct"]
+    },
+    {
+      "name": "targeted_tocc",
+      "runner_arm": "literature_rag",
+      "context_strategy": "tocc_selected_cards",
+      "rag_query": "cvrp regret lookahead detour farthest cluster route length",
+      "selected_card_ids": ["cvrp_regret_insertion", "cvrp_far_first"],
+      "problems": ["cvrp_construct"]
+    }
+  ],
+  "generations": [0],
+  "pop_size": 4,
+  "repeats": 2,
+  "max_runs": 6,
+  "max_llm_calls_estimate": 48,
+  "require_confirm_for_real_run": true,
+  "operators": "i1",
+  "run_timeout_s": 1800,
+  "rag": {
+    "top_k": 2,
+    "max_chars": 2500
+  }
+}

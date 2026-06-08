@@ -1,6 +1,23 @@
 {
   "suite": "phase4_smoke",
   "problems": {
+    "cvrp_construct": [
+      {
+        "arm": "targeted_cvrp",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 13.07835,
+        "valid": "4/4",
+        "cards": [
+          "cvrp_regret_insertion",
+          "cvrp_far_first"
+        ],
+        "code_snippet": "```python\n\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n    if len(unvisited_nodes) == 0:\n        return depot\n    \n    dist_from_current = distance_matrix[current_node][unvisited_nodes]\n    \n```",
+        "algorithm": "The algorithm combines farthest-first seeding when near the depot with regret-based selection when away from the depot to balance clustering efficiency and avoid future large detours, always respecting capacity feasibility and switching to nearest-neighbor fallback when criteria tie.",
+        "runtime_s": 542.281
+      }
+    ],
     "tsp_construct": [
       {
         "arm": "targeted_tsp",
