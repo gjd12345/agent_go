@@ -104,7 +104,7 @@ def _build_user_prompt(trace: dict[str, Any]) -> str:
         f"Arm: {trace.get('arm')}",
         f"RAG Query: {trace.get('rag_query')}",
         f"Selected Cards ({len(items)}): {', '.join(f'{i}({t})' for i, t in zip(items, titles))}",
-        f"Card Scores: {', '.join(f'{s['id']}={s['score']}' for s in scores[:5])}",
+        f"Card Scores: {', '.join(s['id'] + '=' + str(s['score']) for s in scores[:5])}",
         f"Context: {trace.get('rag_context_chars')}/{trace.get('rag_max_chars')} chars, pool_size={trace.get('rag_strategy_pool_size')}",
         f"Valid Candidates: {trace.get('valid_candidates')}/{trace.get('population_size')}",
         f"Best Objective: {trace.get('best_objective')}",
@@ -159,7 +159,7 @@ def propose(
 
     if "/" in endpoint and not endpoint.startswith("http"):
         endpoint = "https://" + endpoint
-    if not endpoint.endswith("/v1/chat/completions"):
+    if not endpoint.rstrip("/").endswith("/chat/completions"):
         endpoint = endpoint.rstrip("/") + "/v1/chat/completions"
 
     headers = {
