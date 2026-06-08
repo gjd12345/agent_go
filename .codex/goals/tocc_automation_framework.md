@@ -34,8 +34,12 @@ manifest
 | phase4_smoke 自动报告 | PASS，summary 同时收录 TSP 和 CVRP |
 | V2 LLM proposer 离线诊断 | PASS，3/3 与 V1 规则版一致 |
 | V2 gatekeeper | PASS，无越权字段，无违规执行 |
-| tests | PASS，106 tests OK |
-| latest V2 commit | `321790f` |
+| V2 real-run validation | PASS，3/3 bounded real runs completed, 15/15 proposal/card trace checks pass |
+| P0 gatekeeper contract fixes | PASS，`d25a0c3` 修复 forbidden fields 与 `cards` / `selected_card_ids` schema alias |
+| P2 goal evidence fixes | PASS，`ead082e` 修复 CVRP cards、TSP evidence tiers、CVRP V2 result、V3 condition 5 |
+| tests | PASS，110 tests OK |
+| latest V2 delivery commit | `50f37b4` |
+| latest goal fix commit | `ead082e` |
 
 V2 离线验证覆盖的 trace：
 
@@ -49,10 +53,12 @@ V2 离线验证覆盖的 trace：
 
 ```text
 TOCC v1 端到端闭环已验证。
-TOCC V2 LLM proposer + rule gatekeeper 离线闭环已验证。
+TOCC V2 LLM proposer + rule gatekeeper 离线闭环已验证，并已通过 3 个 bounded real runs 做 proposal-to-run 验证。
 TSP targeted card selection 已有 repeat 级正向信号。
 CVRP targeted card selection 已有 repeat=2 正向信号，但还不能写统计稳定。
-V2 可以进入小规模 real-run 验证。
+TSP V2 agent real-run best=6.217，刷新当前 TSP 历史最优。
+CVRP V2 agent regret+savings real-run best=13.230 / 13.236，略差于 pure，写入 inconclusive / weak negative。
+V3 只在 V2 validation report 完成、P0/P1 为 0、治理门禁补齐后进入 bounded pilot。
 BP 暂未拉开差距，不作为下一步主线。
 ```
 
@@ -372,19 +378,19 @@ eoh_go_workspace/reports/auto_experiment_reports/tocc_best_code_records.md
   "why": [
     "old/default CVRP literature RAG over-weighted nearest/capacity cards",
     "regret insertion adds lookahead",
-    "far-first adds distance diversity"
+    "savings adds route-distance structure but may be weaker than far-first seeding"
   ],
-  "selected_card_ids": ["cvrp_regret_insertion", "cvrp_far_first"],
-  "rag_query": "cvrp regret lookahead detour farthest cluster route length",
-  "expected_effect": "bias generation toward regret-aware far-first customer selection",
+  "selected_card_ids": ["cvrp_regret_insertion", "cvrp_savings"],
+  "rag_query": "cvrp regret insertion savings distance lookahead route length",
+  "expected_effect": "test whether regret+savings can correct capacity/nearest bias under bounded V2 validation",
   "run_summary_path": ".../official_eoh_run_summary.json",
   "outcome": {
-    "best_objective": 12.92217,
+    "best_objective": 13.230,
     "valid_candidates": 4,
     "population_size": 4,
     "failure_reason": null
   },
-  "confidence": "v2_real_run_smoke"
+  "confidence": "v2_real_run_smoke_inconclusive"
 }
 ```
 
