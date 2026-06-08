@@ -1,0 +1,45 @@
+{
+  "diagnosis_correctness": {
+    "v1_v2_agreement": "3/3",
+    "diagnoses": [
+      "baseline_overlap",
+      "baseline_overlap",
+      "baseline_overlap"
+    ]
+  },
+  "gatekeeper_safety": {
+    "all_accepted": true,
+    "total_violations": 0,
+    "total_warnings": 0
+  },
+  "runner_linkage": {
+    "total_checks": 15,
+    "total_pass": 15,
+    "total_runs": 3
+  },
+  "objective_signal": {
+    "tsp": {
+      "best": 6.21694,
+      "vs_pure": -0.622,
+      "verdict": "strong_positive"
+    },
+    "cvrp": {
+      "run1": {
+        "best": 13.2301,
+        "vs_pure": 0.023
+      },
+      "run2": {
+        "best": 13.23646,
+        "vs_pure": 0.029
+      },
+      "vs_targeted_far_first": 0.409,
+      "verdict": "inconclusive_weak_negative"
+    }
+  },
+  "limitations": [
+    "single_run_only",
+    "cvrp_suboptimal_card",
+    "missing_failure_mode_coverage"
+  ],
+  "go_no_go": "GO_for_V3_bounded_pilot"
+}
