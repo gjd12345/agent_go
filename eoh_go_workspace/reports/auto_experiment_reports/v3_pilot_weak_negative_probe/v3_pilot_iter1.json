@@ -1,0 +1,33 @@
+{
+  "suite": "v3_pilot_iter1",
+  "model": "JoyAI-LLM-Pro",
+  "problems": [
+    "cvrp_construct"
+  ],
+  "arms": [
+    {
+      "name": "agent_proposed_weak_negative",
+      "runner_arm": "literature_rag",
+      "context_strategy": "tocc_selected_cards",
+      "rag_query": "cvrp regret insertion far first distance diversification high-quality initial routes",
+      "selected_card_ids": [
+        "cvrp_regret_insertion",
+        "cvrp_far_first"
+      ]
+    }
+  ],
+  "generations": [
+    0
+  ],
+  "pop_size": 4,
+  "repeats": 1,
+  "max_runs": 1,
+  "max_llm_calls_estimate": 8,
+  "require_confirm_for_real_run": true,
+  "operators": "i1",
+  "run_timeout_s": 1800,
+  "rag": {
+    "top_k": 2,
+    "max_chars": 2500
+  }
+}

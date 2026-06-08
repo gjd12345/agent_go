@@ -1,0 +1,14 @@
+[
+  {
+    "tag": "run_cvrp_construct_agent_proposed_weak_negative_g0_r1",
+    "problem": "cvrp_construct",
+    "arm": "agent_proposed_weak_negative",
+    "generation": 0,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 642.6,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/v3_pilot_weak_negative_probe/v3_pilot_iter1/run_cvrp_construct_agent_proposed_weak_negative_g0_r1",
+    "best_objective": 13.03297,
+    "valid_candidates": 4
+  }
+]

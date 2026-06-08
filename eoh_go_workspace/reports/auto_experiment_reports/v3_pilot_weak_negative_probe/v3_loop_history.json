@@ -1,0 +1,15 @@
+[
+  {
+    "iteration": 1,
+    "phase": "proposed",
+    "diagnosis": "weak_negative",
+    "cards": [
+      "cvrp_regret_insertion",
+      "cvrp_far_first"
+    ],
+    "accepted": true,
+    "run_status": "ok",
+    "new_trace": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/v3_pilot_weak_negative_probe/v3_pilot_iter1/run_cvrp_construct_agent_proposed_weak_negative_g0_r1/official_eoh_run_summary.json",
+    "best_objective": 13.03297
+  }
+]
