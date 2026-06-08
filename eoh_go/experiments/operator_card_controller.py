@@ -175,7 +175,7 @@ def diagnose(trace: dict[str, Any]) -> TOCCDecision:
 
     # --- low_diversity: unique objective count check ---
     if valid >= 3 and pop == valid and len(scores) >= 3:
-        top_scores = [s[0] for s in scores[:3]]
+        top_scores = [s["score"] if isinstance(s, dict) else s[0] for s in scores[:3]]
         score_range = max(top_scores) - min(top_scores)
         if score_range < 3:
             d.diagnosis = "low_diversity"

@@ -88,6 +88,7 @@ def build_official_rag_context(
     top_k: int,
     max_chars: int,
     query: str | None = None,
+    selected_card_ids: list[str] | None = None,
 ) -> tuple[str, dict[str, Any]]:
     if problem not in OFFICIAL_RAG_PROBLEM_CONFIG:
         raise ValueError(f"Unsupported official RAG problem: {problem}")
@@ -107,6 +108,11 @@ def build_official_rag_context(
             for item in corpus
             if item.kind == "code_example" and any(tag in {"obp", "bp_online", "binpacking"} for tag in item.tags)
         ]
+    if selected_card_ids:
+        id_set = set(selected_card_ids)
+        strategy_pool = [item for item in strategy_pool if item.id in id_set]
+        if not strategy_pool:
+            raise ValueError(f"No matching cards for IDs: {selected_card_ids}")
     scored = score_corpus(query_text, strategy_pool)
     retrieved = retrieve(query_text, strategy_pool, top_k=top_k)
     context = format_prompt_context(retrieved, max_chars=max_chars, global_items=global_items).strip()
@@ -387,6 +393,7 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
     context_file = args.context_file
     rag_trace: dict[str, Any] | None = None
     if args.arm in {"literature_rag", "history_rag"}:
+        selected_ids = [sid.strip() for sid in args.selected_card_ids.split(",") if sid.strip()] if args.selected_card_ids else None
         context, rag_trace = build_official_rag_context(
             Path.cwd().resolve(),
             args.problem,
@@ -394,6 +401,7 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
             args.rag_top_k,
             args.rag_max_chars,
             args.rag_query or None,
+            selected_card_ids=selected_ids,
         )
         context_path = run_dir / "rag_context.txt"
         context_path.write_text(context, encoding="utf-8")
@@ -571,6 +579,7 @@ def main() -> None:
     parser.add_argument("--rag-top-k", type=int, default=2)
     parser.add_argument("--rag-max-chars", type=int, default=1800)
     parser.add_argument("--rag-query", default="")
+    parser.add_argument("--selected-card-ids", default="")
     parser.add_argument("--pop-size", type=int, default=2)
     parser.add_argument("--generations", type=int, default=1)
     parser.add_argument("--operators", default="i1")

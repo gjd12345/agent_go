@@ -6,32 +6,44 @@
     {
       "name": "pure_eoh",
       "runner_arm": "pure_eoh",
-      "context_strategy": "none"
+      "context_strategy": "none",
+      "problems": ["tsp_construct", "cvrp_construct"]
     },
     {
       "name": "api_only",
       "runner_arm": "api_only",
-      "context_strategy": "api_rules_only"
+      "context_strategy": "api_rules_only",
+      "problems": ["tsp_construct", "cvrp_construct"]
     },
     {
       "name": "default_rag",
       "runner_arm": "literature_rag",
       "context_strategy": "default_retrieval",
       "rag_query": null,
-      "selected_card_ids": []
+      "selected_card_ids": [],
+      "problems": ["tsp_construct", "cvrp_construct"]
     },
     {
-      "name": "targeted_rag",
+      "name": "targeted_tsp",
       "runner_arm": "literature_rag",
       "context_strategy": "tocc_selected_cards",
       "rag_query": "tsp construct regret farthest lookahead route length",
-      "selected_card_ids": ["tsp_regret_insertion", "tsp_farthest_insertion"]
+      "selected_card_ids": ["tsp_regret_insertion", "tsp_farthest_insertion"],
+      "problems": ["tsp_construct"]
+    },
+    {
+      "name": "targeted_cvrp",
+      "runner_arm": "literature_rag",
+      "context_strategy": "tocc_selected_cards",
+      "rag_query": "cvrp regret lookahead detour farthest cluster route length",
+      "selected_card_ids": ["cvrp_regret_insertion", "cvrp_far_first"],
+      "problems": ["cvrp_construct"]
     }
   ],
   "generations": [0],
   "pop_size": 4,
   "repeats": 1,
-  "max_runs": 8,
+  "max_runs": 10,
   "max_llm_calls_estimate": 64,
   "require_confirm_for_real_run": true,
   "operators": "i1",

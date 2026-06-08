@@ -89,6 +89,9 @@ def _build_cmd(
         cmd.extend(["--rag-max-chars", str(rag.get("max_chars", 2500))])
         if arm.get("rag_query"):
             cmd.extend(["--rag-query", arm["rag_query"]])
+        card_ids = arm.get("selected_card_ids", [])
+        if card_ids:
+            cmd.extend(["--selected-card-ids", ",".join(card_ids)])
     return cmd
 
 
@@ -119,12 +122,26 @@ def main() -> None:
     max_runs = manifest.get("max_runs", 2)
     suite = manifest["suite"]
     output_root = Path(args.output_dir).resolve() / suite
-    output_root.mkdir(parents=True, exist_ok=True)
+    if not args.no_run:
+        output_root.mkdir(parents=True, exist_ok=True)
 
-    if total_runs > max_runs and not args.force and not args.dry_run and not args.no_run:
-        print(f"ERROR: expanded runs ({total_runs}) exceed max_runs ({max_runs}).")
-        print(f"Use --dry-run to preview, --force to override, or reduce the manifest matrix.")
-        sys.exit(1)
+    gens = manifest.get("generations", [1])
+    has_deep_gen = any(g > 1 for g in gens)
+    require_confirm = manifest.get("require_confirm_for_real_run", True)
+
+    if not args.force and not args.dry_run and not args.no_run:
+        if total_runs > max_runs:
+            print(f"ERROR: expanded runs ({total_runs}) exceed max_runs ({max_runs}).")
+            print(f"Use --dry-run to preview, --force to override, or reduce the manifest matrix.")
+            sys.exit(1)
+        if has_deep_gen:
+            print(f"ERROR: generations contain > 1 ({gens}). Deep runs require explicit confirmation.")
+            print(f"Use --force to override, or reduce max generation to 0 or 1.")
+            sys.exit(1)
+        if require_confirm:
+            print(f"ERROR: manifest requires confirmation for real runs (require_confirm_for_real_run=true).")
+            print(f"Use --force to acknowledge.")
+            sys.exit(1)
 
     print(f"Suite: {suite}")
     print(f"Matrix: {len(manifest['problems'])}×{len(manifest['arms'])}×{len(manifest.get('generations',[1]))}×{manifest.get('repeats',1)} = {total_runs} runs")
@@ -138,9 +155,12 @@ def main() -> None:
 
     for p_idx, problem in enumerate(problems):
         for a_idx, arm in enumerate(arms):
+            arm_problems = arm.get("problems", problems)
+            if problem not in arm_problems:
+                continue
             for gen in generations:
                 for rep in range(1, repeats + 1):
-                    run_tag = f"{problem}_{arm['name']}_g{gen}_r{rep}"
+                    run_tag = f"run_{problem}_{arm['name']}_g{gen}_r{rep}"
                     run_out = str(output_root / run_tag)
 
                     if args.dry_run:
@@ -153,9 +173,14 @@ def main() -> None:
                     if args.no_run:
                         continue
 
-                    if args.resume and (Path(run_out) / "official_eoh_run_summary.json").exists():
-                        print(f"[SKIP] {run_tag} (already complete)")
-                        continue
+                    summary_path = Path(run_out) / "official_eoh_run_summary.json"
+                    if args.resume and summary_path.exists():
+                        prev = json.loads(summary_path.read_text(encoding="utf-8"))
+                        if not prev.get("failure_reason") and prev.get("run_summary", {}).get("ok"):
+                            print(f"[SKIP] {run_tag} (already complete)")
+                            continue
+                        else:
+                            print(f"[RETRY] {run_tag} (previous run failed: {prev.get('failure_reason','unknown')})")
 
                     print(f"[RUN] {run_tag}  start={time.strftime('%H:%M:%S')}")
                     cmd = _build_cmd(manifest, problem, arm, gen, rep, run_out)
@@ -178,12 +203,16 @@ def main() -> None:
                         "output_dir": run_out,
                     })
 
-                    summary_path = Path(run_out) / "official_eoh_run_summary.json"
                     if summary_path.exists():
                         summary = json.loads(summary_path.read_text(encoding="utf-8"))
                         run_sum = summary.get("run_summary", {})
                         run_index[-1]["best_objective"] = run_sum.get("best_objective")
                         run_index[-1]["valid_candidates"] = run_sum.get("valid_candidates")
+                        fail_reason = summary.get("failure_reason")
+                        if fail_reason:
+                            run_index[-1]["failure_reason"] = fail_reason
+                            if status == "ok":
+                                run_index[-1]["status"] = "ok_but_summary_failure"
 
                     print(f"[DONE] {run_tag}  status={status}  elapsed={elapsed}s")
 
