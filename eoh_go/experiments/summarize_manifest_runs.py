@@ -97,7 +97,7 @@ def _write_markdown(summary: dict[str, Any], output_path: str) -> None:
         "## 汇总表",
         "",
         "| problem | arm | gen | pop | best | valid | cards | status |",
-        "|---|---|---:|---:|---:|---|---|",
+        "|---|---|---:|---:|---:|---|---|---|",
     ]
 
     for problem, rows in sorted(summary.get("problems", {}).items()):

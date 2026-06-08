@@ -122,8 +122,6 @@ def main() -> None:
     max_runs = manifest.get("max_runs", 2)
     suite = manifest["suite"]
     output_root = Path(args.output_dir).resolve() / suite
-    if not args.no_run:
-        output_root.mkdir(parents=True, exist_ok=True)
 
     gens = manifest.get("generations", [1])
     has_deep_gen = any(g > 1 for g in gens)
@@ -142,6 +140,9 @@ def main() -> None:
             print(f"ERROR: manifest requires confirmation for real runs (require_confirm_for_real_run=true).")
             print(f"Use --force to acknowledge.")
             sys.exit(1)
+
+    if not args.no_run:
+        output_root.mkdir(parents=True, exist_ok=True)
 
     print(f"Suite: {suite}")
     print(f"Matrix: {len(manifest['problems'])}×{len(manifest['arms'])}×{len(manifest.get('generations',[1]))}×{manifest.get('repeats',1)} = {total_runs} runs")
@@ -216,7 +217,7 @@ def main() -> None:
 
                     print(f"[DONE] {run_tag}  status={status}  elapsed={elapsed}s")
 
-    if not args.dry_run:
+    if not args.dry_run and not args.no_run:
         index_path = output_root / "run_index.json"
         index_path.write_text(json.dumps(run_index, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"\nRun index written to {index_path}")

@@ -93,6 +93,27 @@ class TOCCControllerTests(unittest.TestCase):
         d = diagnose(trace)
         self.assertEqual(d.diagnosis, "context_truncated")
 
+    def test_diagnose_low_diversity_accepts_json_score_dicts(self) -> None:
+        trace = {
+            "problem": "tsp_construct",
+            "arm": "literature_rag",
+            "rag_selected_items": [
+                {"id": "tsp_regret_insertion"},
+                {"id": "tsp_farthest_insertion"},
+            ],
+            "rag_all_scores": [
+                {"id": "tsp_regret_insertion", "kind": "algorithm_card", "score": 31},
+                {"id": "tsp_farthest_insertion", "kind": "algorithm_card", "score": 30},
+                {"id": "tsp_two_opt_awareness", "kind": "algorithm_card", "score": 29},
+            ],
+            "rag_context_chars": 1200,
+            "rag_max_chars": 2500,
+            "valid_candidates": 4,
+            "population_size": 4,
+        }
+        d = diagnose(trace)
+        self.assertEqual(d.diagnosis, "low_diversity")
+
     def test_diagnose_valid_collapse(self) -> None:
         trace = {
             "problem": "tsp_construct",
