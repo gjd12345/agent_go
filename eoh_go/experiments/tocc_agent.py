@@ -90,7 +90,17 @@ def _flatten_trace(summary_path: str) -> dict[str, Any]:
         "available_cards": TARGETED_CANDIDATE_CARDS.get(payload.get("problem", ""), []) +
                            list(BASELINE_OVERLAP_CARDS.get(payload.get("problem", ""), set())),
         "baseline_cards": list(BASELINE_OVERLAP_CARDS.get(payload.get("problem", ""), set())),
+        "pure_eoh_best": _BASELINE_OBJECTIVES.get(payload.get("problem", ""), {}).get("pure"),
+        "historical_best": _BASELINE_OBJECTIVES.get(payload.get("problem", ""), {}).get("targeted"),
+        "historical_best_cards": _BASELINE_OBJECTIVES.get(payload.get("problem", ""), {}).get("cards", []),
     }
+
+
+# Known best objectives for comparative diagnosis
+_BASELINE_OBJECTIVES = {
+    "tsp_construct": {"pure": 6.839, "targeted": 6.217, "cards": ["tsp_regret_insertion", "tsp_farthest_insertion"]},
+    "cvrp_construct": {"pure": 13.207, "targeted": 12.821, "cards": ["cvrp_regret_insertion", "cvrp_far_first"]},
+}
 
 
 def _build_user_prompt(trace: dict[str, Any]) -> str:
@@ -113,8 +123,13 @@ def _build_user_prompt(trace: dict[str, Any]) -> str:
         f"Runtime: {trace.get('runtime_seconds')}s",
         f"Available Card IDs: {trace.get('available_cards')}",
         f"Baseline Cards (overlap candidates): {trace.get('baseline_cards')}",
+        f"Historical Baseline: pure_eoh={trace.get('pure_eoh_best')}",
+        f"Historical Best Targeted: {trace.get('historical_best')} (cards={trace.get('historical_best_cards')})",
         "",
-        "Based on this trace, diagnose the failure mode and propose the next card set.",
+        "Compare current Best Objective against Historical Baseline and Historical Best Targeted.",
+        "If current is worse than historical targeted, diagnose weak_negative and recommend different cards.",
+        "If current is within noise of pure baseline, diagnose inconclusive.",
+        "Based on this trace and comparisons, diagnose the failure mode and propose the next card set.",
         "Output only valid JSON, no other text.",
     ]
     return "\n".join(parts)

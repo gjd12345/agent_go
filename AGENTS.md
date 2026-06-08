@@ -16,8 +16,7 @@ Use subagents to prevent uncontrolled code growth, untested changes, and unsafe 
 **On-demand:**
 
 - `rag_researcher`: read-only. Researches RAG, papers, external repos. Enable only for tasks involving retrieval, literature, or external knowledge.
-- `exploration_analyst`: read-only. Monitors TOCC/EoH live experiments. Reads run_index, traces, valid rate, best score, cards, failure_reason. Recommends stop/resume/change_cards/change_query/reduce_budget. Never edits files or executes runs.
-- `exploration_analyst`: read-only. Monitors running/partial experiments, reads traces, run logs, summaries, selected cards, valid rates, and best-code changes. It provides real-time guidance on whether to continue, stop, resume, reduce budget, change cards/query, or switch problem. It must not edit files or execute experiments.
+- `exploration_analyst`: read-only. Monitors TOCC/EoH live experiments. Reads run_index, traces, valid rate, best score, cards, failure_reason. Recommends stop/resume/change_cards/change_query/reduce_budget. Never edits files or executes runs. Used for E2-E5 runs.
 
 ## Task Tiers
 
