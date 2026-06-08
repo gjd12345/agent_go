@@ -1,0 +1,22 @@
+{
+  "suite": "phase4_smoke",
+  "problems": {
+    "tsp_construct": [
+      {
+        "arm": "targeted_tsp",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 6.47488,
+        "valid": "4/4",
+        "cards": [
+          "tsp_regret_insertion",
+          "tsp_farthest_insertion"
+        ],
+        "code_snippet": "```python\n\n    if len(unvisited_nodes) == 1:\n        return unvisited_nodes[0]\n    \n    dist_from_current = distance_matrix[current_node][unvisited_nodes]\n    \n    min_dist_idx = np.argmin(dist_from_current)\n    nearest_neighbor = unvisited_nodes[min_dist_idx]\n```",
+        "algorithm": "A hybrid regret-farthest insertion algorithm that selects the next node by maximizing a weighted score combining immediate distance penalty, regret value, and isolation penalty relative to the destination and current cluster, while falling back to nearest neighbor when scores are tied.",
+        "runtime_s": 206.265
+      }
+    ]
+  }
+}

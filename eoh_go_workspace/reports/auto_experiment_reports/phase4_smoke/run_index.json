@@ -1,0 +1,10 @@
+[
+  {
+    "problem": "tsp_construct",
+    "arm": "targeted_tsp",
+    "generation": 0,
+    "repeat": 1,
+    "status": "ok",
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/phase4_smoke/run_tsp_targeted_tsp_g0_r1"
+  }
+]
