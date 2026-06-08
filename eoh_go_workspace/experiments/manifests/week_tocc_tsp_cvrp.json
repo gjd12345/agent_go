@@ -1,0 +1,43 @@
+{
+  "suite": "week_tocc_tsp_cvrp",
+  "model": "JoyAI-LLM-Pro",
+  "problems": ["tsp_construct", "cvrp_construct"],
+  "arms": [
+    {
+      "name": "pure_eoh",
+      "runner_arm": "pure_eoh",
+      "context_strategy": "none"
+    },
+    {
+      "name": "api_only",
+      "runner_arm": "api_only",
+      "context_strategy": "api_rules_only"
+    },
+    {
+      "name": "default_rag",
+      "runner_arm": "literature_rag",
+      "context_strategy": "default_retrieval",
+      "rag_query": null,
+      "selected_card_ids": []
+    },
+    {
+      "name": "targeted_rag",
+      "runner_arm": "literature_rag",
+      "context_strategy": "tocc_selected_cards",
+      "rag_query": "tsp construct regret farthest lookahead route length",
+      "selected_card_ids": ["tsp_regret_insertion", "tsp_farthest_insertion"]
+    }
+  ],
+  "generations": [0],
+  "pop_size": 4,
+  "repeats": 1,
+  "max_runs": 8,
+  "max_llm_calls_estimate": 64,
+  "require_confirm_for_real_run": true,
+  "operators": "i1",
+  "run_timeout_s": 1800,
+  "rag": {
+    "top_k": 2,
+    "max_chars": 2500
+  }
+}
