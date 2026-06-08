@@ -35,6 +35,15 @@ PROBLEM_PREFIXES = {
 FORBIDDEN_FIELDS = {
     "pop_size", "generations", "repeats", "max_runs",
     "api_key", "endpoint", "model", "llm_model",
+    "output_dir", "shell_command", "shell_cmd", "command",
+    "file_write", "file_write_action", "git_operation", "git",
+    "env", "environment",
+}
+
+# Canonical field names for proposal normalization
+FIELD_ALIASES = {
+    "selected_card_ids": "cards",
+    "rag_query": "query",
 }
 
 MAX_CARDS = 4
@@ -52,6 +61,13 @@ def validate_proposal(
     violations: list[str] = []
     warnings: list[str] = []
     fixed: dict[str, Any] | None = None
+
+    # Normalize field aliases: accept goal-schema or agent-schema names
+    cards_raw = proposal.get("cards") or proposal.get("selected_card_ids", [])
+    query_raw = proposal.get("query") or proposal.get("rag_query", "")
+    proposal = dict(proposal)
+    proposal["cards"] = list(cards_raw)
+    proposal["query"] = str(query_raw)
 
     cards = list(proposal.get("cards", []))
     diagnosis = str(proposal.get("diagnosis", ""))
@@ -147,7 +163,6 @@ def validate_proposal(
         "rag_query": effective_query,
         "selected_card_ids": effective_cards,
     }
-
     accepted = len(violations) == 0
 
     return {

@@ -134,6 +134,51 @@ class ToccGatekeeperTests(unittest.TestCase):
             self.assertIn(p, PROBLEM_PREFIXES)
             self.assertTrue(PROBLEM_PREFIXES[p].endswith("_"))
 
+    # --- P0 fix tests: forbidden fields + alias support ---
+
+    def test_strips_output_dir_from_proposal(self):
+        p = self._good_proposal()
+        p["output_dir"] = "/tmp/malicious"
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertTrue(result["accepted"])
+        self.assertIn("R10", str(result["warnings"]))
+        self.assertIsNotNone(result["fixed"])
+
+    def test_strips_shell_command_from_proposal(self):
+        p = self._good_proposal()
+        p["shell_command"] = "rm -rf /"
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertTrue(result["accepted"])
+        self.assertIn("R10", str(result["warnings"]))
+
+    def test_accepts_goal_schema_with_selected_card_ids(self):
+        p = {
+            "diagnosis": "baseline_overlap",
+            "selected_card_ids": ["tsp_regret_insertion", "tsp_farthest_insertion"],
+            "rag_query": "tsp regret farthest lookahead route length",
+            "why": ["overlap"],
+            "risk": "smoke only",
+            "next_action": "run_init_only",
+        }
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertTrue(result["accepted"])
+        self.assertEqual(result["safe_arm"]["selected_card_ids"], ["tsp_regret_insertion", "tsp_farthest_insertion"])
+
+    def test_goal_schema_output_uses_canonical_names(self):
+        p = {
+            "diagnosis": "baseline_overlap",
+            "selected_card_ids": ["tsp_regret_insertion", "tsp_farthest_insertion"],
+            "rag_query": "tsp regret farthest lookahead",
+            "why": ["baseline cards overlap"],
+            "risk": "smoke",
+            "next_action": "run_init_only",
+        }
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        arm = result["safe_arm"]
+        self.assertIn("selected_card_ids", arm)
+        self.assertIn("rag_query", arm)
+        self.assertEqual(arm["rag_query"], "tsp regret farthest lookahead")
+
 
 if __name__ == "__main__":
     unittest.main()
