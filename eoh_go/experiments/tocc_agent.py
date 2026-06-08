@@ -27,7 +27,7 @@ Your job: read the run trace, diagnose the failure mode, and propose the next op
 
 Output must be valid JSON with exactly these fields:
 {
-  "diagnosis": "<one of 8 types>",
+  "diagnosis": "<one of 10 types>",
   "cards": ["<card_id_1>", "<card_id_2>"],
   "query": "<rag query string>",
   "why": ["<reason 1>", "<reason 2>"],
@@ -44,6 +44,8 @@ Diagnosis types:
 - api_failure: API calls failed, run is incomplete.
 - budget_mismatch: arms have different gen/pop/repeats settings.
 - no_issue: no failure mode detected, maintain current cards.
+- weak_negative: best objective worse than pure baseline or known targeted best, cards should be changed.
+- inconclusive: best objective near pure baseline, no clear signal — needs more runs or different cards.
 
 Next action types:
 - run_init_only: run a single init-only smoke with proposed cards.

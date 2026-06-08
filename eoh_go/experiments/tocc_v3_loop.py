@@ -86,12 +86,13 @@ def run_v3_loop(
             gatekeeper = proposal_raw.get("gatekeeper", {})
             cards = safe_arm["selected_card_ids"] if safe_arm else []
             query = safe_arm["rag_query"] if safe_arm else ""
+            diagnosis = proposal_raw.get("proposal", {}).get("diagnosis", "")
             print(f"[V2] accepted={accepted}, cards={cards}")
 
         history.append({
             "iteration": iteration,
             "phase": "proposed",
-            "diagnosis": proposal_raw.get("diagnosis", ""),
+            "diagnosis": diagnosis,
             "cards": cards,
             "accepted": accepted,
         })

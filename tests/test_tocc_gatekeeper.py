@@ -122,7 +122,23 @@ class ToccGatekeeperTests(unittest.TestCase):
     def test_diagnoses_enum_complete(self):
         self.assertIn("baseline_overlap", VALID_DIAGNOSES)
         self.assertIn("wrong_bias", VALID_DIAGNOSES)
+        self.assertIn("weak_negative", VALID_DIAGNOSES)
+        self.assertIn("inconclusive", VALID_DIAGNOSES)
         self.assertEqual(len(VALID_DIAGNOSES), 10)
+
+    def test_weak_negative_not_fixed_by_r5(self):
+        p = self._good_proposal()
+        p["diagnosis"] = "weak_negative"
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertTrue(result["accepted"])
+        self.assertNotIn("R5", str(result.get("warnings", [])))
+
+    def test_inconclusive_not_fixed_by_r5(self):
+        p = self._good_proposal()
+        p["diagnosis"] = "inconclusive"
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        self.assertTrue(result["accepted"])
+        self.assertNotIn("R5", str(result.get("warnings", [])))
 
     def test_actions_enum_complete(self):
         self.assertIn("run_init_only", VALID_ACTIONS)
