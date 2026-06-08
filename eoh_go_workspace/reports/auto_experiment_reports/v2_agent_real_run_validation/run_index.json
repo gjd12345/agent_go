@@ -1,0 +1,38 @@
+[
+  {
+    "tag": "run_tsp_construct_v2_agent_targeted_tsp_g0_r1",
+    "problem": "tsp_construct",
+    "arm": "v2_agent_targeted_tsp",
+    "generation": 0,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 430.9,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/v2_agent_real_run_validation/run_tsp_construct_v2_agent_targeted_tsp_g0_r1",
+    "best_objective": 6.21694,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_v2_agent_targeted_cvrp_regret_savings_g0_r1",
+    "problem": "cvrp_construct",
+    "arm": "v2_agent_targeted_cvrp_regret_savings",
+    "generation": 0,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 537.2,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/v2_agent_real_run_validation/run_cvrp_construct_v2_agent_targeted_cvrp_regret_savings_g0_r1",
+    "best_objective": 13.2301,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_v2_agent_targeted_cvrp_regret_savings_v2_g0_r1",
+    "problem": "cvrp_construct",
+    "arm": "v2_agent_targeted_cvrp_regret_savings_v2",
+    "generation": 0,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 643.2,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/v2_agent_real_run_validation/run_cvrp_construct_v2_agent_targeted_cvrp_regret_savings_v2_g0_r1",
+    "best_objective": 13.23646,
+    "valid_candidates": 4
+  }
+]

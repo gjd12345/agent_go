@@ -69,7 +69,7 @@ def _build_cmd(
     output_dir: str,
 ) -> list[str]:
     cmd = [
-        sys.executable,
+        manifest.get("python_exe", "/private/tmp/eoh_official_venv/bin/python"),
         "-m",
         RUNNER_MODULE,
         "--problem", problem,
@@ -82,6 +82,8 @@ def _build_cmd(
         "--llm-timeout-s", "180",
         "--run-timeout-s", str(manifest.get("run_timeout_s", 1800)),
         "--output-dir", output_dir,
+        "--official-root", manifest.get("official_root", "/private/tmp/EoH-main"),
+        "--python", manifest.get("python_exe", "/private/tmp/eoh_official_venv/bin/python"),
     ]
     rag = manifest.get("rag", {})
     if arm["runner_arm"] in ("literature_rag", "history_rag"):

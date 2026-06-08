@@ -1,0 +1,54 @@
+{
+  "suite": "v2_agent_real_run_validation",
+  "problems": {
+    "cvrp_construct": [
+      {
+        "arm": "v2_agent_targeted_cvrp_regret_savings",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 13.2301,
+        "valid": "4/4",
+        "cards": [
+          "cvrp_regret_insertion",
+          "cvrp_savings"
+        ],
+        "code_snippet": "```python\n\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n    if len(unvisited_nodes) == 0:\n        return depot\n\n    dist_from_current = distance_matrix[current_node, unvisited_nodes]\n    dist_from_depot = distance_matrix[depot, unvisited_nodes]\n```",
+        "algorithm": "My algorithm combines savings-based scoring with regret-lookahead tie-breaking: first rank feasible customers by Clarke–Wright savings from the current node, then among ties pick the customer with highest regret (second‑best insertion cost minus best), returning depot only when no feasible customer remains.",
+        "runtime_s": 537.117
+      },
+      {
+        "arm": "v2_agent_targeted_cvrp_regret_savings_v2",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 13.23646,
+        "valid": "4/4",
+        "cards": [
+          "cvrp_regret_insertion",
+          "cvrp_savings"
+        ],
+        "code_snippet": "```python\n\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n\n    Args:\n        current_node:    index of the current node (0 = depot)\n        depot:           index of the depot (always 0)\n        unvisited_nodes: array of feasible unvisited customer indices\n```",
+        "algorithm": "A hybrid nearest-neighbor regret heuristic that prefers high-regret feasible customers but falls back to nearest neighbor when regrets are low or ties occur.",
+        "runtime_s": 643.133
+      }
+    ],
+    "tsp_construct": [
+      {
+        "arm": "v2_agent_targeted_tsp",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 6.21694,
+        "valid": "4/4",
+        "cards": [
+          "tsp_regret_insertion",
+          "tsp_farthest_insertion"
+        ],
+        "code_snippet": "```python\n\n    if len(unvisited_nodes) == 1:\n        return unvisited_nodes[0]\n\n    curr_dists = distance_matrix[current_node][unvisited_nodes]\n\n    regret_vals = np.zeros(len(unvisited_nodes))\n    for i, u in enumerate(unvisited_nodes):\n```",
+        "algorithm": "Hybrid regret-farthest heuristic: at each step compute a composite score balancing immediate regret of not visiting soon, distance from current node, and remoteness from the destination cluster, then pick the highest‑score node.",
+        "runtime_s": 430.747
+      }
+    ]
+  }
+}

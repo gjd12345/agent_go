@@ -1,0 +1,43 @@
+{
+  "suite": "v2_agent_real_run_validation",
+  "model": "JoyAI-LLM-Pro",
+  "problems": ["tsp_construct", "cvrp_construct"],
+  "arms": [
+    {
+      "name": "v2_agent_targeted_tsp",
+      "runner_arm": "literature_rag",
+      "context_strategy": "tocc_selected_cards",
+      "rag_query": "tsp construct regret farthest lookahead route length",
+      "selected_card_ids": ["tsp_regret_insertion", "tsp_farthest_insertion"],
+      "problems": ["tsp_construct"]
+    },
+    {
+      "name": "v2_agent_targeted_cvrp_regret_savings",
+      "runner_arm": "literature_rag",
+      "context_strategy": "tocc_selected_cards",
+      "rag_query": "cvrp regret insertion savings distance lookahead route length",
+      "selected_card_ids": ["cvrp_regret_insertion", "cvrp_savings"],
+      "problems": ["cvrp_construct"]
+    },
+    {
+      "name": "v2_agent_targeted_cvrp_regret_savings_v2",
+      "runner_arm": "literature_rag",
+      "context_strategy": "tocc_selected_cards",
+      "rag_query": "cvrp regret insertion savings diversification route length",
+      "selected_card_ids": ["cvrp_regret_insertion", "cvrp_savings"],
+      "problems": ["cvrp_construct"]
+    }
+  ],
+  "generations": [0],
+  "pop_size": 4,
+  "repeats": 1,
+  "max_runs": 3,
+  "max_llm_calls_estimate": 24,
+  "require_confirm_for_real_run": true,
+  "operators": "i1",
+  "run_timeout_s": 1800,
+  "rag": {
+    "top_k": 2,
+    "max_chars": 2500
+  }
+}
