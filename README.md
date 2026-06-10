@@ -51,6 +51,42 @@ python -m eoh_go.experiments.eoh_arrival_grid `
   --objective-res-weight 0.2
 ```
 
+## Development Workflow
+
+### Build
+
+```bash
+go build -o mainbin_sa.exe .
+```
+
+Or use the Makefile:
+
+```bash
+make build          # build the main solver
+```
+
+### Run tests
+
+**Python unit tests (guard, operator, templates):**
+
+```bash
+python -m pytest tests/ -q
+```
+
+**Go benchmark integration tests (requires solomon_benchmark data):**
+
+```bash
+make test           # run SA solver benchmarks
+```
+
+### Code quality
+
+The project currently has no automated Go linting or formatting hooks. When contributing:
+
+- Ensure `go build .` succeeds with no errors.
+- Run `python -m pytest tests/ -q` and confirm all tests pass.
+- Keep Python imports clean; the project uses `pytest` and `unittest`.
+
 ## Notes
 
 The private reference PDF is not included. The report cites it as the local reference manuscript and aligns the experiments with its `Res.`/`J` evaluation style.

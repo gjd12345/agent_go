@@ -1,0 +1,77 @@
+{
+  "operator": "SmartEOHOperator",
+  "timestamp": "2026-05-19T16:31:37",
+  "config": {
+    "generations": 2,
+    "pop_size": 2,
+    "dataset_density": "d25",
+    "arrival_scale": 1.0,
+    "baseline_cost": null
+  },
+  "best_cost": 1233.8434268739852,
+  "best_generation": 1,
+  "baseline_cost": null,
+  "improvement_pct": null,
+  "generation_log": [
+    {
+      "gen": 1,
+      "candidates_generated": 2,
+      "compiled_ok": 2,
+      "compiled_fail": 0,
+      "evaluated_ok": 2,
+      "evaluated_fail": 0,
+      "guard_excluded": 0,
+      "best_fitness": 1233.8434268739852,
+      "avg_fitness": 1383.0276958421261,
+      "best_vs_baseline_pct": null,
+      "fail_rate": 0.0,
+      "repair_count": 0,
+      "repair_success": 0,
+      "active_failure_patterns": [
+        "timeout"
+      ],
+      "elapsed_s": 258.0,
+      "valid_costs": [
+        1233.8434268739852,
+        1532.211964810267
+      ],
+      "best_code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\tlogger := zap.L().Named(\"Insert\")\n\n\tfor jj := range oris {\n\t\t// Collect non-empty assign indices\n\t\tvar nonEmpty []int\n\t\tfor ii := 0; ii < dispatch.AssignsLen; ii++ {\n\t\t\tif dispatch.Assigns[ii].StationsLen > 0 {\n\t\t\t\tnonEmpty = append(nonEmpty, ii)\n\t\t\t}\n\t\t}\n\n\t\t// Compute heuristic score for each non-empty assign:\n\t\t// distance from last station to pickup + time difference (waiting time)\n\t\tscores := make([]float64, len(nonEmpty))\n\t\tfor idx, ii := range nonEmpty {\n\t\t\tlastIdx := dispatch.Assigns[ii].StationsLen - 1\n\t\t\tlastSta := dispatch.Assigns[ii].Stations[lastIdx]\n\t\t\tdist := cal_dis(lastSta, oris[jj])\n\t\t\ttimeDiff := 0\n\t\t\tif oris[jj].TimeStart > dispatch.Assigns[ii].TimeCurrent {\n\t\t\t\ttimeDiff = oris[jj].TimeStart - dispatch.Assigns[ii].TimeCurrent\n\t\t\t}\n\t\t\tscores[idx] = dist + float64(timeDiff)\n\t\t}\n\t\tsort.Slice(nonEmpty, func(i, j int) bool {\n\t\t\treturn scores[i] < scores[j]\n\t\t})\n\n\t\t// Build insertion order: sorted non-empty first, then empty assigns\n\t\torder := make([]int, 0, MAXASSIGNS)\n\t\torder = append(order, nonEmpty...)\n\t\tfor ii := dispatch.AssignsLen; ii < MAXASSIGNS; ii++ {\n\t\t\torder = append(order, ii)\n\t\t}\n\n\t\t// Try insertion in the computed order\n\t\tfor _, ii := range order {\n\t\t\tif !dispatch.Assigns[ii].AddShip(total_ship+jj, oris[jj], dess[jj]) {\n\t\t\t\tdispatch.Assigns[ii].Cost = -1\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\t}\n\n\t\t\tif dispatch.Assigns[ii].Cost < 0 {\n\t\t\t\tdispatch.Assigns[ii].RemoveShip(total_ship + jj)\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\t} else {\n\t\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\t\tdispatch.AssignsLen++\n\t\t\t\t}\n\t\t\t\tbreak\n\t\t\t}\n\n\t\t\t// If we reach an empty assign and insertion fails, log and stop trying this ship\n\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\tlogger.Warn(\n\t\t\t\t\t\"Cannot Insert\",\n\t\t\t\t\tzap.Int(\"ship\", total_ship+jj),\n\t\t\t\t\tzap.Int(\"non_empty\", len(nonEmpty)),\n\t\t\t\t\tzap.Int(\"assigns_len\", dispatch.AssignsLen),\n\t\t\t\t)\n\t\t\t\tfmt.Println(oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[dispatch.AssignsLen].PrettyPrint()\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n}"
+    },
+    {
+      "gen": 2,
+      "candidates_generated": 2,
+      "compiled_ok": 2,
+      "compiled_fail": 0,
+      "evaluated_ok": 2,
+      "evaluated_fail": 0,
+      "guard_excluded": 0,
+      "best_fitness": 1233.8434268739852,
+      "avg_fitness": 1383.0276958421261,
+      "best_vs_baseline_pct": null,
+      "fail_rate": 0.0,
+      "repair_count": 0,
+      "repair_success": 0,
+      "active_failure_patterns": [
+        "timeout"
+      ],
+      "elapsed_s": 160.5,
+      "valid_costs": [
+        1233.8434268739852,
+        1532.211964810267
+      ],
+      "best_code": null
+    }
+  ],
+  "failure_memory": {
+    "total_attempts": 8,
+    "total_failures": 7,
+    "fail_rate": 0.875,
+    "top_failures": [
+      {
+        "key": "timeout",
+        "count": 3
+      }
+    ]
+  },
+  "total_elapsed_s": 418.5
+}

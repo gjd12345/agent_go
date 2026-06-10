@@ -1,0 +1,51 @@
+{
+  "output_dir": "/Users/guojiadong.9/agent_ad/eoh_go_workspace/reports/tables/smart_operator_grid/run_20260521_110716",
+  "run_tag": "20260521_110716",
+  "config": {
+    "root": ".",
+    "output_dir": "eoh_go_workspace/reports/tables/smart_operator_grid",
+    "problem": [
+      "rc101.json"
+    ],
+    "density": [
+      "d25"
+    ],
+    "arrival_scale": [
+      1.0
+    ],
+    "use_density_source_dirs": false,
+    "api_key": "",
+    "llm_model": "deepseek-v4-flash",
+    "mutation_mode": "templates",
+    "generations": 1,
+    "pop_size": 4,
+    "sim_time_multi": 10,
+    "run_timeout_s": 120,
+    "max_cells": 0,
+    "dry_run": false
+  },
+  "rows": [
+    {
+      "problem": "rc101.json",
+      "density": "d25",
+      "arrival_scale": 1.0,
+      "seed_Res": 5.724957,
+      "seed_J": 664.1195472849001,
+      "cell_elapsed_s": 30.1,
+      "operator_ok": true,
+      "operator_error": "",
+      "best_cost": 514.463380086386,
+      "best_generation": 1,
+      "improvement_pct": -22.534522257378047,
+      "total_elapsed_s": 30.1,
+      "memory_total_attempts": 34,
+      "memory_total_failures": 11,
+      "memory_top_failures": "[{\"key\": \"timeout\", \"count\": 4}, {\"key\": \"negative_cost\", \"count\": 1}]",
+      "generation_count": 1,
+      "gen1_best": 514.463380086386,
+      "gen1_compiled_ok": 4,
+      "gen1_eval_ok": 4,
+      "gen1_repairs": 0
+    }
+  ]
+}

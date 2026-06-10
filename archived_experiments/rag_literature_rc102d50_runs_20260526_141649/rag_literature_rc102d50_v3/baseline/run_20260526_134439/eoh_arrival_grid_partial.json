@@ -1,0 +1,212 @@
+{
+  "rows": [
+    {
+      "problem": "rc102.json",
+      "density": "d50",
+      "arrival_scale": 1.0,
+      "eoh_ok": true,
+      "eoh_duration": 265.915712,
+      "population_file": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/tables/rag_literature_rc102d50_v3/baseline/run_20260526_134439/cells/rc102_d50_t1p0/agent_eoh_results/results/pops/population_generation_1.json",
+      "population_size": 4,
+      "valid_candidates": 3,
+      "suspicious_candidates": 1,
+      "invalid_candidates": 0,
+      "non_penalty_candidates": 4,
+      "raw_best_objective": 94.70298,
+      "raw_best_status": "suspicious",
+      "raw_best_flags": [
+        "suspicious_low_objective"
+      ],
+      "filtered_best_objective": 692.07971,
+      "filtered_best_status": "valid",
+      "filtered_best_flags": [],
+      "selected_best_kind": "filtered",
+      "best_objective": 692.07971,
+      "selected_best_status_after_eval": "valid",
+      "selected_best_flags_after_eval": [],
+      "seed_Res": 1.0699933334,
+      "seed_J": 551.810759545803,
+      "best_EOH_Res": null,
+      "best_EOH_J": null,
+      "best_candidate_id": "eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134439",
+      "best_build_ok": true,
+      "data_path": "/Users/guojiadong.9/agent_ad/agent_go/solomon_benchmark_d50/rc102.json",
+      "rag_enabled": false,
+      "rag_context_path": "",
+      "rag_mode_requested": "literature",
+      "rag_mode_effective": null,
+      "rag_query_effective": null,
+      "rag_corpus_size_before": null,
+      "rag_corpus_size_after": null,
+      "rag_retrieved_ids": [],
+      "rag_context_chars": null,
+      "rag_context_truncated": null,
+      "rag_top_k": 3,
+      "rag_query": "",
+      "rag_corpus_dir": "",
+      "rag_max_chars": 6000
+    }
+  ],
+  "raw": [
+    {
+      "row": {
+        "problem": "rc102.json",
+        "density": "d50",
+        "arrival_scale": 1.0,
+        "eoh_ok": true,
+        "eoh_duration": 265.915712,
+        "population_file": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/tables/rag_literature_rc102d50_v3/baseline/run_20260526_134439/cells/rc102_d50_t1p0/agent_eoh_results/results/pops/population_generation_1.json",
+        "population_size": 4,
+        "valid_candidates": 3,
+        "suspicious_candidates": 1,
+        "invalid_candidates": 0,
+        "non_penalty_candidates": 4,
+        "raw_best_objective": 94.70298,
+        "raw_best_status": "suspicious",
+        "raw_best_flags": [
+          "suspicious_low_objective"
+        ],
+        "filtered_best_objective": 692.07971,
+        "filtered_best_status": "valid",
+        "filtered_best_flags": [],
+        "selected_best_kind": "filtered",
+        "best_objective": 692.07971,
+        "selected_best_status_after_eval": "valid",
+        "selected_best_flags_after_eval": [],
+        "seed_Res": 1.0699933334,
+        "seed_J": 551.810759545803,
+        "best_EOH_Res": null,
+        "best_EOH_J": null,
+        "best_candidate_id": "eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134439",
+        "best_build_ok": true,
+        "data_path": "/Users/guojiadong.9/agent_ad/agent_go/solomon_benchmark_d50/rc102.json",
+        "rag_enabled": false,
+        "rag_context_path": "",
+        "rag_mode_requested": "literature",
+        "rag_mode_effective": null,
+        "rag_query_effective": null,
+        "rag_corpus_size_before": null,
+        "rag_corpus_size_after": null,
+        "rag_retrieved_ids": [],
+        "rag_context_chars": null,
+        "rag_context_truncated": null,
+        "rag_top_k": 3,
+        "rag_query": "",
+        "rag_corpus_dir": "",
+        "rag_max_chars": 6000
+      },
+      "eoh_result": {
+        "ok": true,
+        "duration": 265.915712,
+        "population_file": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/tables/rag_literature_rc102d50_v3/baseline/run_20260526_134439/cells/rc102_d50_t1p0/agent_eoh_results/results/pops/population_generation_1.json",
+        "population_size": 4,
+        "population": [
+          {
+            "algorithm": "\n\t/* { Evaluates insertion into all existing assignments and a new empty one, choosing the placement that minimizes the cost increase (delta) rather than the absolute assignment cost, with safe seed fallback. } */\n\tfor jj := range oris {\n\t\tshipID := total_ship + jj\n\t\tbestIdx := -1\n\t\tbestDelta := 0.0\n\t\tfound := false\n\n\t\t// Evaluate insertion into every existing non-empty assignment\n\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\tif dispatch.Assigns[i].StationsLen == 0 {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\toldCost := dispatch.Assigns[i].Cost\n\t\t\tif !dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\tnewCost := dispatch.Assigns[i].Cost\n\t\t\tdelta := newCost - oldCost\n\t\t\tdispatch.Assigns[i].RemoveShip(shipID)\n\t\t\tdispatch.Assigns[i].GenRoute() // restore\n\n\t\t\tif !found || delta < bestDelta {\n\t\t\t\tbestDelta = delta\n\t\t\t\tbestIdx = i\n\t\t\t\tfound = true\n\t\t\t}\n\t\t}\n\n\t\t// Also evaluate creating a new assignment (if space permits)\n\t\tif dispatch.AssignsLen < MAXASSIGNS {\n\t\t\tnewIdx := dispatch.AssignsLen\n\t\t\tif dispatch.Assigns[newIdx].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\tdispatch.Assigns[newIdx].GenRoute()\n\t\t\t\tdelta := dispatch.Assigns[newIdx].Cost // delta from zero\n\t\t\t\tdispatch.Assigns[newIdx].RemoveShip(shipID)\n\t\t\t\tdispatch.Assigns[newIdx].GenRoute() // restore empty\n\t\t\t\tif !found || delta < bestDelta {\n\t\t\t\t\tbestDelta = delta\n\t\t\t\t\tbestIdx = newIdx\n\t\t\t\t\tfound = true\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\t// Apply best insertion\n\t\tif found {\n\t\t\tif bestIdx == dispatch.AssignsLen {\n\t\t\t\t// new assignment selected\n\t\t\t\tdispatch.Assigns[bestIdx].AddShip(shipID, oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t\t\tdispatch.AssignsLen++\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[bestIdx].AddShip(shipID, oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\n\t\t// Fallback: no improving insertion found; create a new assignment safely\n\t\tnewIdx := dispatch.AssignsLen\n\t\tif newIdx >= MAXASSIGNS {\n\t\t\t// Force into any existing slot as last resort\n\t\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\t\tif dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tif !dispatch.Assigns[newIdx].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\tfor k := newIdx + 1; k < MAXASSIGNS; k++ {\n\t\t\t\tif dispatch.Assigns[k].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[k].GenRoute()\n\t\t\t\t\tdispatch.AssignsLen = k + 1\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tdispatch.Assigns[newIdx].GenRoute()\n\t\tdispatch.AssignsLen = newIdx + 1\n\t}\n\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n",
+            "code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\t/* { Evaluates insertion into all existing assignments and a new empty one, choosing the placement that minimizes the cost increase (delta) rather than the absolute assignment cost, with safe seed fallback. } */\n\tfor jj := range oris {\n\t\tshipID := total_ship + jj\n\t\tbestIdx := -1\n\t\tbestDelta := 0.0\n\t\tfound := false\n\n\t\t// Evaluate insertion into every existing non-empty assignment\n\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\tif dispatch.Assigns[i].StationsLen == 0 {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\toldCost := dispatch.Assigns[i].Cost\n\t\t\tif !dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\tnewCost := dispatch.Assigns[i].Cost\n\t\t\tdelta := newCost - oldCost\n\t\t\tdispatch.Assigns[i].RemoveShip(shipID)\n\t\t\tdispatch.Assigns[i].GenRoute() // restore\n\n\t\t\tif !found || delta < bestDelta {\n\t\t\t\tbestDelta = delta\n\t\t\t\tbestIdx = i\n\t\t\t\tfound = true\n\t\t\t}\n\t\t}\n\n\t\t// Also evaluate creating a new assignment (if space permits)\n\t\tif dispatch.AssignsLen < MAXASSIGNS {\n\t\t\tnewIdx := dispatch.AssignsLen\n\t\t\tif dispatch.Assigns[newIdx].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\tdispatch.Assigns[newIdx].GenRoute()\n\t\t\t\tdelta := dispatch.Assigns[newIdx].Cost // delta from zero\n\t\t\t\tdispatch.Assigns[newIdx].RemoveShip(shipID)\n\t\t\t\tdispatch.Assigns[newIdx].GenRoute() // restore empty\n\t\t\t\tif !found || delta < bestDelta {\n\t\t\t\t\tbestDelta = delta\n\t\t\t\t\tbestIdx = newIdx\n\t\t\t\t\tfound = true\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\t// Apply best insertion\n\t\tif found {\n\t\t\tif bestIdx == dispatch.AssignsLen {\n\t\t\t\t// new assignment selected\n\t\t\t\tdispatch.Assigns[bestIdx].AddShip(shipID, oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t\t\tdispatch.AssignsLen++\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[bestIdx].AddShip(shipID, oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\n\t\t// Fallback: no improving insertion found; create a new assignment safely\n\t\tnewIdx := dispatch.AssignsLen\n\t\tif newIdx >= MAXASSIGNS {\n\t\t\t// Force into any existing slot as last resort\n\t\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\t\tif dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tif !dispatch.Assigns[newIdx].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\tfor k := newIdx + 1; k < MAXASSIGNS; k++ {\n\t\t\t\tif dispatch.Assigns[k].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[k].GenRoute()\n\t\t\t\t\tdispatch.AssignsLen = k + 1\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tdispatch.Assigns[newIdx].GenRoute()\n\t\tdispatch.AssignsLen = newIdx + 1\n\t}\n\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n}",
+            "objective": 94.70298,
+            "other_inf": null
+          },
+          {
+            "algorithm": "\n\tfor jj := range oris {\n\t\tshipID := total_ship + jj\n\t\tbestIdx := -1\n\t\tbestCost := 0.0\n\t\tfound := false\n\n\t\t// Evaluate insertion into every existing non-empty assignment\n\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\tif dispatch.Assigns[i].StationsLen == 0 {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tif !dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\tcost := dispatch.Assigns[i].Cost\n\t\t\tdispatch.Assigns[i].RemoveShip(shipID)\n\t\t\tdispatch.Assigns[i].GenRoute() // restore\n\n\t\t\tif !found || cost < bestCost {\n\t\t\t\tbestCost = cost\n\t\t\t\tbestIdx = i\n\t\t\t\tfound = true\n\t\t\t}\n\t\t}\n\n\t\t// Apply best insertion among existing assignments\n\t\tif found {\n\t\t\tdispatch.Assigns[bestIdx].AddShip(shipID, oris[jj], dess[jj])\n\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t\tcontinue\n\t\t}\n\n\t\t// Fallback: create a new assignment (safe seed-style insertion)\n\t\tnewIdx := dispatch.AssignsLen\n\t\tif newIdx >= MAXASSIGNS {\n\t\t\t// No room left; try to force into any existing slot as last resort\n\t\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\t\tif dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tif !dispatch.Assigns[newIdx].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t// Something unexpected; try next available\n\t\t\tfor k := newIdx + 1; k < MAXASSIGNS; k++ {\n\t\t\t\tif dispatch.Assigns[k].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[k].GenRoute()\n\t\t\t\t\tdispatch.AssignsLen = k + 1\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tdispatch.Assigns[newIdx].GenRoute()\n\t\tdispatch.AssignsLen = newIdx + 1\n\t}\n\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n",
+            "code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\tfor jj := range oris {\n\t\tshipID := total_ship + jj\n\t\tbestIdx := -1\n\t\tbestCost := 0.0\n\t\tfound := false\n\n\t\t// Evaluate insertion into every existing non-empty assignment\n\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\tif dispatch.Assigns[i].StationsLen == 0 {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tif !dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\tcost := dispatch.Assigns[i].Cost\n\t\t\tdispatch.Assigns[i].RemoveShip(shipID)\n\t\t\tdispatch.Assigns[i].GenRoute() // restore\n\n\t\t\tif !found || cost < bestCost {\n\t\t\t\tbestCost = cost\n\t\t\t\tbestIdx = i\n\t\t\t\tfound = true\n\t\t\t}\n\t\t}\n\n\t\t// Apply best insertion among existing assignments\n\t\tif found {\n\t\t\tdispatch.Assigns[bestIdx].AddShip(shipID, oris[jj], dess[jj])\n\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t\tcontinue\n\t\t}\n\n\t\t// Fallback: create a new assignment (safe seed-style insertion)\n\t\tnewIdx := dispatch.AssignsLen\n\t\tif newIdx >= MAXASSIGNS {\n\t\t\t// No room left; try to force into any existing slot as last resort\n\t\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\t\tif dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tif !dispatch.Assigns[newIdx].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t// Something unexpected; try next available\n\t\t\tfor k := newIdx + 1; k < MAXASSIGNS; k++ {\n\t\t\t\tif dispatch.Assigns[k].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[k].GenRoute()\n\t\t\t\t\tdispatch.AssignsLen = k + 1\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tdispatch.Assigns[newIdx].GenRoute()\n\t\tdispatch.AssignsLen = newIdx + 1\n\t}\n\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n}",
+            "objective": 692.07971,
+            "other_inf": null
+          },
+          {
+            "algorithm": "\n\tn := len(oris)\n\tindices := make([]int, n)\n\tfor i := 0; i < n; i++ {\n\t\tindices[i] = i\n\t}\n\tfor i := 0; i < n-1; i++ {\n\t\tfor j := i + 1; j < n; j++ {\n\t\t\tif cal_dis(oris[indices[i]], dess[indices[i]]) < cal_dis(oris[indices[j]], dess[indices[j]]) {\n\t\t\t\tindices[i], indices[j] = indices[j], indices[i]\n\t\t\t}\n\t\t}\n\t}\n\n\tfor _, idx := range indices {\n\t\tori := oris[idx]\n\t\tdes := dess[idx]\n\t\tshipID := total_ship + idx\n\n\t\tbestInc := 1e18\n\t\tbestIdx := -1\n\n\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\tif dispatch.Assigns[i].StationsLen == 0 {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tassign := &dispatch.Assigns[i]\n\t\t\tprev := assign.Cost\n\t\t\tif assign.AddShip(shipID, ori, des) {\n\t\t\t\tassign.GenRoute()\n\t\t\t\tif assign.Cost >= 0 {\n\t\t\t\t\tinc := assign.Cost - prev + 0.01*float64(assign.StationsLen)\n\t\t\t\t\tif inc < bestInc {\n\t\t\t\t\t\tbestInc = inc\n\t\t\t\t\t\tbestIdx = i\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tassign.RemoveShip(shipID)\n\t\t\t\tassign.GenRoute()\n\t\t\t}\n\t\t}\n\n\t\tif dispatch.AssignsLen < MAXASSIGNS {\n\t\t\tnewIdx := dispatch.AssignsLen\n\t\t\tassign := &dispatch.Assigns[newIdx]\n\t\t\tif assign.AddShip(shipID, ori, des) {\n\t\t\t\tassign.GenRoute()\n\t\t\t\tif assign.Cost >= 0 {\n\t\t\t\t\tinc := assign.Cost + 50.0\n\t\t\t\t\tif inc < bestInc {\n\t\t\t\t\t\tbestInc = inc\n\t\t\t\t\t\tbestIdx = newIdx\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tassign.RemoveShip(shipID)\n\t\t\t\tassign.GenRoute()\n\t\t\t}\n\t\t}\n\n\t\tif bestIdx != -1 {\n\t\t\tassign := &dispatch.Assigns[bestIdx]\n\t\t\tassign.AddShip(shipID, ori, des)\n\t\t\tassign.GenRoute()\n\t\t\tif bestIdx >= dispatch.AssignsLen {\n\t\t\t\tdispatch.AssignsLen = bestIdx + 1\n\t\t\t}\n\t\t} else {\n\t\t\tinserted := false\n\t\t\tif dispatch.AssignsLen < MAXASSIGNS {\n\t\t\t\tassign := &dispatch.Assigns[dispatch.AssignsLen]\n\t\t\t\tif assign.AddShip(shipID, ori, des) {\n\t\t\t\t\tassign.GenRoute()\n\t\t\t\t\tif assign.Cost >= 0 {\n\t\t\t\t\t\tdispatch.AssignsLen++\n\t\t\t\t\t\tinserted = true\n\t\t\t\t\t} else {\n\t\t\t\t\t\tassign.RemoveShip(shipID)\n\t\t\t\t\t\tassign.GenRoute()\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tif !inserted {\n\t\t\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\t\t\tif dispatch.Assigns[i].StationsLen == 0 {\n\t\t\t\t\t\tassign := &dispatch.Assigns[i]\n\t\t\t\t\t\tif assign.AddShip(shipID, ori, des) {\n\t\t\t\t\t\t\tassign.GenRoute()\n\t\t\t\t\t\t\tif assign.Cost >= 0 {\n\t\t\t\t\t\t\t\tinserted = true\n\t\t\t\t\t\t\t\tbreak\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tassign.RemoveShip(shipID)\n\t\t\t\t\t\t\t\tassign.GenRoute()\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tif !inserted && dispatch.AssignsLen < MAXASSIGNS {\n\t\t\t\tassign := &dispatch.Assigns[dispatch.AssignsLen]\n\t\t\t\tif assign.AddShip(shipID, ori, des) {\n\t\t\t\t\tassign.GenRoute()\n\t\t\t\t\tdispatch.AssignsLen++\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n",
+            "code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\tn := len(oris)\n\tindices := make([]int, n)\n\tfor i := 0; i < n; i++ {\n\t\tindices[i] = i\n\t}\n\tfor i := 0; i < n-1; i++ {\n\t\tfor j := i + 1; j < n; j++ {\n\t\t\tif cal_dis(oris[indices[i]], dess[indices[i]]) < cal_dis(oris[indices[j]], dess[indices[j]]) {\n\t\t\t\tindices[i], indices[j] = indices[j], indices[i]\n\t\t\t}\n\t\t}\n\t}\n\n\tfor _, idx := range indices {\n\t\tori := oris[idx]\n\t\tdes := dess[idx]\n\t\tshipID := total_ship + idx\n\n\t\tbestInc := 1e18\n\t\tbestIdx := -1\n\n\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\tif dispatch.Assigns[i].StationsLen == 0 {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tassign := &dispatch.Assigns[i]\n\t\t\tprev := assign.Cost\n\t\t\tif assign.AddShip(shipID, ori, des) {\n\t\t\t\tassign.GenRoute()\n\t\t\t\tif assign.Cost >= 0 {\n\t\t\t\t\tinc := assign.Cost - prev + 0.01*float64(assign.StationsLen)\n\t\t\t\t\tif inc < bestInc {\n\t\t\t\t\t\tbestInc = inc\n\t\t\t\t\t\tbestIdx = i\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tassign.RemoveShip(shipID)\n\t\t\t\tassign.GenRoute()\n\t\t\t}\n\t\t}\n\n\t\tif dispatch.AssignsLen < MAXASSIGNS {\n\t\t\tnewIdx := dispatch.AssignsLen\n\t\t\tassign := &dispatch.Assigns[newIdx]\n\t\t\tif assign.AddShip(shipID, ori, des) {\n\t\t\t\tassign.GenRoute()\n\t\t\t\tif assign.Cost >= 0 {\n\t\t\t\t\tinc := assign.Cost + 50.0\n\t\t\t\t\tif inc < bestInc {\n\t\t\t\t\t\tbestInc = inc\n\t\t\t\t\t\tbestIdx = newIdx\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tassign.RemoveShip(shipID)\n\t\t\t\tassign.GenRoute()\n\t\t\t}\n\t\t}\n\n\t\tif bestIdx != -1 {\n\t\t\tassign := &dispatch.Assigns[bestIdx]\n\t\t\tassign.AddShip(shipID, ori, des)\n\t\t\tassign.GenRoute()\n\t\t\tif bestIdx >= dispatch.AssignsLen {\n\t\t\t\tdispatch.AssignsLen = bestIdx + 1\n\t\t\t}\n\t\t} else {\n\t\t\tinserted := false\n\t\t\tif dispatch.AssignsLen < MAXASSIGNS {\n\t\t\t\tassign := &dispatch.Assigns[dispatch.AssignsLen]\n\t\t\t\tif assign.AddShip(shipID, ori, des) {\n\t\t\t\t\tassign.GenRoute()\n\t\t\t\t\tif assign.Cost >= 0 {\n\t\t\t\t\t\tdispatch.AssignsLen++\n\t\t\t\t\t\tinserted = true\n\t\t\t\t\t} else {\n\t\t\t\t\t\tassign.RemoveShip(shipID)\n\t\t\t\t\t\tassign.GenRoute()\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tif !inserted {\n\t\t\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\t\t\tif dispatch.Assigns[i].StationsLen == 0 {\n\t\t\t\t\t\tassign := &dispatch.Assigns[i]\n\t\t\t\t\t\tif assign.AddShip(shipID, ori, des) {\n\t\t\t\t\t\t\tassign.GenRoute()\n\t\t\t\t\t\t\tif assign.Cost >= 0 {\n\t\t\t\t\t\t\t\tinserted = true\n\t\t\t\t\t\t\t\tbreak\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tassign.RemoveShip(shipID)\n\t\t\t\t\t\t\t\tassign.GenRoute()\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tif !inserted && dispatch.AssignsLen < MAXASSIGNS {\n\t\t\t\tassign := &dispatch.Assigns[dispatch.AssignsLen]\n\t\t\t\tif assign.AddShip(shipID, ori, des) {\n\t\t\t\t\tassign.GenRoute()\n\t\t\t\t\tdispatch.AssignsLen++\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n}",
+            "objective": 694.98072,
+            "other_inf": null
+          },
+          {
+            "algorithm": "SA baseline InsertShips extracted from project root main.go",
+            "code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\tvar rand_range [MAXASSIGNS]int\n\tvar rand_limit int = 0 //记录有多少个有车的assign\n\n\tlogger := zap.L().Named(\"Insert\")\n\n\t// 生成随机序列 TODO: 有些车在时间触发过程中可能变空了\n\tfor ii := range rand_range {\n\t\trand_range[ii] = ii\n\t\t// 交换不空的解\n\t\tif ii < dispatch.AssignsLen && dispatch.Assigns[ii].StationsLen > 0 {\n\t\t\trand_range[ii], rand_range[rand_limit] = rand_range[rand_limit], ii\n\t\t\t// 记录有多少个不空的解\n\t\t\trand_limit += 1\n\t\t}\n\t}\n\t//由于不空的解都在前面，所以只需要打乱前面这部分\n\trand.Shuffle(rand_limit, func(i, j int) {\n\t\trand_range[i], rand_range[j] = rand_range[j], rand_range[i]\n\t})\n\n\t// 开始插入\n\tfor jj := range oris {\n\t\tfor _, ii := range rand_range {\n\t\t\t//尝试插入解\n\t\t\tif !dispatch.Assigns[ii].AddShip(total_ship+jj, oris[jj], dess[jj]) {\n\n\t\t\t\tdispatch.Assigns[ii].Cost = -1\n\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\n\t\t\t}\n\t\t\t//插入失败\n\t\t\tif dispatch.Assigns[ii].Cost < 0 {\n\t\t\t\t//fmt.Println(\"inserted but not avaliable\")\n\t\t\t\tdispatch.Assigns[ii].RemoveShip(total_ship + jj)\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\t} else {\n\t\t\t\t//如果插入成功，并且插入了一辆空车，那么扩展一辆车\n\t\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\t\tdispatch.AssignsLen += 1\n\t\t\t\t}\n\t\t\t\tbreak\n\t\t\t}\n\t\t\t// 应当一定有一辆车能插入成功,否则第assignslen也插入失败的话，说明该订单插不进去\n\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\tlogger.Warn(\n\t\t\t\t\t\"Cannot Insert\",\n\t\t\t\t\tzap.Int(\"ship\", total_ship+jj),\n\t\t\t\t\tzap.Int(\"non_empty\", rand_limit),\n\t\t\t\t\tzap.Int(\"assigns_len\", dispatch.AssignsLen),\n\t\t\t\t)\n\t\t\t\tfmt.Println(oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[dispatch.AssignsLen].PrettyPrint()\n\t\t\t\t//dispatch.Assigns[dispatch.AssignsLen].AddShip(total_ship + jj, oris[jj], dess[jj])\n\t\t\t\t//checkDispatch(&dispatch)\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n\tdispatch.RenewnTotalCost()\n\t//XXX: 调查发现,insertion不会改变累计里程，是别的东西删除了累计里程\n\treturn dispatch\n}\n",
+            "objective": 713.52158,
+            "other_inf": null
+          }
+        ],
+        "rag_trace": null
+      },
+      "raw_best_population_item": {
+        "algorithm": "\n\t/* { Evaluates insertion into all existing assignments and a new empty one, choosing the placement that minimizes the cost increase (delta) rather than the absolute assignment cost, with safe seed fallback. } */\n\tfor jj := range oris {\n\t\tshipID := total_ship + jj\n\t\tbestIdx := -1\n\t\tbestDelta := 0.0\n\t\tfound := false\n\n\t\t// Evaluate insertion into every existing non-empty assignment\n\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\tif dispatch.Assigns[i].StationsLen == 0 {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\toldCost := dispatch.Assigns[i].Cost\n\t\t\tif !dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\tnewCost := dispatch.Assigns[i].Cost\n\t\t\tdelta := newCost - oldCost\n\t\t\tdispatch.Assigns[i].RemoveShip(shipID)\n\t\t\tdispatch.Assigns[i].GenRoute() // restore\n\n\t\t\tif !found || delta < bestDelta {\n\t\t\t\tbestDelta = delta\n\t\t\t\tbestIdx = i\n\t\t\t\tfound = true\n\t\t\t}\n\t\t}\n\n\t\t// Also evaluate creating a new assignment (if space permits)\n\t\tif dispatch.AssignsLen < MAXASSIGNS {\n\t\t\tnewIdx := dispatch.AssignsLen\n\t\t\tif dispatch.Assigns[newIdx].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\tdispatch.Assigns[newIdx].GenRoute()\n\t\t\t\tdelta := dispatch.Assigns[newIdx].Cost // delta from zero\n\t\t\t\tdispatch.Assigns[newIdx].RemoveShip(shipID)\n\t\t\t\tdispatch.Assigns[newIdx].GenRoute() // restore empty\n\t\t\t\tif !found || delta < bestDelta {\n\t\t\t\t\tbestDelta = delta\n\t\t\t\t\tbestIdx = newIdx\n\t\t\t\t\tfound = true\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\t// Apply best insertion\n\t\tif found {\n\t\t\tif bestIdx == dispatch.AssignsLen {\n\t\t\t\t// new assignment selected\n\t\t\t\tdispatch.Assigns[bestIdx].AddShip(shipID, oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t\t\tdispatch.AssignsLen++\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[bestIdx].AddShip(shipID, oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\n\t\t// Fallback: no improving insertion found; create a new assignment safely\n\t\tnewIdx := dispatch.AssignsLen\n\t\tif newIdx >= MAXASSIGNS {\n\t\t\t// Force into any existing slot as last resort\n\t\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\t\tif dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tif !dispatch.Assigns[newIdx].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\tfor k := newIdx + 1; k < MAXASSIGNS; k++ {\n\t\t\t\tif dispatch.Assigns[k].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[k].GenRoute()\n\t\t\t\t\tdispatch.AssignsLen = k + 1\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tdispatch.Assigns[newIdx].GenRoute()\n\t\tdispatch.AssignsLen = newIdx + 1\n\t}\n\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n",
+        "code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\t/* { Evaluates insertion into all existing assignments and a new empty one, choosing the placement that minimizes the cost increase (delta) rather than the absolute assignment cost, with safe seed fallback. } */\n\tfor jj := range oris {\n\t\tshipID := total_ship + jj\n\t\tbestIdx := -1\n\t\tbestDelta := 0.0\n\t\tfound := false\n\n\t\t// Evaluate insertion into every existing non-empty assignment\n\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\tif dispatch.Assigns[i].StationsLen == 0 {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\toldCost := dispatch.Assigns[i].Cost\n\t\t\tif !dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\tnewCost := dispatch.Assigns[i].Cost\n\t\t\tdelta := newCost - oldCost\n\t\t\tdispatch.Assigns[i].RemoveShip(shipID)\n\t\t\tdispatch.Assigns[i].GenRoute() // restore\n\n\t\t\tif !found || delta < bestDelta {\n\t\t\t\tbestDelta = delta\n\t\t\t\tbestIdx = i\n\t\t\t\tfound = true\n\t\t\t}\n\t\t}\n\n\t\t// Also evaluate creating a new assignment (if space permits)\n\t\tif dispatch.AssignsLen < MAXASSIGNS {\n\t\t\tnewIdx := dispatch.AssignsLen\n\t\t\tif dispatch.Assigns[newIdx].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\tdispatch.Assigns[newIdx].GenRoute()\n\t\t\t\tdelta := dispatch.Assigns[newIdx].Cost // delta from zero\n\t\t\t\tdispatch.Assigns[newIdx].RemoveShip(shipID)\n\t\t\t\tdispatch.Assigns[newIdx].GenRoute() // restore empty\n\t\t\t\tif !found || delta < bestDelta {\n\t\t\t\t\tbestDelta = delta\n\t\t\t\t\tbestIdx = newIdx\n\t\t\t\t\tfound = true\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\t// Apply best insertion\n\t\tif found {\n\t\t\tif bestIdx == dispatch.AssignsLen {\n\t\t\t\t// new assignment selected\n\t\t\t\tdispatch.Assigns[bestIdx].AddShip(shipID, oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t\t\tdispatch.AssignsLen++\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[bestIdx].AddShip(shipID, oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\n\t\t// Fallback: no improving insertion found; create a new assignment safely\n\t\tnewIdx := dispatch.AssignsLen\n\t\tif newIdx >= MAXASSIGNS {\n\t\t\t// Force into any existing slot as last resort\n\t\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\t\tif dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tif !dispatch.Assigns[newIdx].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\tfor k := newIdx + 1; k < MAXASSIGNS; k++ {\n\t\t\t\tif dispatch.Assigns[k].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[k].GenRoute()\n\t\t\t\t\tdispatch.AssignsLen = k + 1\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tdispatch.Assigns[newIdx].GenRoute()\n\t\tdispatch.AssignsLen = newIdx + 1\n\t}\n\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n}",
+        "objective": 94.70298,
+        "other_inf": null
+      },
+      "filtered_best_population_item": {
+        "algorithm": "\n\tfor jj := range oris {\n\t\tshipID := total_ship + jj\n\t\tbestIdx := -1\n\t\tbestCost := 0.0\n\t\tfound := false\n\n\t\t// Evaluate insertion into every existing non-empty assignment\n\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\tif dispatch.Assigns[i].StationsLen == 0 {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tif !dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\tcost := dispatch.Assigns[i].Cost\n\t\t\tdispatch.Assigns[i].RemoveShip(shipID)\n\t\t\tdispatch.Assigns[i].GenRoute() // restore\n\n\t\t\tif !found || cost < bestCost {\n\t\t\t\tbestCost = cost\n\t\t\t\tbestIdx = i\n\t\t\t\tfound = true\n\t\t\t}\n\t\t}\n\n\t\t// Apply best insertion among existing assignments\n\t\tif found {\n\t\t\tdispatch.Assigns[bestIdx].AddShip(shipID, oris[jj], dess[jj])\n\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t\tcontinue\n\t\t}\n\n\t\t// Fallback: create a new assignment (safe seed-style insertion)\n\t\tnewIdx := dispatch.AssignsLen\n\t\tif newIdx >= MAXASSIGNS {\n\t\t\t// No room left; try to force into any existing slot as last resort\n\t\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\t\tif dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tif !dispatch.Assigns[newIdx].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t// Something unexpected; try next available\n\t\t\tfor k := newIdx + 1; k < MAXASSIGNS; k++ {\n\t\t\t\tif dispatch.Assigns[k].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[k].GenRoute()\n\t\t\t\t\tdispatch.AssignsLen = k + 1\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tdispatch.Assigns[newIdx].GenRoute()\n\t\tdispatch.AssignsLen = newIdx + 1\n\t}\n\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n",
+        "code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\tfor jj := range oris {\n\t\tshipID := total_ship + jj\n\t\tbestIdx := -1\n\t\tbestCost := 0.0\n\t\tfound := false\n\n\t\t// Evaluate insertion into every existing non-empty assignment\n\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\tif dispatch.Assigns[i].StationsLen == 0 {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tif !dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\tcost := dispatch.Assigns[i].Cost\n\t\t\tdispatch.Assigns[i].RemoveShip(shipID)\n\t\t\tdispatch.Assigns[i].GenRoute() // restore\n\n\t\t\tif !found || cost < bestCost {\n\t\t\t\tbestCost = cost\n\t\t\t\tbestIdx = i\n\t\t\t\tfound = true\n\t\t\t}\n\t\t}\n\n\t\t// Apply best insertion among existing assignments\n\t\tif found {\n\t\t\tdispatch.Assigns[bestIdx].AddShip(shipID, oris[jj], dess[jj])\n\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t\tcontinue\n\t\t}\n\n\t\t// Fallback: create a new assignment (safe seed-style insertion)\n\t\tnewIdx := dispatch.AssignsLen\n\t\tif newIdx >= MAXASSIGNS {\n\t\t\t// No room left; try to force into any existing slot as last resort\n\t\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\t\tif dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tif !dispatch.Assigns[newIdx].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t// Something unexpected; try next available\n\t\t\tfor k := newIdx + 1; k < MAXASSIGNS; k++ {\n\t\t\t\tif dispatch.Assigns[k].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[k].GenRoute()\n\t\t\t\t\tdispatch.AssignsLen = k + 1\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tdispatch.Assigns[newIdx].GenRoute()\n\t\tdispatch.AssignsLen = newIdx + 1\n\t}\n\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n}",
+        "objective": 692.07971,
+        "other_inf": null
+      },
+      "best_population_item": {
+        "algorithm": "\n\tfor jj := range oris {\n\t\tshipID := total_ship + jj\n\t\tbestIdx := -1\n\t\tbestCost := 0.0\n\t\tfound := false\n\n\t\t// Evaluate insertion into every existing non-empty assignment\n\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\tif dispatch.Assigns[i].StationsLen == 0 {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tif !dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\tcost := dispatch.Assigns[i].Cost\n\t\t\tdispatch.Assigns[i].RemoveShip(shipID)\n\t\t\tdispatch.Assigns[i].GenRoute() // restore\n\n\t\t\tif !found || cost < bestCost {\n\t\t\t\tbestCost = cost\n\t\t\t\tbestIdx = i\n\t\t\t\tfound = true\n\t\t\t}\n\t\t}\n\n\t\t// Apply best insertion among existing assignments\n\t\tif found {\n\t\t\tdispatch.Assigns[bestIdx].AddShip(shipID, oris[jj], dess[jj])\n\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t\tcontinue\n\t\t}\n\n\t\t// Fallback: create a new assignment (safe seed-style insertion)\n\t\tnewIdx := dispatch.AssignsLen\n\t\tif newIdx >= MAXASSIGNS {\n\t\t\t// No room left; try to force into any existing slot as last resort\n\t\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\t\tif dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tif !dispatch.Assigns[newIdx].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t// Something unexpected; try next available\n\t\t\tfor k := newIdx + 1; k < MAXASSIGNS; k++ {\n\t\t\t\tif dispatch.Assigns[k].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[k].GenRoute()\n\t\t\t\t\tdispatch.AssignsLen = k + 1\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tdispatch.Assigns[newIdx].GenRoute()\n\t\tdispatch.AssignsLen = newIdx + 1\n\t}\n\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n",
+        "code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\tfor jj := range oris {\n\t\tshipID := total_ship + jj\n\t\tbestIdx := -1\n\t\tbestCost := 0.0\n\t\tfound := false\n\n\t\t// Evaluate insertion into every existing non-empty assignment\n\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\tif dispatch.Assigns[i].StationsLen == 0 {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tif !dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\tcost := dispatch.Assigns[i].Cost\n\t\t\tdispatch.Assigns[i].RemoveShip(shipID)\n\t\t\tdispatch.Assigns[i].GenRoute() // restore\n\n\t\t\tif !found || cost < bestCost {\n\t\t\t\tbestCost = cost\n\t\t\t\tbestIdx = i\n\t\t\t\tfound = true\n\t\t\t}\n\t\t}\n\n\t\t// Apply best insertion among existing assignments\n\t\tif found {\n\t\t\tdispatch.Assigns[bestIdx].AddShip(shipID, oris[jj], dess[jj])\n\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t\tcontinue\n\t\t}\n\n\t\t// Fallback: create a new assignment (safe seed-style insertion)\n\t\tnewIdx := dispatch.AssignsLen\n\t\tif newIdx >= MAXASSIGNS {\n\t\t\t// No room left; try to force into any existing slot as last resort\n\t\t\tfor i := 0; i < dispatch.AssignsLen; i++ {\n\t\t\t\tif dispatch.Assigns[i].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[i].GenRoute()\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tif !dispatch.Assigns[newIdx].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t// Something unexpected; try next available\n\t\t\tfor k := newIdx + 1; k < MAXASSIGNS; k++ {\n\t\t\t\tif dispatch.Assigns[k].AddShip(shipID, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[k].GenRoute()\n\t\t\t\t\tdispatch.AssignsLen = k + 1\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\tdispatch.Assigns[newIdx].GenRoute()\n\t\tdispatch.AssignsLen = newIdx + 1\n\t}\n\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n}",
+        "objective": 692.07971,
+        "other_inf": null
+      },
+      "candidate_statuses": [
+        {
+          "index": 0,
+          "status": "suspicious",
+          "objective": 94.70298,
+          "flags": [
+            "suspicious_low_objective"
+          ],
+          "reason": "suspicious_low_objective"
+        },
+        {
+          "index": 1,
+          "status": "valid",
+          "objective": 692.07971,
+          "flags": [],
+          "reason": "ok"
+        },
+        {
+          "index": 2,
+          "status": "valid",
+          "objective": 694.98072,
+          "flags": [],
+          "reason": "ok"
+        },
+        {
+          "index": 3,
+          "status": "valid",
+          "objective": 713.52158,
+          "flags": [],
+          "reason": "ok"
+        }
+      ],
+      "selected_after_eval": {
+        "status": "valid",
+        "objective": 692.07971,
+        "flags": [],
+        "reason": "ok"
+      },
+      "build_info": {
+        "candidate_id": "eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134439",
+        "project_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/generated/projects/eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134439",
+        "bin_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/generated/bins/eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134439.exe",
+        "build_ok": true,
+        "build_return_code": 0,
+        "build_stdout": "",
+        "build_stderr": "",
+        "build_duration": 1.139914,
+        "algorithm": "agent_eoh_arrival_scale_best",
+        "target_file": "main.go",
+        "candidate_label": "eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134439",
+        "candidate_origin": "eoh_arrival_grid",
+        "rationale": "Best EOH candidate from arrival-scale grid experiment."
+      },
+      "best_eval": {
+        "candidate_id": "eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134439",
+        "build_ok": true,
+        "Res": null,
+        "J": null,
+        "return_code": 2,
+        "bin_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/generated/bins/eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134439.exe"
+      }
+    }
+  ]
+}

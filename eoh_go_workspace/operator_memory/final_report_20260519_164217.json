@@ -1,0 +1,82 @@
+{
+  "operator": "SmartEOHOperator",
+  "timestamp": "2026-05-19T16:42:17",
+  "config": {
+    "generations": 2,
+    "pop_size": 3,
+    "dataset_density": "d25",
+    "arrival_scale": 1.0,
+    "baseline_cost": 664.1195472849001
+  },
+  "best_cost": 664.1195472849001,
+  "best_generation": 1,
+  "baseline_cost": 664.1195472849001,
+  "improvement_pct": 0.0,
+  "generation_log": [
+    {
+      "gen": 1,
+      "candidates_generated": 3,
+      "compiled_ok": 3,
+      "compiled_fail": 0,
+      "evaluated_ok": 2,
+      "evaluated_fail": 1,
+      "guard_excluded": 1,
+      "best_fitness": 664.1195472849001,
+      "avg_fitness": 715.9259982176029,
+      "best_vs_baseline_pct": 0.0,
+      "fail_rate": 0.3333333333333333,
+      "repair_count": 0,
+      "repair_success": 0,
+      "active_failure_patterns": [
+        "timeout"
+      ],
+      "elapsed_s": 226.5,
+      "valid_costs": [
+        664.1195472849001,
+        767.7324491503057
+      ],
+      "best_code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\tvar rand_range [MAXASSIGNS]int\n\tvar rand_limit int = 0\n\n\tlogger := zap.L().Named(\"Insert\")\n\n\t// 收集非空assigns并按StationLen升序排序（先尝试空闲或负载轻的车辆）\n\tfor ii := range rand_range {\n\t\trand_range[ii] = ii\n\t\tif ii < dispatch.AssignsLen && dispatch.Assigns[ii].StationsLen > 0 {\n\t\t\t// 将非空的放到前面，同时记录数量\n\t\t\trand_range[ii], rand_range[rand_limit] = rand_range[rand_limit], ii\n\t\t\trand_limit++\n\t\t}\n\t}\n\t// 对前rand_limit个assign按StationsLen升序排列（简单选择排序）\n\tfor i := 0; i < rand_limit; i++ {\n\t\tbestIdx := i\n\t\tfor j := i + 1; j < rand_limit; j++ {\n\t\t\tif dispatch.Assigns[rand_range[j]].StationsLen < dispatch.Assigns[rand_range[bestIdx]].StationsLen {\n\t\t\t\tbestIdx = j\n\t\t\t}\n\t\t}\n\t\tif bestIdx != i {\n\t\t\trand_range[i], rand_range[bestIdx] = rand_range[bestIdx], rand_range[i]\n\t\t}\n\t}\n\n\t// 开始插入\n\tfor jj := range oris {\n\t\tfor _, ii := range rand_range {\n\t\t\t//尝试插入解\n\t\t\tif !dispatch.Assigns[ii].AddShip(total_ship+jj, oris[jj], dess[jj]) {\n\t\t\t\tdispatch.Assigns[ii].Cost = -1\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\t}\n\t\t\t//插入失败\n\t\t\tif dispatch.Assigns[ii].Cost < 0 {\n\t\t\t\tdispatch.Assigns[ii].RemoveShip(total_ship + jj)\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\t} else {\n\t\t\t\t//如果插入成功，并且插入了一辆空车，那么扩展一辆车\n\t\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\t\tdispatch.AssignsLen += 1\n\t\t\t\t}\n\t\t\t\tbreak\n\t\t\t}\n\t\t\t// 应当一定有一辆车能插入成功,否则第assignslen也插入失败的话，说明该订单插不进去\n\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\tlogger.Warn(\n\t\t\t\t\t\"Cannot Insert\",\n\t\t\t\t\tzap.Int(\"ship\", total_ship+jj),\n\t\t\t\t\tzap.Int(\"non_empty\", rand_limit),\n\t\t\t\t\tzap.Int(\"assigns_len\", dispatch.AssignsLen),\n\t\t\t\t)\n\t\t\t\tfmt.Println(oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[dispatch.AssignsLen].PrettyPrint()\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n}"
+    },
+    {
+      "gen": 2,
+      "candidates_generated": 3,
+      "compiled_ok": 3,
+      "compiled_fail": 0,
+      "evaluated_ok": 2,
+      "evaluated_fail": 1,
+      "guard_excluded": 0,
+      "best_fitness": 664.1195472849001,
+      "avg_fitness": 664.1195472849001,
+      "best_vs_baseline_pct": 0.0,
+      "fail_rate": 0.3333333333333333,
+      "repair_count": 1,
+      "repair_success": 1,
+      "active_failure_patterns": [
+        "timeout",
+        "negative_cost"
+      ],
+      "elapsed_s": 370.3,
+      "valid_costs": [
+        664.1195472849001,
+        664.1195472849001
+      ],
+      "best_code": null
+    }
+  ],
+  "failure_memory": {
+    "total_attempts": 14,
+    "total_failures": 11,
+    "fail_rate": 0.7857142857142857,
+    "top_failures": [
+      {
+        "key": "timeout",
+        "count": 4
+      },
+      {
+        "key": "negative_cost",
+        "count": 1
+      }
+    ]
+  },
+  "total_elapsed_s": 596.8
+}

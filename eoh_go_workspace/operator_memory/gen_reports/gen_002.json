@@ -1,0 +1,25 @@
+{
+  "gen": 2,
+  "candidates_generated": 3,
+  "compiled_ok": 3,
+  "compiled_fail": 0,
+  "evaluated_ok": 2,
+  "evaluated_fail": 1,
+  "guard_excluded": 0,
+  "best_fitness": 664.1195472849001,
+  "avg_fitness": 664.1195472849001,
+  "best_vs_baseline_pct": 0.0,
+  "fail_rate": 0.3333333333333333,
+  "repair_count": 1,
+  "repair_success": 1,
+  "active_failure_patterns": [
+    "timeout",
+    "negative_cost"
+  ],
+  "elapsed_s": 370.3,
+  "valid_costs": [
+    664.1195472849001,
+    664.1195472849001
+  ],
+  "best_code": null
+}

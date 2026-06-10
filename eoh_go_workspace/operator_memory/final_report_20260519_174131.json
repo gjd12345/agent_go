@@ -1,0 +1,59 @@
+{
+  "operator": "SmartEOHOperator",
+  "timestamp": "2026-05-19T17:41:31",
+  "config": {
+    "generations": 1,
+    "pop_size": 2,
+    "dataset_density": "d25",
+    "arrival_scale": 1.0,
+    "baseline_cost": 664.1195472849001,
+    "mutation_mode": "templates"
+  },
+  "best_cost": 664.1195472849001,
+  "best_generation": 1,
+  "baseline_cost": 664.1195472849001,
+  "improvement_pct": 0.0,
+  "generation_log": [
+    {
+      "gen": 1,
+      "candidates_generated": 2,
+      "compiled_ok": 2,
+      "compiled_fail": 0,
+      "evaluated_ok": 2,
+      "evaluated_fail": 0,
+      "guard_excluded": 0,
+      "best_fitness": 664.1195472849001,
+      "avg_fitness": 948.9814870794427,
+      "best_vs_baseline_pct": 0.0,
+      "fail_rate": 0.0,
+      "repair_count": 0,
+      "repair_success": 0,
+      "active_failure_patterns": [
+        "timeout",
+        "negative_cost"
+      ],
+      "elapsed_s": 16.7,
+      "valid_costs": [
+        1233.8434268739852,
+        664.1195472849001
+      ],
+      "best_code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\tvar randRange [MAXASSIGNS]int\n\trandLimit := 0\n\n\tfor ii := range randRange {\n\t\trandRange[ii] = ii\n\t\tif ii < dispatch.AssignsLen && dispatch.Assigns[ii].StationsLen > 0 {\n\t\t\trandRange[ii], randRange[randLimit] = randRange[randLimit], ii\n\t\t\trandLimit++\n\t\t}\n\t}\n\trand.Shuffle(randLimit, func(i, j int) {\n\t\trandRange[i], randRange[j] = randRange[j], randRange[i]\n\t})\n\n\tfor jj := range oris {\n\t\tinserted := false\n\t\tfor _, ii := range randRange {\n\t\t\tif ii >= MAXASSIGNS {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tif !dispatch.Assigns[ii].AddShip(total_ship+jj, oris[jj], dess[jj]) {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\tif dispatch.Assigns[ii].Cost >= 0 {\n\t\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\t\tdispatch.AssignsLen = ii + 1\n\t\t\t\t}\n\t\t\t\tinserted = true\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tdispatch.Assigns[ii].RemoveShip(total_ship + jj)\n\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t\tif !inserted && dispatch.AssignsLen < MAXASSIGNS {\n\t\t\tii := dispatch.AssignsLen\n\t\t\tif dispatch.Assigns[ii].AddShip(total_ship+jj, oris[jj], dess[jj]) {\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\t\tif dispatch.Assigns[ii].Cost >= 0 {\n\t\t\t\t\tdispatch.AssignsLen = ii + 1\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n}"
+    }
+  ],
+  "failure_memory": {
+    "total_attempts": 16,
+    "total_failures": 11,
+    "fail_rate": 0.6875,
+    "top_failures": [
+      {
+        "key": "timeout",
+        "count": 4
+      },
+      {
+        "key": "negative_cost",
+        "count": 1
+      }
+    ]
+  },
+  "total_elapsed_s": 16.7
+}

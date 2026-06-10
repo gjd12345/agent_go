@@ -1,0 +1,252 @@
+{
+  "rows": [
+    {
+      "problem": "rc102.json",
+      "density": "d50",
+      "arrival_scale": 1.0,
+      "eoh_ok": true,
+      "eoh_duration": 284.559565,
+      "population_file": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/tables/rag_literature_rc102d50_v3/rag/run_20260526_134914/cells/rc102_d50_t1p0/agent_eoh_results/results/pops/population_generation_1.json",
+      "population_size": 1,
+      "valid_candidates": 1,
+      "suspicious_candidates": 0,
+      "invalid_candidates": 0,
+      "non_penalty_candidates": 1,
+      "raw_best_objective": 713.52158,
+      "raw_best_status": "valid",
+      "raw_best_flags": [],
+      "filtered_best_objective": 713.52158,
+      "filtered_best_status": "valid",
+      "filtered_best_flags": [],
+      "selected_best_kind": "filtered",
+      "best_objective": 713.52158,
+      "selected_best_status_after_eval": "valid",
+      "selected_best_flags_after_eval": [],
+      "seed_Res": 1.159026175,
+      "seed_J": 551.810759545803,
+      "best_EOH_Res": 1.1168077832,
+      "best_EOH_J": 551.810759545803,
+      "best_candidate_id": "eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134914",
+      "best_build_ok": true,
+      "data_path": "/Users/guojiadong.9/agent_ad/agent_go/solomon_benchmark_d50/rc102.json",
+      "rag_enabled": true,
+      "rag_context_path": "",
+      "rag_mode_requested": "literature",
+      "rag_mode_effective": "literature",
+      "rag_query_effective": "dynamic InsertShips insertion heuristic density=d50 arrival_scale=1.0 medium density route capacity insertion cost final cost",
+      "rag_corpus_size_before": 19,
+      "rag_corpus_size_after": 9,
+      "rag_retrieved_ids": [
+        "regret2_insertion",
+        "solomon_i1",
+        "farthest_insertion"
+      ],
+      "rag_context_chars": 3828,
+      "rag_context_truncated": false,
+      "rag_top_k": 3,
+      "rag_query": "",
+      "rag_corpus_dir": "",
+      "rag_max_chars": 6000
+    }
+  ],
+  "raw": [
+    {
+      "row": {
+        "problem": "rc102.json",
+        "density": "d50",
+        "arrival_scale": 1.0,
+        "eoh_ok": true,
+        "eoh_duration": 284.559565,
+        "population_file": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/tables/rag_literature_rc102d50_v3/rag/run_20260526_134914/cells/rc102_d50_t1p0/agent_eoh_results/results/pops/population_generation_1.json",
+        "population_size": 1,
+        "valid_candidates": 1,
+        "suspicious_candidates": 0,
+        "invalid_candidates": 0,
+        "non_penalty_candidates": 1,
+        "raw_best_objective": 713.52158,
+        "raw_best_status": "valid",
+        "raw_best_flags": [],
+        "filtered_best_objective": 713.52158,
+        "filtered_best_status": "valid",
+        "filtered_best_flags": [],
+        "selected_best_kind": "filtered",
+        "best_objective": 713.52158,
+        "selected_best_status_after_eval": "valid",
+        "selected_best_flags_after_eval": [],
+        "seed_Res": 1.159026175,
+        "seed_J": 551.810759545803,
+        "best_EOH_Res": 1.1168077832,
+        "best_EOH_J": 551.810759545803,
+        "best_candidate_id": "eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134914",
+        "best_build_ok": true,
+        "data_path": "/Users/guojiadong.9/agent_ad/agent_go/solomon_benchmark_d50/rc102.json",
+        "rag_enabled": true,
+        "rag_context_path": "",
+        "rag_mode_requested": "literature",
+        "rag_mode_effective": "literature",
+        "rag_query_effective": "dynamic InsertShips insertion heuristic density=d50 arrival_scale=1.0 medium density route capacity insertion cost final cost",
+        "rag_corpus_size_before": 19,
+        "rag_corpus_size_after": 9,
+        "rag_retrieved_ids": [
+          "regret2_insertion",
+          "solomon_i1",
+          "farthest_insertion"
+        ],
+        "rag_context_chars": 3828,
+        "rag_context_truncated": false,
+        "rag_top_k": 3,
+        "rag_query": "",
+        "rag_corpus_dir": "",
+        "rag_max_chars": 6000
+      },
+      "eoh_result": {
+        "ok": true,
+        "duration": 284.559565,
+        "population_file": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/tables/rag_literature_rc102d50_v3/rag/run_20260526_134914/cells/rc102_d50_t1p0/agent_eoh_results/results/pops/population_generation_1.json",
+        "population_size": 1,
+        "population": [
+          {
+            "algorithm": "SA baseline InsertShips extracted from project root main.go",
+            "code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\tvar rand_range [MAXASSIGNS]int\n\tvar rand_limit int = 0 //记录有多少个有车的assign\n\n\tlogger := zap.L().Named(\"Insert\")\n\n\t// 生成随机序列 TODO: 有些车在时间触发过程中可能变空了\n\tfor ii := range rand_range {\n\t\trand_range[ii] = ii\n\t\t// 交换不空的解\n\t\tif ii < dispatch.AssignsLen && dispatch.Assigns[ii].StationsLen > 0 {\n\t\t\trand_range[ii], rand_range[rand_limit] = rand_range[rand_limit], ii\n\t\t\t// 记录有多少个不空的解\n\t\t\trand_limit += 1\n\t\t}\n\t}\n\t//由于不空的解都在前面，所以只需要打乱前面这部分\n\trand.Shuffle(rand_limit, func(i, j int) {\n\t\trand_range[i], rand_range[j] = rand_range[j], rand_range[i]\n\t})\n\n\t// 开始插入\n\tfor jj := range oris {\n\t\tfor _, ii := range rand_range {\n\t\t\t//尝试插入解\n\t\t\tif !dispatch.Assigns[ii].AddShip(total_ship+jj, oris[jj], dess[jj]) {\n\n\t\t\t\tdispatch.Assigns[ii].Cost = -1\n\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\n\t\t\t}\n\t\t\t//插入失败\n\t\t\tif dispatch.Assigns[ii].Cost < 0 {\n\t\t\t\t//fmt.Println(\"inserted but not avaliable\")\n\t\t\t\tdispatch.Assigns[ii].RemoveShip(total_ship + jj)\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\t} else {\n\t\t\t\t//如果插入成功，并且插入了一辆空车，那么扩展一辆车\n\t\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\t\tdispatch.AssignsLen += 1\n\t\t\t\t}\n\t\t\t\tbreak\n\t\t\t}\n\t\t\t// 应当一定有一辆车能插入成功,否则第assignslen也插入失败的话，说明该订单插不进去\n\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\tlogger.Warn(\n\t\t\t\t\t\"Cannot Insert\",\n\t\t\t\t\tzap.Int(\"ship\", total_ship+jj),\n\t\t\t\t\tzap.Int(\"non_empty\", rand_limit),\n\t\t\t\t\tzap.Int(\"assigns_len\", dispatch.AssignsLen),\n\t\t\t\t)\n\t\t\t\tfmt.Println(oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[dispatch.AssignsLen].PrettyPrint()\n\t\t\t\t//dispatch.Assigns[dispatch.AssignsLen].AddShip(total_ship + jj, oris[jj], dess[jj])\n\t\t\t\t//checkDispatch(&dispatch)\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n\tdispatch.RenewnTotalCost()\n\t//XXX: 调查发现,insertion不会改变累计里程，是别的东西删除了累计里程\n\treturn dispatch\n}\n",
+            "objective": 713.52158,
+            "other_inf": null
+          }
+        ],
+        "rag_trace": {
+          "rag_mode": "literature",
+          "rag_query": "dynamic InsertShips insertion heuristic density=d50 arrival_scale=1.0 medium density route capacity insertion cost final cost",
+          "rag_top_k": 3,
+          "rag_corpus_size_before_filter": 19,
+          "rag_corpus_size_after_filter": 9,
+          "rag_global_items": [
+            {
+              "id": "insertships_api_skeleton",
+              "kind": "api_constraint",
+              "title": "InsertShips Go API skeleton"
+            },
+            {
+              "id": "suspicious_low_objective",
+              "kind": "failure_case",
+              "title": "Suspiciously low objective"
+            },
+            {
+              "id": "negative_or_missing_result",
+              "kind": "failure_case",
+              "title": "Negative cost or missing result"
+            },
+            {
+              "id": "timeout_or_unbounded_search",
+              "kind": "failure_case",
+              "title": "Timeout or unbounded search"
+            }
+          ],
+          "rag_all_scores": [
+            {
+              "id": "regret2_insertion",
+              "kind": "algorithm_card",
+              "score": 40
+            },
+            {
+              "id": "solomon_i1",
+              "kind": "algorithm_card",
+              "score": 38
+            },
+            {
+              "id": "farthest_insertion",
+              "kind": "algorithm_card",
+              "score": 34
+            },
+            {
+              "id": "nearest_insertion",
+              "kind": "algorithm_card",
+              "score": 34
+            },
+            {
+              "id": "cw_savings",
+              "kind": "algorithm_card",
+              "score": 7
+            }
+          ],
+          "rag_selected_items": [
+            {
+              "id": "regret2_insertion",
+              "kind": "algorithm_card",
+              "title": "Regret-2 Insertion Skill Card",
+              "score": 40
+            },
+            {
+              "id": "solomon_i1",
+              "kind": "algorithm_card",
+              "title": "Solomon I1 Skill Card",
+              "score": 38
+            },
+            {
+              "id": "farthest_insertion",
+              "kind": "algorithm_card",
+              "title": "Farthest Insertion Skill Card",
+              "score": 34
+            }
+          ],
+          "rag_context_chars": 3828,
+          "rag_context_truncated": false
+        }
+      },
+      "raw_best_population_item": {
+        "algorithm": "SA baseline InsertShips extracted from project root main.go",
+        "code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\tvar rand_range [MAXASSIGNS]int\n\tvar rand_limit int = 0 //记录有多少个有车的assign\n\n\tlogger := zap.L().Named(\"Insert\")\n\n\t// 生成随机序列 TODO: 有些车在时间触发过程中可能变空了\n\tfor ii := range rand_range {\n\t\trand_range[ii] = ii\n\t\t// 交换不空的解\n\t\tif ii < dispatch.AssignsLen && dispatch.Assigns[ii].StationsLen > 0 {\n\t\t\trand_range[ii], rand_range[rand_limit] = rand_range[rand_limit], ii\n\t\t\t// 记录有多少个不空的解\n\t\t\trand_limit += 1\n\t\t}\n\t}\n\t//由于不空的解都在前面，所以只需要打乱前面这部分\n\trand.Shuffle(rand_limit, func(i, j int) {\n\t\trand_range[i], rand_range[j] = rand_range[j], rand_range[i]\n\t})\n\n\t// 开始插入\n\tfor jj := range oris {\n\t\tfor _, ii := range rand_range {\n\t\t\t//尝试插入解\n\t\t\tif !dispatch.Assigns[ii].AddShip(total_ship+jj, oris[jj], dess[jj]) {\n\n\t\t\t\tdispatch.Assigns[ii].Cost = -1\n\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\n\t\t\t}\n\t\t\t//插入失败\n\t\t\tif dispatch.Assigns[ii].Cost < 0 {\n\t\t\t\t//fmt.Println(\"inserted but not avaliable\")\n\t\t\t\tdispatch.Assigns[ii].RemoveShip(total_ship + jj)\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\t} else {\n\t\t\t\t//如果插入成功，并且插入了一辆空车，那么扩展一辆车\n\t\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\t\tdispatch.AssignsLen += 1\n\t\t\t\t}\n\t\t\t\tbreak\n\t\t\t}\n\t\t\t// 应当一定有一辆车能插入成功,否则第assignslen也插入失败的话，说明该订单插不进去\n\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\tlogger.Warn(\n\t\t\t\t\t\"Cannot Insert\",\n\t\t\t\t\tzap.Int(\"ship\", total_ship+jj),\n\t\t\t\t\tzap.Int(\"non_empty\", rand_limit),\n\t\t\t\t\tzap.Int(\"assigns_len\", dispatch.AssignsLen),\n\t\t\t\t)\n\t\t\t\tfmt.Println(oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[dispatch.AssignsLen].PrettyPrint()\n\t\t\t\t//dispatch.Assigns[dispatch.AssignsLen].AddShip(total_ship + jj, oris[jj], dess[jj])\n\t\t\t\t//checkDispatch(&dispatch)\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n\tdispatch.RenewnTotalCost()\n\t//XXX: 调查发现,insertion不会改变累计里程，是别的东西删除了累计里程\n\treturn dispatch\n}\n",
+        "objective": 713.52158,
+        "other_inf": null
+      },
+      "filtered_best_population_item": {
+        "algorithm": "SA baseline InsertShips extracted from project root main.go",
+        "code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\tvar rand_range [MAXASSIGNS]int\n\tvar rand_limit int = 0 //记录有多少个有车的assign\n\n\tlogger := zap.L().Named(\"Insert\")\n\n\t// 生成随机序列 TODO: 有些车在时间触发过程中可能变空了\n\tfor ii := range rand_range {\n\t\trand_range[ii] = ii\n\t\t// 交换不空的解\n\t\tif ii < dispatch.AssignsLen && dispatch.Assigns[ii].StationsLen > 0 {\n\t\t\trand_range[ii], rand_range[rand_limit] = rand_range[rand_limit], ii\n\t\t\t// 记录有多少个不空的解\n\t\t\trand_limit += 1\n\t\t}\n\t}\n\t//由于不空的解都在前面，所以只需要打乱前面这部分\n\trand.Shuffle(rand_limit, func(i, j int) {\n\t\trand_range[i], rand_range[j] = rand_range[j], rand_range[i]\n\t})\n\n\t// 开始插入\n\tfor jj := range oris {\n\t\tfor _, ii := range rand_range {\n\t\t\t//尝试插入解\n\t\t\tif !dispatch.Assigns[ii].AddShip(total_ship+jj, oris[jj], dess[jj]) {\n\n\t\t\t\tdispatch.Assigns[ii].Cost = -1\n\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\n\t\t\t}\n\t\t\t//插入失败\n\t\t\tif dispatch.Assigns[ii].Cost < 0 {\n\t\t\t\t//fmt.Println(\"inserted but not avaliable\")\n\t\t\t\tdispatch.Assigns[ii].RemoveShip(total_ship + jj)\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\t} else {\n\t\t\t\t//如果插入成功，并且插入了一辆空车，那么扩展一辆车\n\t\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\t\tdispatch.AssignsLen += 1\n\t\t\t\t}\n\t\t\t\tbreak\n\t\t\t}\n\t\t\t// 应当一定有一辆车能插入成功,否则第assignslen也插入失败的话，说明该订单插不进去\n\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\tlogger.Warn(\n\t\t\t\t\t\"Cannot Insert\",\n\t\t\t\t\tzap.Int(\"ship\", total_ship+jj),\n\t\t\t\t\tzap.Int(\"non_empty\", rand_limit),\n\t\t\t\t\tzap.Int(\"assigns_len\", dispatch.AssignsLen),\n\t\t\t\t)\n\t\t\t\tfmt.Println(oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[dispatch.AssignsLen].PrettyPrint()\n\t\t\t\t//dispatch.Assigns[dispatch.AssignsLen].AddShip(total_ship + jj, oris[jj], dess[jj])\n\t\t\t\t//checkDispatch(&dispatch)\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n\tdispatch.RenewnTotalCost()\n\t//XXX: 调查发现,insertion不会改变累计里程，是别的东西删除了累计里程\n\treturn dispatch\n}\n",
+        "objective": 713.52158,
+        "other_inf": null
+      },
+      "best_population_item": {
+        "algorithm": "SA baseline InsertShips extracted from project root main.go",
+        "code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\tvar rand_range [MAXASSIGNS]int\n\tvar rand_limit int = 0 //记录有多少个有车的assign\n\n\tlogger := zap.L().Named(\"Insert\")\n\n\t// 生成随机序列 TODO: 有些车在时间触发过程中可能变空了\n\tfor ii := range rand_range {\n\t\trand_range[ii] = ii\n\t\t// 交换不空的解\n\t\tif ii < dispatch.AssignsLen && dispatch.Assigns[ii].StationsLen > 0 {\n\t\t\trand_range[ii], rand_range[rand_limit] = rand_range[rand_limit], ii\n\t\t\t// 记录有多少个不空的解\n\t\t\trand_limit += 1\n\t\t}\n\t}\n\t//由于不空的解都在前面，所以只需要打乱前面这部分\n\trand.Shuffle(rand_limit, func(i, j int) {\n\t\trand_range[i], rand_range[j] = rand_range[j], rand_range[i]\n\t})\n\n\t// 开始插入\n\tfor jj := range oris {\n\t\tfor _, ii := range rand_range {\n\t\t\t//尝试插入解\n\t\t\tif !dispatch.Assigns[ii].AddShip(total_ship+jj, oris[jj], dess[jj]) {\n\n\t\t\t\tdispatch.Assigns[ii].Cost = -1\n\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\n\t\t\t}\n\t\t\t//插入失败\n\t\t\tif dispatch.Assigns[ii].Cost < 0 {\n\t\t\t\t//fmt.Println(\"inserted but not avaliable\")\n\t\t\t\tdispatch.Assigns[ii].RemoveShip(total_ship + jj)\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\t} else {\n\t\t\t\t//如果插入成功，并且插入了一辆空车，那么扩展一辆车\n\t\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\t\tdispatch.AssignsLen += 1\n\t\t\t\t}\n\t\t\t\tbreak\n\t\t\t}\n\t\t\t// 应当一定有一辆车能插入成功,否则第assignslen也插入失败的话，说明该订单插不进去\n\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\tlogger.Warn(\n\t\t\t\t\t\"Cannot Insert\",\n\t\t\t\t\tzap.Int(\"ship\", total_ship+jj),\n\t\t\t\t\tzap.Int(\"non_empty\", rand_limit),\n\t\t\t\t\tzap.Int(\"assigns_len\", dispatch.AssignsLen),\n\t\t\t\t)\n\t\t\t\tfmt.Println(oris[jj], dess[jj])\n\t\t\t\tdispatch.Assigns[dispatch.AssignsLen].PrettyPrint()\n\t\t\t\t//dispatch.Assigns[dispatch.AssignsLen].AddShip(total_ship + jj, oris[jj], dess[jj])\n\t\t\t\t//checkDispatch(&dispatch)\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n\tdispatch.RenewnTotalCost()\n\t//XXX: 调查发现,insertion不会改变累计里程，是别的东西删除了累计里程\n\treturn dispatch\n}\n",
+        "objective": 713.52158,
+        "other_inf": null
+      },
+      "candidate_statuses": [
+        {
+          "index": 0,
+          "status": "valid",
+          "objective": 713.52158,
+          "flags": [],
+          "reason": "ok"
+        }
+      ],
+      "selected_after_eval": {
+        "status": "valid",
+        "objective": 713.52158,
+        "flags": [],
+        "reason": "ok"
+      },
+      "build_info": {
+        "candidate_id": "eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134914",
+        "project_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/generated/projects/eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134914",
+        "bin_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/generated/bins/eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134914.exe",
+        "build_ok": true,
+        "build_return_code": 0,
+        "build_stdout": "",
+        "build_stderr": "",
+        "build_duration": 1.163184,
+        "algorithm": "agent_eoh_arrival_scale_best",
+        "target_file": "main.go",
+        "candidate_label": "eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134914",
+        "candidate_origin": "eoh_arrival_grid",
+        "rationale": "Best EOH candidate from arrival-scale grid experiment."
+      },
+      "best_eval": {
+        "candidate_id": "eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134914",
+        "build_ok": true,
+        "Res": 1.1168077832,
+        "J": 551.810759545803,
+        "return_code": 0,
+        "bin_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/generated/bins/eoh_arrival_d50_t1p0_rc102_d50_t1p0_20260526_134914.exe"
+      }
+    }
+  ]
+}

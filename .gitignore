@@ -14,8 +14,6 @@ eoh_go_workspace/candidates/
 eoh_go_workspace/runs/
 eoh_go_workspace/memory/
 eoh_go_workspace/reports/tables/eoh_arrival_grid*/
-!eoh_go_workspace/reports/tables/eoh_grid_cleaned_summary_rc101_105/
-!eoh_go_workspace/reports/tables/eoh_selected_repeats_summary_20260426/
 eoh_go_workspace/generated/
 node_modules/
 package.json
@@ -34,3 +32,15 @@ outputs/
 
 # macOS
 .DS_Store
+
+# Virtual env
+.venv/
+
+# External repos (re-clone as needed)
+external_repos/
+
+# Compiled binaries
+mainbin*
+
+# Archived zips
+*.zip

@@ -1,0 +1,54 @@
+{
+  "output_dir": "/Users/guojiadong.9/agent_ad/eoh_go_workspace/reports/tables/smart_operator_grid/run_20260519_163215",
+  "run_tag": "20260519_163215",
+  "config": {
+    "root": ".",
+    "output_dir": "eoh_go_workspace/reports/tables/smart_operator_grid",
+    "problem": [
+      "rc101.json"
+    ],
+    "density": [
+      "d25"
+    ],
+    "arrival_scale": [
+      1.0
+    ],
+    "use_density_source_dirs": false,
+    "api_key": "",
+    "llm_model": "deepseek-v4-flash",
+    "generations": 2,
+    "pop_size": 3,
+    "sim_time_multi": 10,
+    "run_timeout_s": 180,
+    "max_cells": 1,
+    "dry_run": false
+  },
+  "rows": [
+    {
+      "problem": "rc101.json",
+      "density": "d25",
+      "arrival_scale": 1.0,
+      "seed_Res": 5.622998,
+      "seed_J": 664.1195472849001,
+      "cell_elapsed_s": 596.7,
+      "operator_ok": true,
+      "operator_error": "",
+      "best_cost": 664.1195472849001,
+      "best_generation": 1,
+      "improvement_pct": 0.0,
+      "total_elapsed_s": 596.8,
+      "memory_total_attempts": 14,
+      "memory_total_failures": 11,
+      "memory_top_failures": "[{\"key\": \"timeout\", \"count\": 4}, {\"key\": \"negative_cost\", \"count\": 1}]",
+      "generation_count": 2,
+      "gen1_best": 664.1195472849001,
+      "gen1_compiled_ok": 3,
+      "gen1_eval_ok": 2,
+      "gen1_repairs": 0,
+      "gen2_best": 664.1195472849001,
+      "gen2_compiled_ok": 3,
+      "gen2_eval_ok": 2,
+      "gen2_repairs": 1
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "gen": 1,
+  "candidates_generated": 4,
+  "compiled_ok": 4,
+  "compiled_fail": 0,
+  "evaluated_ok": 4,
+  "evaluated_fail": 0,
+  "guard_excluded": 0,
+  "best_fitness": 514.463380086386,
+  "avg_fitness": 911.5674452798141,
+  "best_vs_baseline_pct": -22.534522257378047,
+  "fail_rate": 0.0,
+  "repair_count": 0,
+  "repair_success": 0,
+  "active_failure_patterns": [
+    "timeout",
+    "negative_cost"
+  ],
+  "elapsed_s": 30.8,
+  "valid_costs": [
+    1233.8434268739852,
+    514.463380086386,
+    664.1195472849001,
+    1233.8434268739852
+  ],
+  "best_code": "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {\n\tconst pickupWeight = 0.5\n\n\tfor jj := range oris {\n\t\tbestIdx := -1\n\t\tbestScore := -1.0\n\n\t\tfor ii := 0; ii < dispatch.AssignsLen; ii++ {\n\t\t\tif dispatch.Assigns[ii].StationsLen == 0 {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\toldCost := dispatch.Assigns[ii].Cost\n\t\t\tdistPenalty := cal_dis(dispatch.Assigns[ii].StationCurrent, oris[jj])\n\t\t\tif !dispatch.Assigns[ii].AddShip(total_ship+jj, oris[jj], dess[jj]) {\n\t\t\t\tdispatch.Assigns[ii].Cost = -1\n\t\t\t} else {\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\t}\n\t\t\tnewCost := dispatch.Assigns[ii].Cost\n\t\t\tif newCost >= 0 {\n\t\t\t\tscore := (newCost - oldCost) + pickupWeight*distPenalty\n\t\t\t\tif bestIdx == -1 || score < bestScore {\n\t\t\t\t\tbestScore = score\n\t\t\t\t\tbestIdx = ii\n\t\t\t\t}\n\t\t\t}\n\t\t\tdispatch.Assigns[ii].RemoveShip(total_ship + jj)\n\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t}\n\n\t\tif bestIdx >= 0 {\n\t\t\tdispatch.Assigns[bestIdx].AddShip(total_ship+jj, oris[jj], dess[jj])\n\t\t\tdispatch.Assigns[bestIdx].GenRoute()\n\t\t} else {\n\t\t\tinserted := false\n\t\t\tfor ii := 0; ii <= dispatch.AssignsLen && ii < MAXASSIGNS; ii++ {\n\t\t\t\tif !dispatch.Assigns[ii].AddShip(total_ship+jj, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[ii].Cost = -1\n\t\t\t\t} else {\n\t\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\t\t}\n\t\t\t\tif dispatch.Assigns[ii].Cost >= 0 {\n\t\t\t\t\tif ii >= dispatch.AssignsLen {\n\t\t\t\t\t\tdispatch.AssignsLen += 1\n\t\t\t\t\t}\n\t\t\t\t\tinserted = true\n\t\t\t\t\tbreak\n\t\t\t\t}\n\t\t\t\tdispatch.Assigns[ii].RemoveShip(total_ship + jj)\n\t\t\t\tdispatch.Assigns[ii].GenRoute()\n\t\t\t}\n\t\t\tif !inserted {\n\t\t\t\tclosestIdx := 0\n\t\t\t\tclosestDist := -1.0\n\t\t\t\tfor ii := 0; ii < dispatch.AssignsLen; ii++ {\n\t\t\t\t\tdist := cal_dis(dispatch.Assigns[ii].StationCurrent, oris[jj])\n\t\t\t\t\tif closestDist < 0 || dist < closestDist {\n\t\t\t\t\t\tclosestDist = dist\n\t\t\t\t\t\tclosestIdx = ii\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif dispatch.Assigns[closestIdx].AddShip(total_ship+jj, oris[jj], dess[jj]) {\n\t\t\t\t\tdispatch.Assigns[closestIdx].GenRoute()\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n\tdispatch.RenewnTotalCost()\n\treturn dispatch\n}"
+}

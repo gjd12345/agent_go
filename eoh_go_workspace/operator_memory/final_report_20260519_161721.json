@@ -1,0 +1,48 @@
+{
+  "operator": "SmartEOHOperator",
+  "timestamp": "2026-05-19T16:17:21",
+  "config": {
+    "generations": 1,
+    "pop_size": 2,
+    "dataset_density": "d25",
+    "arrival_scale": 1.0,
+    "baseline_cost": null
+  },
+  "best_cost": null,
+  "best_generation": null,
+  "baseline_cost": null,
+  "improvement_pct": null,
+  "generation_log": [
+    {
+      "gen": 1,
+      "candidates_generated": 2,
+      "compiled_ok": 2,
+      "compiled_fail": 0,
+      "evaluated_ok": 0,
+      "evaluated_fail": 2,
+      "guard_excluded": 0,
+      "best_fitness": null,
+      "avg_fitness": null,
+      "best_vs_baseline_pct": null,
+      "fail_rate": 1.0,
+      "repair_count": 1,
+      "repair_success": 1,
+      "active_failure_patterns": [],
+      "elapsed_s": 301.3,
+      "valid_costs": [],
+      "best_code": null
+    }
+  ],
+  "failure_memory": {
+    "total_attempts": 3,
+    "total_failures": 5,
+    "fail_rate": 1.6666666666666667,
+    "top_failures": [
+      {
+        "key": "timeout",
+        "count": 2
+      }
+    ]
+  },
+  "total_elapsed_s": 301.3
+}

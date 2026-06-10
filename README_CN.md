@@ -52,6 +52,42 @@ cd eoh_go_workspace/reports/paper_draft_full_20260426
 tectonic --outdir build guarded_eoh_go_full_draft_cn.tex
 ```
 
+## 开发工作流
+
+### 编译
+
+```bash
+go build -o mainbin_sa.exe .
+```
+
+或使用 Makefile：
+
+```bash
+make build          # 编译主求解器
+```
+
+### 运行测试
+
+**Python 单元测试（guard、operator、templates）：**
+
+```bash
+python -m pytest tests/ -q
+```
+
+**Go 基准集成测试（需要 solomon_benchmark 数据）：**
+
+```bash
+make test           # 运行 SA 求解器基准测试
+```
+
+### 代码质量
+
+项目目前没有配置自动 Go 代码检查或格式化钩子。提交代码时请注意：
+
+- 确保 `go build .` 无报错。
+- 运行 `python -m pytest tests/ -q` 并确认所有测试通过。
+- 保持 Python import 整洁；项目使用 `pytest` 和 `unittest`。
+
 ## 运行一组小规模 EOH 实验
 
 运行 EOH 需要配置 DeepSeek/OpenAI-compatible API key。建议先在环境变量中设置：

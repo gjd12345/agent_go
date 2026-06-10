@@ -1,0 +1,50 @@
+{
+  "rows": [
+    {
+      "problem": "rc101.json",
+      "density": "d25",
+      "arrival_scale": 1.0,
+      "seed_Res": 6.056386,
+      "seed_J": 664.1195472849001,
+      "cell_elapsed_s": 14.3,
+      "operator_ok": true,
+      "operator_error": "",
+      "best_cost": 664.1195472849001,
+      "best_generation": 1,
+      "improvement_pct": 0.0,
+      "total_elapsed_s": 14.3,
+      "memory_total_attempts": 18,
+      "memory_total_failures": 11,
+      "memory_top_failures": "[{\"key\": \"timeout\", \"count\": 4}, {\"key\": \"negative_cost\", \"count\": 1}]",
+      "generation_count": 1,
+      "gen1_best": 664.1195472849001,
+      "gen1_compiled_ok": 2,
+      "gen1_eval_ok": 2,
+      "gen1_repairs": 0
+    }
+  ],
+  "config": {
+    "root": ".",
+    "output_dir": "eoh_go_workspace/reports/tables/smart_operator_grid",
+    "problem": [
+      "rc101.json"
+    ],
+    "density": [
+      "d25"
+    ],
+    "arrival_scale": [
+      1.0
+    ],
+    "use_density_source_dirs": false,
+    "api_key": "",
+    "llm_model": "deepseek-v4-flash",
+    "mutation_mode": "templates",
+    "generations": 1,
+    "pop_size": 2,
+    "sim_time_multi": 10,
+    "run_timeout_s": 180,
+    "max_cells": 0,
+    "dry_run": false
+  },
+  "run_tag": "20260519_174244"
+}

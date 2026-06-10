@@ -1,0 +1,46 @@
+{
+  "output_dir": "/Users/guojiadong.9/agent_ad/eoh_go_workspace/reports/tables/smart_operator_grid/run_20260519_160634",
+  "run_tag": "20260519_160634",
+  "config": {
+    "root": ".",
+    "output_dir": "eoh_go_workspace/reports/tables/smart_operator_grid",
+    "problem": [
+      "rc101.json"
+    ],
+    "density": [
+      "d25"
+    ],
+    "arrival_scale": [
+      1.0
+    ],
+    "use_density_source_dirs": false,
+    "api_key": "",
+    "llm_model": "deepseek-v4-flash",
+    "generations": 2,
+    "pop_size": 2,
+    "sim_time_multi": 10,
+    "run_timeout_s": 60,
+    "max_cells": 0,
+    "dry_run": false
+  },
+  "rows": [
+    {
+      "problem": "rc101.json",
+      "density": "d25",
+      "arrival_scale": 1.0,
+      "seed_Res": null,
+      "seed_J": null,
+      "cell_elapsed_s": 136.6,
+      "operator_ok": false,
+      "operator_error": "'NoneType' object has no attribute 'get'",
+      "best_cost": null,
+      "best_generation": null,
+      "improvement_pct": null,
+      "total_elapsed_s": null,
+      "memory_total_attempts": 0,
+      "memory_total_failures": 0,
+      "memory_top_failures": "[]",
+      "generation_count": 0
+    }
+  ]
+}
