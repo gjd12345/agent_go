@@ -1,0 +1,74 @@
+{
+  "total_runs": 3,
+  "proposal_accept": {
+    "passed": 3,
+    "total": 3,
+    "rate": 1.0
+  },
+  "linkage_success": {
+    "passed": 0,
+    "total": 0,
+    "rate": 0,
+    "note": "insufficient data"
+  },
+  "generation_success": {
+    "passed": 3,
+    "total": 3,
+    "rate": 1.0
+  },
+  "objective_success": {
+    "passed": 2,
+    "total": 3,
+    "rate": 0.667
+  },
+  "pure_baselines": {
+    "tsp_construct": 6.469333333333334
+  },
+  "per_run": [
+    {
+      "proposal_accept": true,
+      "linkage_success": null,
+      "generation_success": true,
+      "objective_success": true,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 6.26884,
+      "pure_baseline": 6.469333333333334,
+      "problem": "tsp_construct",
+      "arm": "pure_eoh",
+      "gen": 4
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": null,
+      "generation_success": true,
+      "objective_success": true,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 6.46162,
+      "pure_baseline": 6.469333333333334,
+      "problem": "tsp_construct",
+      "arm": "pure_eoh",
+      "gen": 4
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": null,
+      "generation_success": true,
+      "objective_success": false,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 6.67754,
+      "pure_baseline": 6.469333333333334,
+      "problem": "tsp_construct",
+      "arm": "pure_eoh",
+      "gen": 4
+    }
+  ]
+}

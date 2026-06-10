@@ -1,0 +1,72 @@
+{
+  "total_runs": 3,
+  "proposal_accept": {
+    "passed": 3,
+    "total": 3,
+    "rate": 1.0
+  },
+  "linkage_success": {
+    "passed": 3,
+    "total": 3,
+    "rate": 1.0
+  },
+  "generation_success": {
+    "passed": 3,
+    "total": 3,
+    "rate": 1.0
+  },
+  "objective_success": {
+    "passed": 0,
+    "total": 0,
+    "rate": 0,
+    "note": "insufficient data"
+  },
+  "pure_baselines": {},
+  "per_run": [
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": true,
+      "objective_success": null,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 7.32429,
+      "pure_baseline": null,
+      "problem": "tsp_construct",
+      "arm": "tocc_corrected",
+      "gen": 4
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": true,
+      "objective_success": null,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 6.39984,
+      "pure_baseline": null,
+      "problem": "tsp_construct",
+      "arm": "tocc_corrected",
+      "gen": 4
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": true,
+      "objective_success": null,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 6.50991,
+      "pure_baseline": null,
+      "problem": "tsp_construct",
+      "arm": "tocc_corrected",
+      "gen": 4
+    }
+  ]
+}

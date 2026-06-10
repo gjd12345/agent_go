@@ -1,0 +1,82 @@
+[
+     {
+          "operator": "m1",
+          "index": 0,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "763b68e22b48",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tgap := rem - item\n\t\tscores[i] = -math.Abs(float64(gap))\n\t}\n\treturn scores\n}",
+          "algorithm": "Modified best-fit: prefer bins where the resulting empty space is closest to zero, using negative absolute deviation to keep higher score for tighter fit.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tgap := rem - item\n\t\tscores[i] = -math.Abs(float64(gap))\n\t}\n\treturn scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m1",
+          "index": 1,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "cde1163e4123",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    for i, rem := range remaining {\n        newRem := rem - item\n        if newRem <= 0 {\n            scores[i] = math.Exp(float64(capacity))\n        } else {\n            ratio := float64(newRem) / float64(capacity)\n            scores[i] = math.Exp(-ratio * float64(capacity) / float64(item+1))\n        }\n    }\n    return scores\n}",
+          "algorithm": "Modified best-fit with exponential penalty based on remaining space after placement: prefer bins that become nearly full.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    for i, rem := range remaining {\n        newRem := rem - item\n        if newRem <= 0 {\n            scores[i] = math.Exp(float64(capacity))\n        } else {\n            ratio := float64(newRem) / float64(capacity)\n            scores[i] = math.Exp(-ratio * float64(capacity) / float64(item+1))\n        }\n    }\n    return scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m1",
+          "index": 2,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "d03fcc266201",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tgapAfter := rem - item\n\t\tscores[i] = float64(capacity - gapAfter)\n\t}\n\treturn scores\n}",
+          "algorithm": "Modified best-fit: prefer bins where remaining capacity after placement is closest to zero, using negative absolute deviation from perfect fit to keep scores positive.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tgapAfter := rem - item\n\t\tscores[i] = float64(capacity - gapAfter)\n\t}\n\treturn scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m1",
+          "index": 3,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "77d87ed281f6",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tscores[i] = math.Exp(-0.5 * float64(newRem))\n\t}\n\treturn scores\n}",
+          "algorithm": "Modified best-fit with exponential penalty for larger remaining space after placement, favoring tighter fits.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tscores[i] = math.Exp(-0.5 * float64(newRem))\n\t}\n\treturn scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m1",
+          "index": 4,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "9b8933619c9a",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    for i, rem := range remaining {\n        leftover := rem - item\n        tightness := float64(leftover)\n        scores[i] = math.Exp(-tightness * 0.5)\n    }\n    return scores\n}",
+          "algorithm": "Modified best-fit that scores higher when the remaining space after placement is closer to zero but penalizes extremely tight fits using an exponential decay factor based on leftover space.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    for i, rem := range remaining {\n        leftover := rem - item\n        tightness := float64(leftover)\n        scores[i] = math.Exp(-tightness * 0.5)\n    }\n    return scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m1",
+          "index": 5,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "600da405c17b",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tgapRatio := float64(newRem) / float64(capacity)\n\t\tscores[i] = -math.Exp(gapRatio * 10)\n\t}\n\treturn scores\n}",
+          "algorithm": "Modified best-fit with exponential penalty for larger gaps, preferring smaller post-placement remaining capacity more strongly.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tgapRatio := float64(newRem) / float64(capacity)\n\t\tscores[i] = -math.Exp(gapRatio * 10)\n\t}\n\treturn scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m1",
+          "index": 6,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "a0425164d8cf",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    targetLeftover := 0\n    maxPossibleDeviation := capacity\n    for i, rem := range remaining {\n        leftover := rem - item\n        deviation := leftover - targetLeftover\n        if deviation < 0 {\n            deviation = -deviation\n        }\n        scores[i] = float64(maxPossibleDeviation - deviation)\n    }\n    return scores\n}",
+          "algorithm": "Modified best-fit that favors bins leaving moderate leftover space, using a normalized measure that peaks at zero leftover and decreases symmetrically as leftover deviates from ideal small residual.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    targetLeftover := 0\n    maxPossibleDeviation := capacity\n    for i, rem := range remaining {\n        leftover := rem - item\n        deviation := leftover - targetLeftover\n        if deviation < 0 {\n            deviation = -deviation\n        }\n        scores[i] = float64(maxPossibleDeviation - deviation)\n    }\n    return scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m1",
+          "index": 7,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "9f82cb6d0c84",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    for i, rem := range remaining {\n        newRem := rem - item\n        scores[i] = math.Exp(-float64(newRem) / float64(capacity))\n    }\n    return scores\n}",
+          "algorithm": "Modified best-fit using exponential penalty on remaining space after placement to favor tighter fits.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    for i, rem := range remaining {\n        newRem := rem - item\n        scores[i] = math.Exp(-float64(newRem) / float64(capacity))\n    }\n    return scores\n",
+          "other_inf": null
+     }
+]

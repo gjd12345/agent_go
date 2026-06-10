@@ -1,0 +1,14 @@
+{
+     "raw_offspring_count": 16,
+     "raw_with_code_count": 16,
+     "raw_penalty_count": 0,
+     "raw_valid_candidate_count": 16,
+     "unique_code_count": 16,
+     "unique_objective_count": 2,
+     "survivor_population_size": 2,
+     "survivor_objectives": [
+          0.05903,
+          0.11879
+     ],
+     "survivor_drop_reason": "objective_or_code_dedup"
+}

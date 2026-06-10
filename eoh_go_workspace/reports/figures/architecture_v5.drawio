@@ -1,0 +1,284 @@
+<mxGraphModel adaptiveColors="auto" dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1050" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <mxCell id="title" value="&lt;b&gt;TOCC System Architecture v5 — Full Stack&lt;/b&gt;" style="text;html=1;fontSize=18;fontColor=#1a3a5c;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="300" y="8" width="1200" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- ===== LAYER 1: TOCC Control (Green) ===== -->
+    <mxCell id="l1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#66bb6a;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="15" y="48" width="1770" height="175" as="geometry"/>
+    </mxCell>
+    <mxCell id="l1t" value="&lt;b&gt;Layer 1 — TOCC Agent (Control)&lt;/b&gt;" style="text;html=1;fontSize=13;fontColor=#2e7d32;align=left;verticalAlign=top;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="22" y="50" width="400" height="20" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="t1" value="&lt;b&gt;1. Trace Reader&lt;/b&gt;&lt;br&gt;reads run_summary,&lt;br&gt;rag_trace, run_index" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a5d6a7;strokeColor=#43a047;strokeWidth=2;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="25" y="80" width="170" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="t2" value="&lt;b&gt;2. Card Selector (LLM)&lt;/b&gt;&lt;br&gt;trace → proposal JSON&lt;br&gt;6 fields only, no budget/shell" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#66bb6a;strokeColor=#2e7d32;strokeWidth=2;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="240" y="78" width="240" height="75" as="geometry"/>
+    </mxCell>
+    <mxCell id="t3" value="&lt;b&gt;3. Gatekeeper&lt;/b&gt;&lt;br&gt;R1-R11 rules&lt;br&gt;schema, budget check" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a5d6a7;strokeColor=#43a047;strokeWidth=2;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="525" y="80" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="t4" value="&lt;b&gt;4. Manifest Runner&lt;/b&gt;&lt;br&gt;bounded EOH execution&lt;br&gt;gen≤1, pop=4, dry-run" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a5d6a7;strokeColor=#43a047;strokeWidth=2;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="750" y="78" width="210" height="75" as="geometry"/>
+    </mxCell>
+    <mxCell id="t5" value="&lt;b&gt;5. Summarizer&lt;/b&gt;&lt;br&gt;summary + funnel&lt;br&gt;+ card_decisions + norm" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a5d6a7;strokeColor=#43a047;strokeWidth=2;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1005" y="78" width="210" height="75" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="a12" value="" style="endArrow=classic;html=1;strokeColor=#2e7d32;strokeWidth=2.5;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="195" y="115" as="sourcePoint"/><mxPoint x="240" y="115" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="a23" value="" style="endArrow=classic;html=1;strokeColor=#2e7d32;strokeWidth=2.5;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="480" y="115" as="sourcePoint"/><mxPoint x="525" y="115" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="a34" value="" style="endArrow=classic;html=1;strokeColor=#2e7d32;strokeWidth=2.5;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="705" y="115" as="sourcePoint"/><mxPoint x="750" y="115" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="a45" value="" style="endArrow=classic;html=1;strokeColor=#2e7d32;strokeWidth=2.5;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="960" y="115" as="sourcePoint"/><mxPoint x="1005" y="115" as="targetPoint"/></mxGeometry>
+    </mxCell>
+
+    <mxCell id="fb" value="" style="endArrow=classic;html=1;strokeColor=#ff9800;strokeWidth=2;dashed=1;curved=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="1110" y="175" as="sourcePoint"/><mxPoint x="110" y="175" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="fbl" value="&lt;b&gt;next trace → next iteration (bounded loop)&lt;/b&gt;" style="text;html=1;fontSize=10;fontColor=#e65100;align=center;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="340" y="163" width="430" height="16" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="rag" value="&lt;b&gt;RAG:&lt;/b&gt; Corpus (candidate_sources + literature JSONL) → Retriever → Prompt → Card Selector | &lt;b&gt;3 modes:&lt;/b&gt; baseline / API-only / history-RAG | &lt;b&gt;1-card-diff:&lt;/b&gt; regret vs nearest = 100%→0% valid" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#81c784;strokeWidth=1;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="25" y="170" width="1190" height="30" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="clv" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9c4;strokeColor=#f9a825;strokeWidth=1.5;" vertex="1" parent="1">
+      <mxGeometry x="1260" y="55" width="230" height="145" as="geometry"/>
+    </mxCell>
+    <mxCell id="clvt" value="&lt;b&gt;C+L+V Foundation&lt;/b&gt;" style="text;html=1;fontSize=12;fontColor=#f57f17;align=center;verticalAlign=top;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="1260" y="58" width="230" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="clvc" value="&lt;b&gt;C&lt;/b&gt; Candidates: 13+177 pool" style="text;html=1;fontSize=10;fontColor=#555555;align=left;spacingLeft=6;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="1270" y="82" width="210" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="clvl" value="&lt;b&gt;L&lt;/b&gt; LLM Proposer: RAG, 3 modes" style="text;html=1;fontSize=10;fontColor=#555555;align=left;spacingLeft=6;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="1270" y="105" width="210" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="clvv" value="&lt;b&gt;V&lt;/b&gt; Validation: guard_checks" style="text;html=1;fontSize=10;fontColor=#555555;align=left;spacingLeft=6;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="1270" y="128" width="210" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="clvn" value="TOCC controls C+L+V via card selection" style="text;html=1;fontSize=8;fontColor=#999999;align=center;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="1260" y="170" width="230" height="16" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="prob" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2fd;strokeColor=#1e88e5;strokeWidth=1.5;" vertex="1" parent="1">
+      <mxGeometry x="1530" y="55" width="240" height="145" as="geometry"/>
+    </mxCell>
+    <mxCell id="probt" value="&lt;b&gt;Problem Slots&lt;/b&gt;" style="text;html=1;fontSize=12;fontColor=#1565c0;align=center;verticalAlign=top;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="1530" y="58" width="240" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="pcvrp" value="&lt;b&gt;CVRP&lt;/b&gt; repeat-level ✅&lt;br&gt;8/8 vs pure, -4.2%&lt;br&gt;cards: regret+farthest" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#90caf9;strokeColor=#1976d2;strokeWidth=1;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1540" y="82" width="220" height="42" as="geometry"/>
+    </mxCell>
+    <mxCell id="ptsp" value="&lt;b&gt;TSP&lt;/b&gt; gen=4 in progress&lt;br&gt;cards: regret+farthest" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#90caf9;strokeColor=#1976d2;strokeWidth=1;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1540" y="130" width="220" height="42" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="funnel" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#ff9800;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="15" y="235" width="1755" height="155" as="geometry"/>
+    </mxCell>
+    <mxCell id="funt" value="&lt;b&gt;Success Funnel&lt;/b&gt; (HeuriGym-aligned 5-layer)" style="text;html=1;fontSize=13;fontColor=#e65100;align=left;verticalAlign=top;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="22" y="238" width="400" height="20" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="f1b" value="&lt;b&gt;1. Diagnosis&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe0b2;strokeColor=#fb8c00;strokeWidth=1.5;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="30" y="270" width="300" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="f2b" value="&lt;b&gt;2. Proposal Accept&lt;/b&gt; (gatekeeper R1-R11)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe0b2;strokeColor=#fb8c00;strokeWidth=1.5;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="355" y="270" width="320" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="f3b" value="&lt;b&gt;3. Linkage&lt;/b&gt; (cards == rag_trace)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe0b2;strokeColor=#fb8c00;strokeWidth=1.5;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="700" y="270" width="320" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="f4b" value="&lt;b&gt;4. Generation&lt;/b&gt; (valid ≥ ceil(0.5×pop))" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe0b2;strokeColor=#fb8c00;strokeWidth=1.5;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1045" y="270" width="340" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="f5b" value="&lt;b&gt;5. Objective&lt;/b&gt; (best &lt; pure baseline mean)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffcc80;strokeColor=#ef6c00;strokeWidth=2;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="30" y="320" width="1355" height="35" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="fcvrpt" value="&lt;b&gt;CVRP tocc:&lt;/b&gt; 100%→100%→100%→100%→100% (8/8) | &lt;b&gt;CVRP default:&lt;/b&gt; N/A→100%→100%→&lt;font color=&quot;#c62828&quot;&gt;0%&lt;/font&gt;→&lt;font color=&quot;#c62828&quot;&gt;0%&lt;/font&gt; (all degenerate) | &lt;b&gt;TSP tocc g0:&lt;/b&gt; N/A→100%→100%→100%→&lt;font color=&quot;#e65100&quot;&gt;33%&lt;/font&gt; (outlier 9.656)" style="text;html=1;fontSize=10;fontColor=#555555;align=left;spacingLeft=10;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="30" y="363" width="1355" height="18" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="cross1" value="" style="endArrow=classic;html=1;strokeColor=#2e7d32;strokeWidth=3;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="855" y="223" as="sourcePoint"/><mxPoint x="855" y="235" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="cross1l" value="Manifest → EOH Engine" style="text;html=1;fontSize=9;fontColor=#2e7d32;align=center;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="800" y="220" width="110" height="14" as="geometry"/>
+    </mxCell>
+
+    <!-- ===== LAYER 2: EOH Engine (Blue) ===== -->
+    <mxCell id="l2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2fd;strokeColor=#1e88e5;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="15" y="410" width="1770" height="170" as="geometry"/>
+    </mxCell>
+    <mxCell id="l2t" value="&lt;b&gt;Layer 2 — EOH Evolution Engine&lt;/b&gt;" style="text;html=1;fontSize=13;fontColor=#1565c0;align=left;verticalAlign=top;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="22" y="412" width="400" height="20" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e1" value="&lt;b&gt;evolution.py&lt;/b&gt;&lt;br&gt;Orchestrator&lt;br&gt;code replace → build&lt;br&gt;→ eval → fitness" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#90caf9;strokeColor=#1976d2;strokeWidth=1.5;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="25" y="445" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="&lt;b&gt;eoh_runner/&lt;/b&gt;&lt;br&gt;registry.py&lt;br&gt;runner.py&lt;br&gt;candidate_guard.py" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#90caf9;strokeColor=#1976d2;strokeWidth=1.5;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="215" y="445" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="&lt;b&gt;rag/&lt;/b&gt;&lt;br&gt;build_corpus&lt;br&gt;retriever&lt;br&gt;prompt_context" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#90caf9;strokeColor=#1976d2;strokeWidth=1.5;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="405" y="445" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="&lt;b&gt;benchmark.py&lt;/b&gt;&lt;br&gt;go build&lt;br&gt;run_subprocess&lt;br&gt;parse cost" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#90caf9;strokeColor=#1976d2;strokeWidth=1.5;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="585" y="445" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="&lt;b&gt;strategy_router.py&lt;/b&gt;&lt;br&gt;Instance features&lt;br&gt;Density-aware routing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#90caf9;strokeColor=#1976d2;strokeWidth=1.5;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="765" y="445" width="170" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="&lt;b&gt;candidates.py&lt;/b&gt;&lt;br&gt;add / load&lt;br&gt;register result" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#90caf9;strokeColor=#1976d2;strokeWidth=1.5;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="965" y="445" width="150" height="80" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="eoh-flow" value="&lt;b&gt;EOH Loop:&lt;/b&gt; Seed → LLM Generate → Guard Validate → Build&amp;Test → Fitness → Select → Next Gen" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#64b5f6;strokeWidth=1;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="25" y="540" width="1090" height="28" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="tocc-exp" value="&lt;b&gt;TOCC experiments:&lt;/b&gt; tocc_agent.py | tocc_gatekeeper.py | tocc_v2_pipeline.py | eoh_arrival_grid.py | run_experiment_manifest.py | summarize_manifest_runs.py" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#64b5f6;strokeWidth=1;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1145" y="445" width="620" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="ws" value="&lt;b&gt;Workspace:&lt;/b&gt; candidate_sources/ (13) | candidates/ (177) | problems/ | rag/corpus/ | reports/ | experiments/manifests/ | local_runs/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#64b5f6;strokeWidth=1;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1145" y="500" width="620" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- ===== LAYER 3: Execution (Purple) ===== -->
+    <mxCell id="l3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#7b1fa2;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="15" y="600" width="1770" height="195" as="geometry"/>
+    </mxCell>
+    <mxCell id="l3t" value="&lt;b&gt;Layer 3 — Execution (Go &amp; Python Solvers + Data)&lt;/b&gt;" style="text;html=1;fontSize=13;fontColor=#6a1b9a;align=left;verticalAlign=top;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="22" y="602" width="500" height="20" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="go-main" value="&lt;b&gt;main.go — VRP Dispatch&lt;/b&gt;&lt;br&gt;InsertShips() | Optimization()&lt;br&gt;Memory+Manager | Dispatch+Assign&lt;br&gt;GoInsertShips | GoOptimization&lt;br&gt;h2pSimulation (event-driven)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ce93d8;strokeColor=#6a1b9a;strokeWidth=1.5;fontSize=10;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="25" y="635" width="270" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="go-route" value="&lt;b&gt;routing.go — TSPTW Engine&lt;/b&gt;&lt;br&gt;RoutingTS() B&amp;B + 2-Opt&lt;br&gt;candidateScore() adaptive&lt;br&gt;computeLowerBound() MST&lt;br&gt;twoOptImprove() local search" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ce93d8;strokeColor=#6a1b9a;strokeWidth=1.5;fontSize=10;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="325" y="635" width="270" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="other-solvers" value="&lt;b&gt;Other Solvers&lt;/b&gt;&lt;br&gt;Knapsack: SelectItems()&lt;br&gt;BinPacking: ScoreBin()&lt;br&gt;MixerSplit: SplitOrders()&lt;br&gt;TSP/CVRP: select_next_node(), heuristics()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ce93d8;strokeColor=#6a1b9a;strokeWidth=1.5;fontSize=10;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="625" y="635" width="270" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="data-eval" value="&lt;b&gt;Data &amp; Evaluation&lt;/b&gt;&lt;br&gt;Solomon d25/d50/d75 (rc101-108)&lt;br&gt;go build → binary → eval&lt;br&gt;Targets: InsertShips, Optimization,&lt;br&gt;SelectItems, SplitOrders, ScoreBin" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ce93d8;strokeColor=#6a1b9a;strokeWidth=1.5;fontSize=10;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="925" y="635" width="310" height="100" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="future" value="&lt;b&gt;Future:&lt;/b&gt; MCTS trace exploration | TTS-BON rollout | Agentic RL fine-tune | ReEvo-style LT reflection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1bee7;strokeColor=#ab47bc;strokeWidth=1;fontSize=11;align=center;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="1265" y="640" width="500" height="50" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="cross2" value="" style="endArrow=classic;html=1;strokeColor=#1e88e5;strokeWidth=3;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="660" y="580" as="sourcePoint"/><mxPoint x="660" y="600" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="cross2l" value="build → Go binary → eval" style="text;html=1;fontSize=9;fontColor=#1e88e5;align=center;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="610" y="575" width="100" height="14" as="geometry"/>
+    </mxCell>
+
+    <!-- ===== BOTTOM: Literature ===== -->
+    <mxCell id="lit" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#9e9e9e;strokeWidth=1;" vertex="1" parent="1">
+      <mxGeometry x="15" y="815" width="1770" height="75" as="geometry"/>
+    </mxCell>
+    <mxCell id="litt" value="&lt;b&gt;Literature:&lt;/b&gt;" style="text;html=1;fontSize=11;fontColor=#424242;align=left;verticalAlign=top;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="22" y="818" width="80" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="lit1" value="&lt;b&gt;HeuriGym&lt;/b&gt;&lt;br&gt;ICLR 2026&lt;br&gt;Agent benchmark" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#9e9e9e;strokeWidth=1;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="30" y="842" width="120" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="lit2" value="&lt;b&gt;HeurAgenix&lt;/b&gt;&lt;br&gt;MSRA 2025&lt;br&gt;Hyper-heuristic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#9e9e9e;strokeWidth=1;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="165" y="842" width="120" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="lit3" value="&lt;b&gt;ReEvo&lt;/b&gt;&lt;br&gt;NeurIPS 2024&lt;br&gt;Reflective evo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#9e9e9e;strokeWidth=1;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="300" y="842" width="120" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="lit4" value="&lt;b&gt;MCTS-AHD&lt;/b&gt;&lt;br&gt;ICML 2025&lt;br&gt;Tree search" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#9e9e9e;strokeWidth=1;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="435" y="842" width="120" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="lit5" value="&lt;b&gt;CO-Bench&lt;/b&gt;&lt;br&gt;CMU 2025&lt;br&gt;Eval framework" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#9e9e9e;strokeWidth=1;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="570" y="842" width="120" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="lit6" value="&lt;b&gt;EoH&lt;/b&gt;&lt;br&gt;ICML 2024&lt;br&gt;Evolution engine" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#9e9e9e;strokeWidth=1;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="705" y="842" width="120" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="lit7" value="&lt;b&gt;FunSearch&lt;/b&gt;&lt;br&gt;Nature 2023&lt;br&gt;Island model" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#9e9e9e;strokeWidth=1;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="840" y="842" width="120" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="lit8" value="&lt;b&gt;AHD Agent&lt;/b&gt;&lt;br&gt;arXiv 2605&lt;br&gt;Agentic RL (no code)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#bdbdbd;strokeWidth=1;fontSize=9;align=center;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="975" y="842" width="130" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="lit9" value="&lt;b&gt;LHS&lt;/b&gt;&lt;br&gt;2025&lt;br&gt;Latent search" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#bdbdbd;strokeWidth=1;fontSize=9;align=center;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="1120" y="842" width="120" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="lit-pos" value="&lt;b&gt;TOCC:&lt;/b&gt; experiment-control primitives — not operator-implementation (CoEvo-AHD), not solving-state selection (HeurAgenix)" style="text;html=1;fontSize=11;fontColor=#616161;align=left;spacingLeft=6;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="1270" y="845" width="500" height="32" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="legend" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#bdbdbd;strokeWidth=1;" vertex="1" parent="1">
+      <mxGeometry x="15" y="905" width="1770" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="lg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a5d6a7;strokeColor=#43a047;strokeWidth=1;" vertex="1" parent="1">
+      <mxGeometry x="25" y="915" width="12" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="lgt" value="Control" style="text;html=1;fontSize=8;fontColor=#555555;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="40" y="913" width="40" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="lb" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#90caf9;strokeColor=#1976d2;strokeWidth=1;" vertex="1" parent="1">
+      <mxGeometry x="90" y="915" width="12" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="lbt" value="EOH" style="text;html=1;fontSize=8;fontColor=#555555;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="105" y="913" width="30" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="lp" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ce93d8;strokeColor=#6a1b9a;strokeWidth=1;" vertex="1" parent="1">
+      <mxGeometry x="145" y="915" width="12" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="lpt" value="Solvers" style="text;html=1;fontSize=8;fontColor=#555555;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="160" y="913" width="40" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="lo" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe0b2;strokeColor=#fb8c00;strokeWidth=1;" vertex="1" parent="1">
+      <mxGeometry x="210" y="915" width="12" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="lot" value="Funnel" style="text;html=1;fontSize=8;fontColor=#555555;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="225" y="913" width="40" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="ly" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff176;strokeColor=#fbc02d;strokeWidth=1;" vertex="1" parent="1">
+      <mxGeometry x="275" y="915" width="12" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="lyt" value="C+L+V" style="text;html=1;fontSize=8;fontColor=#555555;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="290" y="913" width="40" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="ls" value="" style="endArrow=classic;html=1;strokeColor=#555555;strokeWidth=1.5;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="345" y="920" as="sourcePoint"/><mxPoint x="370" y="920" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="lst" value="Flow" style="text;html=1;fontSize=8;fontColor=#555555;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="372" y="913" width="30" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="ld" value="" style="endArrow=classic;html=1;strokeColor=#ff9800;strokeWidth=1.5;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="415" y="920" as="sourcePoint"/><mxPoint x="440" y="920" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="ldt" value="Feedback" style="text;html=1;fontSize=8;fontColor=#555555;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="442" y="913" width="50" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="lgr" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#9e9e9e;strokeWidth=1;" vertex="1" parent="1">
+      <mxGeometry x="505" y="915" width="12" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="lgrt" value="Literature" style="text;html=1;fontSize=8;fontColor=#555555;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="520" y="913" width="50" height="14" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

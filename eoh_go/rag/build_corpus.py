@@ -38,6 +38,11 @@ CVRP_LITERATURE_IDS = {
 }
 LITERATURE_IDS = VRP_LITERATURE_IDS | OBP_LITERATURE_IDS | TSP_LITERATURE_IDS | CVRP_LITERATURE_IDS
 
+
+def _is_history_card(item: CorpusItem) -> bool:
+    """Check if a card was synthesized from best code (not hand-curated)."""
+    return item.kind == "algorithm_card" and item.source_path != "curated"
+
 _STANDARD_INSERTSHIPS_CONSTRAINTS = [
     "Never skip orders unless no feasible assignment exists.",
     "Rollback tentative insertions when a candidate route fails.",
@@ -332,7 +337,11 @@ def build_all_corpora(project_root: str | Path, corpus_dir: str | Path | None = 
     algorithm_path = target_dir / CORPUS_FILES["algorithm_card"]
     curated_algorithm_cards: list[CorpusItem] = []
     if algorithm_path.exists():
-        existing_algorithm_cards = [item for item in load_corpus(algorithm_path) if item.id in LITERATURE_IDS]
+        # Preserve both curated literature cards AND history-derived cards (from best-code feedback loop).
+        existing_algorithm_cards = [
+            item for item in load_corpus(algorithm_path)
+            if item.id in LITERATURE_IDS or _is_history_card(item)
+        ]
         curated_algorithm_cards = existing_algorithm_cards
         lit_count = len({item.id for item in curated_algorithm_cards})
         if lit_count < len(LITERATURE_IDS):

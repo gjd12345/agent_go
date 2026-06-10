@@ -1,0 +1,118 @@
+{
+  "total_runs": 6,
+  "proposal_accept": {
+    "passed": 6,
+    "total": 6,
+    "rate": 1.0
+  },
+  "linkage_success": {
+    "passed": 4,
+    "total": 4,
+    "rate": 1.0
+  },
+  "generation_success": {
+    "passed": 4,
+    "total": 6,
+    "rate": 0.667
+  },
+  "objective_success": {
+    "passed": 5,
+    "total": 6,
+    "rate": 0.833
+  },
+  "pure_baselines": {
+    "cvrp_construct": 13.587925
+  },
+  "per_run": [
+    {
+      "proposal_accept": true,
+      "linkage_success": null,
+      "generation_success": true,
+      "objective_success": true,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 13.56507,
+      "pure_baseline": 13.587925,
+      "problem": "cvrp_construct",
+      "arm": "pure_eoh",
+      "gen": 0
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": null,
+      "generation_success": true,
+      "objective_success": false,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 13.61078,
+      "pure_baseline": 13.587925,
+      "problem": "cvrp_construct",
+      "arm": "pure_eoh",
+      "gen": 0
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": false,
+      "objective_success": true,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 1,
+      "population_size": 1,
+      "best_objective": 13.28321,
+      "pure_baseline": 13.587925,
+      "problem": "cvrp_construct",
+      "arm": "default_rag",
+      "gen": 0
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": false,
+      "objective_success": true,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 1,
+      "population_size": 1,
+      "best_objective": 13.28321,
+      "pure_baseline": 13.587925,
+      "problem": "cvrp_construct",
+      "arm": "default_rag",
+      "gen": 0
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": true,
+      "objective_success": true,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 12.886,
+      "pure_baseline": 13.587925,
+      "problem": "cvrp_construct",
+      "arm": "targeted_tocc",
+      "gen": 0
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": true,
+      "objective_success": true,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 12.92217,
+      "pure_baseline": 13.587925,
+      "problem": "cvrp_construct",
+      "arm": "targeted_tocc",
+      "gen": 0
+    }
+  ]
+}

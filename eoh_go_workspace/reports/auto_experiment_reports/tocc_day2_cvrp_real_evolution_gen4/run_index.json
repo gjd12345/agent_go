@@ -1,0 +1,122 @@
+[
+  {
+    "tag": "run_cvrp_construct_pure_eoh_g4_r1",
+    "problem": "cvrp_construct",
+    "arm": "pure_eoh",
+    "generation": 4,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 553.0,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_day2_cvrp_real_evolution_gen4/run_cvrp_construct_pure_eoh_g4_r1",
+    "best_objective": 13.57617,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_pure_eoh_g4_r2",
+    "problem": "cvrp_construct",
+    "arm": "pure_eoh",
+    "generation": 4,
+    "repeat": 2,
+    "status": "ok",
+    "runtime_s": 573.3,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_day2_cvrp_real_evolution_gen4/run_cvrp_construct_pure_eoh_g4_r2",
+    "best_objective": 13.58669,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_pure_eoh_g4_r3",
+    "problem": "cvrp_construct",
+    "arm": "pure_eoh",
+    "generation": 4,
+    "repeat": 3,
+    "status": "ok",
+    "runtime_s": 490.6,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_day2_cvrp_real_evolution_gen4/run_cvrp_construct_pure_eoh_g4_r3",
+    "best_objective": 13.23646,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_pure_eoh_g4_r4",
+    "problem": "cvrp_construct",
+    "arm": "pure_eoh",
+    "generation": 4,
+    "repeat": 4,
+    "status": "ok",
+    "runtime_s": 410.3,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_day2_cvrp_real_evolution_gen4/run_cvrp_construct_pure_eoh_g4_r4",
+    "best_objective": 13.14576,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_pure_eoh_g4_r5",
+    "problem": "cvrp_construct",
+    "arm": "pure_eoh",
+    "generation": 4,
+    "repeat": 5,
+    "status": "ok",
+    "runtime_s": 369.9,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_day2_cvrp_real_evolution_gen4/run_cvrp_construct_pure_eoh_g4_r5",
+    "best_objective": 13.17585,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_tocc_corrected_g4_r1",
+    "problem": "cvrp_construct",
+    "arm": "tocc_corrected",
+    "generation": 4,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 603.8,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_day2_cvrp_real_evolution_gen4/run_cvrp_construct_tocc_corrected_g4_r1",
+    "best_objective": 12.9665,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_tocc_corrected_g4_r2",
+    "problem": "cvrp_construct",
+    "arm": "tocc_corrected",
+    "generation": 4,
+    "repeat": 2,
+    "status": "ok",
+    "runtime_s": 732.3,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_day2_cvrp_real_evolution_gen4/run_cvrp_construct_tocc_corrected_g4_r2",
+    "best_objective": 12.829,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_tocc_corrected_g4_r3",
+    "problem": "cvrp_construct",
+    "arm": "tocc_corrected",
+    "generation": 4,
+    "repeat": 3,
+    "status": "ok",
+    "runtime_s": 597.1,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_day2_cvrp_real_evolution_gen4/run_cvrp_construct_tocc_corrected_g4_r3",
+    "best_objective": 12.85606,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_tocc_corrected_g4_r4",
+    "problem": "cvrp_construct",
+    "arm": "tocc_corrected",
+    "generation": 4,
+    "repeat": 4,
+    "status": "ok",
+    "runtime_s": 720.0,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_day2_cvrp_real_evolution_gen4/run_cvrp_construct_tocc_corrected_g4_r4",
+    "best_objective": 12.829,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_tocc_corrected_g4_r5",
+    "problem": "cvrp_construct",
+    "arm": "tocc_corrected",
+    "generation": 4,
+    "repeat": 5,
+    "status": "ok",
+    "runtime_s": 671.4,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_day2_cvrp_real_evolution_gen4/run_cvrp_construct_tocc_corrected_g4_r5",
+    "best_objective": 12.70481,
+    "valid_candidates": 4
+  }
+]

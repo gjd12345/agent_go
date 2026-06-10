@@ -1,0 +1,82 @@
+[
+     {
+          "operator": "m1",
+          "index": 0,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "9b972766819c",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tutilizationRatio := float64(capacity-newRem) / float64(capacity)\n\t\ttightFitScore := float64(rem - item)\n\t\tscores[i] = 1.0/(tightFitScore+1.0) + 0.5*utilizationRatio\n\t}\n\treturn scores\n}",
+          "algorithm": "Modified best-fit with utilization boost: prefer tighter fits while slightly favoring higher utilization via normalized remaining ratio.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tutilizationRatio := float64(capacity-newRem) / float64(capacity)\n\t\ttightFitScore := float64(rem - item)\n\t\tscores[i] = 1.0/(tightFitScore+1.0) + 0.5*utilizationRatio\n\t}\n\treturn scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m1",
+          "index": 1,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "5446d066d059",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tutilizationGain := float64(capacity-rem+item) / float64(capacity)\n\t\tresidualPenalty := 1.0 / (math.Sqrt(float64(newRem)+1.0) + 0.5)\n\t\tgapFactor := math.Exp(-float64(newRem) / float64(capacity))\n\t\tscores[i] = utilizationGain*10.0 + residualPenalty + gapFactor\n\t}\n\treturn scores\n}",
+          "algorithm": "Prefer bins where the new remaining space is small but not too small, using a combination of the inverse of the new remaining plus a small penalty based on how close it is to zero to avoid overly tight fits.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tutilizationGain := float64(capacity-rem+item) / float64(capacity)\n\t\tresidualPenalty := 1.0 / (math.Sqrt(float64(newRem)+1.0) + 0.5)\n\t\tgapFactor := math.Exp(-float64(newRem) / float64(capacity))\n\t\tscores[i] = utilizationGain*10.0 + residualPenalty + gapFactor\n\t}\n\treturn scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m1",
+          "index": 2,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "c09189805b3b",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tutilization := float64(capacity-newRem) / float64(capacity)\n\t\tsmallGapPenalty := math.Exp(-float64(newRem) * 0.5)\n\t\tscores[i] = utilization*10.0 + smallGapPenalty\n\t}\n\treturn scores\n}",
+          "algorithm": "Modified best-fit with normalized utilization bonus and exponential small-gap preference: prefer slightly tighter fits unless it leaves an extremely small fragment, rewarding higher post-placement utilization while mildly penalizing very tiny leftovers.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tutilization := float64(capacity-newRem) / float64(capacity)\n\t\tsmallGapPenalty := math.Exp(-float64(newRem) * 0.5)\n\t\tscores[i] = utilization*10.0 + smallGapPenalty\n\t}\n\treturn scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m1",
+          "index": 3,
+          "objective": 0.11879,
+          "has_code": true,
+          "code_hash": "b91cef1e8472",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tutilization := float64(capacity-newRem) / float64(capacity)\n\t\tsmoothGap := math.Sqrt(float64(newRem)+0.5) * math.Exp(-utilization*utilization)\n\t\tscores[i] = float64(capacity-newRem) + 10.0*(1.0/utilization)*smoothGap\n\t}\n\treturn scores\n}",
+          "algorithm": "Modified best-fit with exponential preference for higher post-placement utilization and sqrt-smoothed remaining space.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tutilization := float64(capacity-newRem) / float64(capacity)\n\t\tsmoothGap := math.Sqrt(float64(newRem)+0.5) * math.Exp(-utilization*utilization)\n\t\tscores[i] = float64(capacity-newRem) + 10.0*(1.0/utilization)*smoothGap\n\t}\n\treturn scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m1",
+          "index": 4,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "d8dba0860af6",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tleftover := rem - item\n\t\tutilGain := float64(capacity-rem+item)\n\t\ttightPenalty := math.Exp(float64(leftover)*0.01)\n\t\tscores[i] = utilGain / tightPenalty\n\t}\n\treturn scores\n}",
+          "algorithm": "Modified best-fit that prefers smaller leftover space while also penalizing extremely tight fits via an exponential term to balance utilization and future flexibility.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tleftover := rem - item\n\t\tutilGain := float64(capacity-rem+item)\n\t\ttightPenalty := math.Exp(float64(leftover)*0.01)\n\t\tscores[i] = utilGain / tightPenalty\n\t}\n\treturn scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m1",
+          "index": 5,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "fe39d442e438",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tutilization := float64(capacity-newRem) / float64(capacity)\n\t\tleftoverRatio := float64(newRem) / float64(capacity)\n\t\tpenalty := math.Exp(-leftoverRatio * 10.0)\n\t\tscores[i] = utilization + 0.5*penalty\n\t}\n\treturn scores\n}",
+          "algorithm": "Modified best-fit score with exponential penalty on small leftover space to discourage fragmentation while still favoring tight fits.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tutilization := float64(capacity-newRem) / float64(capacity)\n\t\tleftoverRatio := float64(newRem) / float64(capacity)\n\t\tpenalty := math.Exp(-leftoverRatio * 10.0)\n\t\tscores[i] = utilization + 0.5*penalty\n\t}\n\treturn scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m1",
+          "index": 6,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "711aab958320",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    for i, rem := range remaining {\n        newRem := rem - item\n        utilRatio := float64(capacity-newRem) / float64(capacity)\n        tightness := float64(newRem) + 1.0\n        scores[i] = utilRatio * (1.0 / math.Sqrt(tightness))\n    }\n    return scores\n}",
+          "algorithm": "Modified best-fit that penalizes near-full bins less while still favoring tighter fits using a scaled inverse of post-placement remainder.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    for i, rem := range remaining {\n        newRem := rem - item\n        utilRatio := float64(capacity-newRem) / float64(capacity)\n        tightness := float64(newRem) + 1.0\n        scores[i] = utilRatio * (1.0 / math.Sqrt(tightness))\n    }\n    return scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m1",
+          "index": 7,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "5cbcff65de9d",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tutilizationGain := float64(item) / float64(capacity)\n\t\tresidualTerm := math.Sqrt(float64(newRem))\n\t\texpDecay := math.Exp(-float64(newRem) / float64(capacity))\n\t\tscores[i] = utilizationGain*10 + 1/(residualTerm+0.5) + expDecay*2\n\t}\n\treturn scores\n}",
+          "algorithm": "Prefer bins where the sum of the square root of the new remaining space and an exponential decay of the resulting utilization deviation from ideal yields the highest score.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tutilizationGain := float64(item) / float64(capacity)\n\t\tresidualTerm := math.Sqrt(float64(newRem))\n\t\texpDecay := math.Exp(-float64(newRem) / float64(capacity))\n\t\tscores[i] = utilizationGain*10 + 1/(residualTerm+0.5) + expDecay*2\n\t}\n\treturn scores\n",
+          "other_inf": null
+     }
+]

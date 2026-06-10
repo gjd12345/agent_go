@@ -1,0 +1,23 @@
+{
+  "suite": "tocc_day2_tsp_pure_gen4",
+  "model": "JoyAI-LLM-Pro",
+  "problems": ["tsp_construct"],
+  "arms": [
+    {
+      "name": "pure_eoh",
+      "runner_arm": "pure_eoh",
+      "context_strategy": "none",
+      "problems": ["tsp_construct"]
+    }
+  ],
+  "generations": [4],
+  "pop_size": 4,
+  "repeats": 3,
+  "max_runs": 3,
+  "max_llm_calls_estimate": 72,
+  "require_confirm_for_real_run": true,
+  "operators": "i1",
+  "run_timeout_s": 7200,
+  "python_exe": "/private/tmp/eoh_official_venv/bin/python",
+  "official_root": "/private/tmp/EoH-main"
+}

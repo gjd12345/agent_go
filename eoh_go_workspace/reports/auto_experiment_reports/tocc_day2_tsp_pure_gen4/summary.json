@@ -1,0 +1,144 @@
+{
+  "suite": "tocc_day2_tsp_pure_gen4",
+  "problems": {
+    "tsp_construct": [
+      {
+        "arm": "pure_eoh",
+        "gen": 4,
+        "pop": 4,
+        "status": "ok",
+        "best": 6.26884,
+        "valid": "4/4",
+        "cards": [],
+        "norm_score": 1.032,
+        "delta_pct": -3.1,
+        "code_snippet": "```python\n\n    if len(unvisited_nodes) == 1:\n        return unvisited_nodes[0]\n    \n    dist_from_current = distance_matrix[current_node, unvisited_nodes]\n    dist_to_dest = distance_matrix[unvisited_nodes, destination_node]\n    \n    max_fwd = np.max(dist_from_current)\n```",
+        "algorithm": "The algorithm selects the next node by minimizing a weighted score combining normalized forward distance to candidate, backward distance from last visited cluster, and proximity penalty to avoid revisiting near-start too early; implemented via iterative greedy scoring over unvisited nodes.",
+        "runtime_s": 1682.364,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": null,
+          "generation_success": true,
+          "objective_success": true,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "pure_eoh",
+        "gen": 4,
+        "pop": 4,
+        "status": "ok",
+        "best": 6.46162,
+        "valid": "4/4",
+        "cards": [],
+        "norm_score": 1.0012,
+        "delta_pct": -0.1,
+        "code_snippet": "```python\n\n\n    Args:\n        current_node: ID of the current node\n        destination_node: ID of the destination (return) node\n        unvisited_nodes: array of unvisited node IDs\n        distance_matrix: pairwise distance matrix between all nodes\n    Returns:\n```",
+        "algorithm": "Adaptive lookahead greedy selection chooses the next node by minimizing the product of the direct distance from the current node and the estimated cost to reach the destination via remaining nodes, approximated by the nearest‑neighbor heuristic over unvisited nodes.",
+        "runtime_s": 1922.572,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": null,
+          "generation_success": true,
+          "objective_success": true,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "pure_eoh",
+        "gen": 4,
+        "pop": 4,
+        "status": "ok",
+        "best": 6.67754,
+        "valid": "4/4",
+        "cards": [],
+        "norm_score": 0.9688,
+        "delta_pct": 3.2,
+        "code_snippet": "```python\n\n    if len(unvisited_nodes) == 1:\n        return unvisited_nodes[0]\n\n        n = len(nodes)\n        if n <= 1:\n            return 0.0\n        included = [False] * n\n```",
+        "algorithm": "Adaptive look‑ahead greedy selection balances immediate cost against future reachability by evaluating for each candidate its direct distance from the current node plus the minimum spanning tree weight connecting it to the remaining unvisited nodes and the destination, then picks the candidate minimizing this combined estimate.",
+        "runtime_s": 1824.931,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": null,
+          "generation_success": true,
+          "objective_success": false,
+          "failure_reason": null
+        }
+      }
+    ]
+  },
+  "success_funnel": {
+    "total_runs": 3,
+    "proposal_accept": {
+      "passed": 3,
+      "total": 3,
+      "rate": 1.0
+    },
+    "linkage_success": {
+      "passed": 0,
+      "total": 0,
+      "rate": 0,
+      "note": "insufficient data"
+    },
+    "generation_success": {
+      "passed": 3,
+      "total": 3,
+      "rate": 1.0
+    },
+    "objective_success": {
+      "passed": 2,
+      "total": 3,
+      "rate": 0.667
+    },
+    "pure_baselines": {
+      "tsp_construct": 6.469333333333334
+    },
+    "per_run": [
+      {
+        "proposal_accept": true,
+        "linkage_success": null,
+        "generation_success": true,
+        "objective_success": true,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 6.26884,
+        "pure_baseline": 6.469333333333334,
+        "problem": "tsp_construct",
+        "arm": "pure_eoh",
+        "gen": 4
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": null,
+        "generation_success": true,
+        "objective_success": true,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 6.46162,
+        "pure_baseline": 6.469333333333334,
+        "problem": "tsp_construct",
+        "arm": "pure_eoh",
+        "gen": 4
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": null,
+        "generation_success": true,
+        "objective_success": false,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 6.67754,
+        "pure_baseline": 6.469333333333334,
+        "problem": "tsp_construct",
+        "arm": "pure_eoh",
+        "gen": 4
+      }
+    ]
+  }
+}

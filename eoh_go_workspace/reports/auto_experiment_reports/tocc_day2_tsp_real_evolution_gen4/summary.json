@@ -1,0 +1,260 @@
+{
+  "suite": "tocc_day2_tsp_real_evolution_gen4",
+  "problems": {
+    "tsp_construct": [
+      {
+        "arm": "pure_eoh",
+        "gen": 4,
+        "pop": 4,
+        "status": "ok",
+        "best": 6.60788,
+        "valid": "4/4",
+        "cards": [],
+        "norm_score": 0.991,
+        "delta_pct": 0.9,
+        "code_snippet": "```python\n\n\n    Args:\n        current_node: ID of the current node\n        destination_node: ID of the destination (return) node\n        unvisited_nodes: array of unvisited node IDs\n        distance_matrix: pairwise distance matrix between all nodes\n    Returns:\n```",
+        "algorithm": "A diffusion‑process‑inspired algorithm where each candidate’s score is computed as the discounted sum of its influence propagating outward through the network of unvisited nodes, with the discount factor adapting to the remaining tour length to balance local greediness and global connectivity.",
+        "runtime_s": 765.568,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": null,
+          "generation_success": true,
+          "objective_success": false,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "pure_eoh",
+        "gen": 4,
+        "pop": 4,
+        "status": "ok",
+        "best": 6.60788,
+        "valid": "4/4",
+        "cards": [],
+        "norm_score": 0.991,
+        "delta_pct": 0.9,
+        "code_snippet": "```python\n\n    if len(unvisited_nodes) == 1:\n        return unvisited_nodes[0]\n\n    n_unvisited = len(unvisited_nodes)\n    sub_indices = list(unvisited_nodes)\n    idx_map = {node: i for i, node in enumerate(sub_indices)}\n    \n```",
+        "algorithm": "\"A graph‑topology driven selection that scores each candidate by its centrality within the unvisited subgraph, its marginal contribution to a minimum‐spanning‐tree of the unvisited set, and a dynamic regret term that penalizes choices far from a learned centroid direction, balancing local connectivity, structural efficiency, and directional bias.\"",
+        "runtime_s": 530.761,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": null,
+          "generation_success": true,
+          "objective_success": false,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "pure_eoh",
+        "gen": 4,
+        "pop": 4,
+        "status": "ok",
+        "best": 6.42951,
+        "valid": "4/4",
+        "cards": [],
+        "norm_score": 1.0185,
+        "delta_pct": -1.8,
+        "code_snippet": "```python\n\n\n    Args:\n        current_node: ID of the current node\n        destination_node: ID of the destination (return) node\n        unvisited_nodes: array of unvisited node IDs\n        distance_matrix: pairwise distance matrix between all nodes\n    Returns:\n```",
+        "algorithm": "Iteratively select the next node by maximizing a score based on the ratio of inverse normalized forward distance and an exploration factor combining local sparsity and global angular separation relative to the start‑to‑destination axis, preferring locally near but globally diversifying choices.",
+        "runtime_s": 540.367,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": null,
+          "generation_success": true,
+          "objective_success": true,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "tocc_corrected",
+        "gen": 4,
+        "pop": 4,
+        "status": "ok",
+        "best": 6.29166,
+        "valid": "4/4",
+        "cards": [
+          "tsp_regret_insertion",
+          "tsp_farthest_insertion"
+        ],
+        "norm_score": 1.0408,
+        "delta_pct": -3.9,
+        "code_snippet": "```python\n\n    n_unvisited = len(unvisited_nodes)\n    if n_unvisited <= 2:\n        return unvisited_nodes[np.argmin(distance_matrix[current_node][unvisited_nodes])]\n\n    dist_from_current = distance_matrix[current_node][unvisited_nodes]\n    dist_to_dest = distance_matrix[destination_node][unvisited_nodes]\n\n```",
+        "algorithm": "The proposed \"Cluster-Aware Regret Insertion\" algorithm selects the next node by balancing two factors: (1) the immediate cost from the current node, and (2) a combined penalty based on both the regret value (difference between the closest and second‑closest connections among the current node, destination, and already chosen candidates) and a long‑term clustering measure (the maximum distance from any other unvisited node), thereby prioritizing nodes that are expensive to defer while also preventing distant clusters from being left isolated at the end of the tour.",
+        "runtime_s": 657.876,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": true,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "tocc_corrected",
+        "gen": 4,
+        "pop": 4,
+        "status": "ok",
+        "best": 6.61498,
+        "valid": "4/4",
+        "cards": [
+          "tsp_regret_insertion",
+          "tsp_farthest_insertion"
+        ],
+        "norm_score": 0.9899,
+        "delta_pct": 1.0,
+        "code_snippet": "```python\n\n    if len(unvisited_nodes) == 0:\n        raise ValueError(\"No unvisited nodes\")\n    \n    if len(unvisited_nodes) <= 2:\n        return unvisited_nodes[np.argmin(distance_matrix[current_node][unvisited_nodes])]\n    \n    dest_dists = distance_matrix[destination_node][unvisited_nodes]\n```",
+        "algorithm": "A hybrid regret-farthest insertion algorithm that selects the next node by maximizing a weighted score combining immediate distance savings, regret cost of delaying the node, and proximity to the farthest unvisited cluster centroid from the destination, while keeping lookahead limited to two-step evaluations.",
+        "runtime_s": 666.697,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": false,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "tocc_corrected",
+        "gen": 4,
+        "pop": 4,
+        "status": "ok",
+        "best": 6.45989,
+        "valid": "4/4",
+        "cards": [
+          "tsp_regret_insertion",
+          "tsp_farthest_insertion"
+        ],
+        "norm_score": 1.0137,
+        "delta_pct": -1.4,
+        "code_snippet": "```python\n\n    uv = np.asarray(unvisited_nodes, dtype=int)\n    n = len(uv)\n    if n == 1:\n        return uv[0].item()\n\n    dist_cur = distance_matrix[current_node, uv]\n    dist_dest = distance_matrix[uv, destination_node]\n```",
+        "algorithm": "A three-phase adaptive selection that prioritizes nodes with balanced forward-cost impact, geometric dispersion, and efficient tie-breaking via minimal combined detour.",
+        "runtime_s": 651.305,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": true,
+          "failure_reason": null
+        }
+      }
+    ]
+  },
+  "success_funnel": {
+    "total_runs": 6,
+    "proposal_accept": {
+      "passed": 6,
+      "total": 6,
+      "rate": 1.0
+    },
+    "linkage_success": {
+      "passed": 3,
+      "total": 3,
+      "rate": 1.0
+    },
+    "generation_success": {
+      "passed": 6,
+      "total": 6,
+      "rate": 1.0
+    },
+    "objective_success": {
+      "passed": 3,
+      "total": 6,
+      "rate": 0.5
+    },
+    "pure_baselines": {
+      "tsp_construct": 6.548423333333333
+    },
+    "per_run": [
+      {
+        "proposal_accept": true,
+        "linkage_success": null,
+        "generation_success": true,
+        "objective_success": false,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 6.60788,
+        "pure_baseline": 6.548423333333333,
+        "problem": "tsp_construct",
+        "arm": "pure_eoh",
+        "gen": 4
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": null,
+        "generation_success": true,
+        "objective_success": false,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 6.60788,
+        "pure_baseline": 6.548423333333333,
+        "problem": "tsp_construct",
+        "arm": "pure_eoh",
+        "gen": 4
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": null,
+        "generation_success": true,
+        "objective_success": true,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 6.42951,
+        "pure_baseline": 6.548423333333333,
+        "problem": "tsp_construct",
+        "arm": "pure_eoh",
+        "gen": 4
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": true,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 6.29166,
+        "pure_baseline": 6.548423333333333,
+        "problem": "tsp_construct",
+        "arm": "tocc_corrected",
+        "gen": 4
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": false,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 6.61498,
+        "pure_baseline": 6.548423333333333,
+        "problem": "tsp_construct",
+        "arm": "tocc_corrected",
+        "gen": 4
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": true,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 6.45989,
+        "pure_baseline": 6.548423333333333,
+        "problem": "tsp_construct",
+        "arm": "tocc_corrected",
+        "gen": 4
+      }
+    ]
+  }
+}

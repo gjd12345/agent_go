@@ -1,0 +1,13 @@
+{
+  "problem_name": "mixer_split",
+  "target": "SplitOrders",
+  "run_tag": "20260601_101704",
+  "eoh_ok": true,
+  "population_size": 2,
+  "valid_candidates": 1,
+  "best_objective": 175.01468,
+  "population_file": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/tables/weekly_mixer_split_smoke_20260601/baseline/run_20260601_101704/agent_eoh_results/results/pops/population_generation_1.json",
+  "rag_trace": null,
+  "rag_context_chars": null,
+  "rag_global_items": []
+}

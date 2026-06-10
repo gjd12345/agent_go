@@ -1,0 +1,74 @@
+{
+  "problem": "tsp_construct",
+  "arm": "literature_rag",
+  "official_root": "/private/tmp/EoH-main",
+  "python_exe": "/private/tmp/eoh_official_venv/bin/python",
+  "run_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/evolution_smoke/tsp_construct/literature_rag/run_20260609_215558",
+  "generated_at": "2026-06-09 21:55:58",
+  "pop_size": 4,
+  "generations": 1,
+  "operators": "e1,e2,m1,m2",
+  "use_official_seed": false,
+  "api_key_present": true,
+  "api_endpoint_present": true,
+  "model_present": true,
+  "return_code": 0,
+  "runtime_seconds": 1008.089,
+  "stdout_tail": "[2026-06-09 21:55:59] LLM: JoyAI-LLM-Pro @ [api-endpoint-redacted]\n[2026-06-09 21:56:10] LLM connection verified.\n[2026-06-09 21:56:10] ======================================================\n[2026-06-09 21:56:10]   EoH\n[2026-06-09 21:56:10]   LLM      : JoyAI-LLM-Pro @ [api-endpoint-redacted]\n[2026-06-09 21:56:10]   EC       : gen=1  pop=4  ops=[e1 e2 m1 m2]\n[2026-06-09 21:56:10]   Sampling : init=8 (2\u00d7pop)  per_gen=4  parallel=1\n[2026-06-09 21:56:10]   Timeout  : llm=180s  eval=40s\n[2026-06-09 21:56:10] ======================================================\n[2026-06-09 21:56:10] \n[Init]  (8 samples \u2192 pop=4)\n[2026-06-09 22:02:01]   #1    [i1]  9.71605           best=9.71605  *\n[2026-06-09 22:02:01]   #2    [i1]  8.25858           best=8.25858  *\n[2026-06-09 22:02:01]   #3    [i1]  26.35005          best=8.25858\n[2026-06-09 22:02:01]   #4    [i1]  8.82249           best=8.25858\n[2026-06-09 22:08:54]   #5    [i1]  28.1079           best=8.25858\n[2026-06-09 22:08:54]   #6    [i1]  8.31724           best=8.25858\n[2026-06-09 22:08:54]   #7    [i1]  9.19768           best=8.25858\n[2026-06-09 22:08:54]   #8    [i1]  None (evaluation failed)  best=8.25858\n[2026-06-09 22:08:54]   Init done: 7/8 evaluated  pop=4  best=8.25858  elapsed=12.7m\n[2026-06-09 22:08:54] \n[Gen 1/1]\n[2026-06-09 22:12:46]   #9    [e2]  6.69203           best=6.69203  *\n[2026-06-09 22:12:46]   #10   [m1]  14.10582          best=6.69203\n[2026-06-09 22:12:46]   #11   [e2]  14.01121          best=6.69203\n[2026-06-09 22:12:46]   #12   [m2]  13.37134          best=6.69203\n[2026-06-09 22:12:46]   --- gen 1 done  pop=4  best=6.69203  elapsed=16.6m\n[2026-06-09 22:12:46] ======================================================\n[2026-06-09 22:12:46]   Evolution finished.  best=6.69203  samples=12  time=16.6m\n[2026-06-09 22:12:46] ======================================================\n",
+  "stderr_tail": "",
+  "rag_trace": {
+    "rag_mode": "literature_rag",
+    "rag_query": "tsp construct regret farthest lookahead route length",
+    "rag_top_k": 2,
+    "rag_max_chars": 2500,
+    "rag_corpus_size": 44,
+    "rag_strategy_pool_size": 2,
+    "rag_global_items": [
+      {
+        "id": "tsp_construct_api_skeleton",
+        "kind": "api_constraint",
+        "title": "Official TSP Construct select_next_node API skeleton"
+      }
+    ],
+    "rag_selected_items": [
+      {
+        "id": "tsp_regret_insertion",
+        "kind": "algorithm_card",
+        "title": "TSP Regret Insertion Skill Card"
+      },
+      {
+        "id": "tsp_farthest_insertion",
+        "kind": "algorithm_card",
+        "title": "TSP Farthest Insertion Skill Card"
+      }
+    ],
+    "rag_all_scores": [
+      {
+        "id": "tsp_regret_insertion",
+        "kind": "algorithm_card",
+        "score": 24
+      },
+      {
+        "id": "tsp_farthest_insertion",
+        "kind": "algorithm_card",
+        "score": 19
+      }
+    ],
+    "rag_context_chars": 1917,
+    "rag_context_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/evolution_smoke/tsp_construct/literature_rag/run_20260609_215558/rag_context.txt"
+  },
+  "run_summary": {
+    "run_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/evolution_smoke/tsp_construct/literature_rag/run_20260609_215558",
+    "ok": true,
+    "failure_reason": null,
+    "latest_population_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/evolution_smoke/tsp_construct/literature_rag/run_20260609_215558/results/pops/population_generation_1.json",
+    "latest_generation": 1,
+    "population_size": 4,
+    "valid_candidates": 4,
+    "best_objective": 6.69203,
+    "best_algorithm": "Use a dynamic thresholding rule that picks the node with the minimum adjusted distance, where adjustment is computed as the sum of the direct distance plus a penalty proportional to the node's closeness centrality among unvisited nodes, thereby favoring nodes that bridge remote clusters while avoiding excessive detours.",
+    "best_code": "import numpy as np\n\ndef select_next_node(current_node: int, destination_node: int, unvisited_nodes: np.ndarray, distance_matrix: np.ndarray) -> int:\n    \"\"\"Select the next node to visit in a TSP greedy construction.\"\"\"\n    n = len(unvisited_nodes)\n    if n == 1:\n        return unvisited_nodes[0]\n    \n    # Direct distances from current node to each candidate\n    direct = distance_matrix[current_node][unvisited_nodes]\n    \n    # Compute closeness centrality among unvisited subgraph for each candidate\n    centralities = np.zeros(n)\n    for idx, u in enumerate(unvisited_nodes):\n        others = np.setdiff1d(unvisited_nodes, [u])\n        if len(others) == 0:\n            centralities[idx] = 0.0\n        else:\n            # Sum of distances from u to all other unvisited nodes\n            dist_sum = np.sum(distance_matrix[u][others])\n            centralities[idx] = dist_sum / len(others)\n    \n    # Normalize centralities to [0,1] relative to min/max among candidates\n    c_min, c_max = centralities.min(), centralities.max()\n    if c_max > c_min + 1e-12:\n        norm_cent = (centralities - c_min) / (c_max - c_min)\n    else:\n        norm_cent = np.zeros_like(centralities)\n    \n    # Dynamic threshold: penalty decreases as more nodes are visited\n    # Penalty factor increases with centrality to discourage visiting highly central nodes early\n    # because they are easy to reach later; instead favor peripheral nodes first.\n    penalty_factor = 0.7 * (n / max(len(distance_matrix), 1))\n    adjusted_distance = direct + penalty_factor * (1.0 - norm_cent) * direct.std() if direct.std() > 1e-12 else direct\n    \n    # Choose the node with minimal adjusted distance\n    return unvisited_nodes[np.argmin(adjusted_distance)]",
+    "sample_file_count": 2,
+    "best_sample_path": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/evolution_smoke/tsp_construct/literature_rag/run_20260609_215558/results/samples/samples_best.json"
+  }
+}

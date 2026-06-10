@@ -1,0 +1,151 @@
+{
+  "suite": "tocc_day2_tsp_tocc_gen4",
+  "problems": {
+    "tsp_construct": [
+      {
+        "arm": "tocc_corrected",
+        "gen": 4,
+        "pop": 4,
+        "status": "ok",
+        "best": 7.32429,
+        "valid": "4/4",
+        "cards": [
+          "tsp_regret_insertion",
+          "tsp_farthest_insertion"
+        ],
+        "norm_score": null,
+        "delta_pct": null,
+        "code_snippet": "```python\n\n    if len(unvisited_nodes) == 0:\n        raise ValueError(\"No unvisited nodes\")\n    if len(unvisited_nodes) == 1:\n        return unvisited_nodes[0]\n\n    dist_from_current = distance_matrix[current_node][unvisited_nodes]\n    dist_to_dest = distance_matrix[destination_node][unvisited_nodes]\n```",
+        "algorithm": "A hybrid regret-aware insertion that balances immediate cost, future regret from missing the alternative, and geometric dispersion toward the return hub.",
+        "runtime_s": 4622.597,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": null,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "tocc_corrected",
+        "gen": 4,
+        "pop": 4,
+        "status": "ok",
+        "best": 6.39984,
+        "valid": "4/4",
+        "cards": [
+          "tsp_regret_insertion",
+          "tsp_farthest_insertion"
+        ],
+        "norm_score": null,
+        "delta_pct": null,
+        "code_snippet": "```python\n\n    if len(unvisited_nodes) <= 2:\n        return unvisited_nodes[np.argmin(distance_matrix[current_node][unvisited_nodes])]\n\n    curr_dists = distance_matrix[current_node][unvisited_nodes]\n    dest_dists = distance_matrix[destination_node][unvisited_nodes]\n\n    scores = np.empty(len(unvisited_nodes), dtype=np.float64)\n```",
+        "algorithm": "Hybrid regret–farthest lookahead: compute for each unvisited node its immediate cost plus a penalized regret score based on distances to both current and destination, favoring nodes that are both somewhat distant from the origin cluster and have high alternative‑connection penalty.",
+        "runtime_s": 2856.168,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": null,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "tocc_corrected",
+        "gen": 4,
+        "pop": 4,
+        "status": "ok",
+        "best": 6.50991,
+        "valid": "4/4",
+        "cards": [
+          "tsp_regret_insertion",
+          "tsp_farthest_insertion"
+        ],
+        "norm_score": null,
+        "delta_pct": null,
+        "code_snippet": "```python\n\n    if len(unvisited_nodes) == 0:\n        raise ValueError(\"No unvisited nodes\")\n    \n    cur_dists = distance_matrix[current_node][unvisited_nodes]\n    nn_score = cur_dists / np.max(cur_dists) if np.max(cur_dists) > 0 else np.ones_like(cur_dists)\n    \n    dest_dists = distance_matrix[destination_node][unvisited_nodes]\n```",
+        "algorithm": "Adaptive hybrid selection combining nearest-neighbor proximity with farthest-cluster awareness and regret-based lookahead, using weighted scoring to balance immediate cost, future isolation risk, and alternative-path penalty, while staying deterministic and bounded.",
+        "runtime_s": 2127.292,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": null,
+          "failure_reason": null
+        }
+      }
+    ]
+  },
+  "success_funnel": {
+    "total_runs": 3,
+    "proposal_accept": {
+      "passed": 3,
+      "total": 3,
+      "rate": 1.0
+    },
+    "linkage_success": {
+      "passed": 3,
+      "total": 3,
+      "rate": 1.0
+    },
+    "generation_success": {
+      "passed": 3,
+      "total": 3,
+      "rate": 1.0
+    },
+    "objective_success": {
+      "passed": 0,
+      "total": 0,
+      "rate": 0,
+      "note": "insufficient data"
+    },
+    "pure_baselines": {},
+    "per_run": [
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": null,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 7.32429,
+        "pure_baseline": null,
+        "problem": "tsp_construct",
+        "arm": "tocc_corrected",
+        "gen": 4
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": null,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 6.39984,
+        "pure_baseline": null,
+        "problem": "tsp_construct",
+        "arm": "tocc_corrected",
+        "gen": 4
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": null,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 6.50991,
+        "pure_baseline": null,
+        "problem": "tsp_construct",
+        "arm": "tocc_corrected",
+        "gen": 4
+      }
+    ]
+  }
+}

@@ -45,6 +45,8 @@ class RagBuildCorpusTests(unittest.TestCase):
                     "knapsack_api_skeleton",
                     "mixer_split_api_skeleton",
                     "obp_api_skeleton",
+                    "tsp_construct_api_skeleton",
+                    "cvrp_construct_api_skeleton",
                 },
                 {item.id for item in api_items},
             )
@@ -124,14 +126,16 @@ class RagBuildCorpusTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         corpus = load_all_corpora(root)
         cards = [item for item in corpus if item.kind == "algorithm_card"]
+        card_ids = {item.id for item in cards}
 
-        self.assertEqual(LITERATURE_IDS, {item.id for item in cards})
-        self.assertEqual(len(LITERATURE_IDS), len(cards))
-        self.assertNotIn("sa_seed_1", {item.id for item in cards})
+        # LITERATURE_IDS must be a subset; history cards may also be present.
+        self.assertTrue(LITERATURE_IDS.issubset(card_ids), f"Missing: {LITERATURE_IDS - card_ids}")
+        self.assertNotIn("sa_seed_1", card_ids)
         for item in cards:
-            self.assertLessEqual(len(item.constraints), 2, item.id)
-            self.assertLessEqual(len(item.content), 450, item.id)
-            item.content.encode("ascii")
+            if item.id in LITERATURE_IDS:
+                self.assertLessEqual(len(item.constraints), 2, item.id)
+                self.assertLessEqual(len(item.content), 450, item.id)
+                item.content.encode("ascii")
 
         by_id = {item.id: item for item in cards}
         self.assertTrue({"d50", "d75", "medium-density", "capacity", "limited-capacity", "lookahead"}.issubset(by_id["regret2_insertion"].tags))

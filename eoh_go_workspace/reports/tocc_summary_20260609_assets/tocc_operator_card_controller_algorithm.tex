@@ -1,0 +1,47 @@
+\documentclass{article}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{amsmath,amssymb}
+\begin{document}
+
+\begin{algorithm}[H]
+\caption{Trace-Conditioned Operator-Card Controller (TOCC)}
+\KwIn{
+Initial experiment manifest $\mathcal{M}$; operator-card library $\mathcal{C}$; official EOH runner $\mathcal{E}$; budget $B$; maximum loop count $K$
+}
+\KwOut{
+Run archive $\mathcal{A}$ containing traces, selected cards, best programs, and verified objectives
+}
+
+$\mathcal{A} \leftarrow \emptyset$\;
+\For{$k \leftarrow 1$ \KwTo $K$}{
+    $\mathcal{T}_k \leftarrow \mathrm{CollectTrace}(\mathcal{A}, \mathcal{M})$\;
+    $d_k \leftarrow \mathrm{DiagnoseBias}(\mathcal{T}_k)$\;
+
+    \uIf{$d_k \in \{\mathrm{baseline\_overlap}, \mathrm{wrong\_bias}, \mathrm{low\_diversity}\}$}{
+        $(\mathcal{S}_k, q_k) \leftarrow \mathrm{SelectCards}(\mathcal{C}, d_k, \mathcal{T}_k)$\;
+    }
+    \ElseIf{$d_k \in \{\mathrm{valid\_collapse}, \mathrm{api\_failure}\}$}{
+        $(\mathcal{S}_k, q_k) \leftarrow \mathrm{ReduceContextAndKeepApiRules}(\mathcal{C})$\;
+    }
+    \Else{
+        $\mathcal{S}_k \leftarrow \emptyset$; $q_k \leftarrow \varnothing$\;
+    }
+
+    $\pi_k \leftarrow \mathrm{Gatekeep}(d_k, \mathcal{S}_k, q_k, B)$\;
+    \If{$\pi_k$ is rejected}{
+        $\mathcal{A} \leftarrow \mathcal{A} \cup \{(\mathcal{T}_k, d_k, \mathrm{rejected})\}$\;
+        \textbf{continue}\;
+    }
+
+    $\mathcal{R}_k \leftarrow \mathcal{E}(\mathcal{M}, \pi_k)$\;
+    $\mathcal{V}_k \leftarrow \mathrm{VerifyRun}(\mathcal{R}_k)$\;
+    $\mathcal{A} \leftarrow \mathcal{A} \cup \{(\mathcal{T}_k, d_k, \pi_k, \mathcal{R}_k, \mathcal{V}_k)\}$\;
+
+    \If{$\mathrm{StopCriterion}(\mathcal{A}, B)$}{
+        \textbf{break}\;
+    }
+}
+\Return{$\mathcal{A}$}\;
+\end{algorithm}
+
+\end{document}

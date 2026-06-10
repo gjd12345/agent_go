@@ -1,0 +1,118 @@
+{
+  "total_runs": 6,
+  "proposal_accept": {
+    "passed": 6,
+    "total": 6,
+    "rate": 1.0
+  },
+  "linkage_success": {
+    "passed": 3,
+    "total": 3,
+    "rate": 1.0
+  },
+  "generation_success": {
+    "passed": 6,
+    "total": 6,
+    "rate": 1.0
+  },
+  "objective_success": {
+    "passed": 3,
+    "total": 6,
+    "rate": 0.5
+  },
+  "pure_baselines": {
+    "tsp_construct": 6.548423333333333
+  },
+  "per_run": [
+    {
+      "proposal_accept": true,
+      "linkage_success": null,
+      "generation_success": true,
+      "objective_success": false,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 6.60788,
+      "pure_baseline": 6.548423333333333,
+      "problem": "tsp_construct",
+      "arm": "pure_eoh",
+      "gen": 4
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": null,
+      "generation_success": true,
+      "objective_success": false,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 6.60788,
+      "pure_baseline": 6.548423333333333,
+      "problem": "tsp_construct",
+      "arm": "pure_eoh",
+      "gen": 4
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": null,
+      "generation_success": true,
+      "objective_success": true,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 6.42951,
+      "pure_baseline": 6.548423333333333,
+      "problem": "tsp_construct",
+      "arm": "pure_eoh",
+      "gen": 4
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": true,
+      "objective_success": true,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 6.29166,
+      "pure_baseline": 6.548423333333333,
+      "problem": "tsp_construct",
+      "arm": "tocc_corrected",
+      "gen": 4
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": true,
+      "objective_success": false,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 6.61498,
+      "pure_baseline": 6.548423333333333,
+      "problem": "tsp_construct",
+      "arm": "tocc_corrected",
+      "gen": 4
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": true,
+      "objective_success": true,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 6.45989,
+      "pure_baseline": 6.548423333333333,
+      "problem": "tsp_construct",
+      "arm": "tocc_corrected",
+      "gen": 4
+    }
+  ]
+}

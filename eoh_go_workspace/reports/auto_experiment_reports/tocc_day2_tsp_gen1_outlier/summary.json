@@ -1,0 +1,112 @@
+{
+  "suite": "tocc_day2_tsp_gen1_outlier",
+  "problems": {
+    "tsp_construct": [
+      {
+        "arm": "tocc_corrected",
+        "gen": 1,
+        "pop": 4,
+        "status": "ok",
+        "best": 6.55479,
+        "valid": "4/4",
+        "cards": [
+          "tsp_regret_insertion",
+          "tsp_farthest_insertion"
+        ],
+        "norm_score": null,
+        "delta_pct": null,
+        "code_snippet": "```python\n\n    n = len(unvisited_nodes)\n    if n == 0:\n        raise ValueError(\"No unvisited nodes available.\")\n    if n == 1:\n        return unvisited_nodes[0]\n\n    MAX_CANDIDATES_FOR_REGRET = 50\n```",
+        "algorithm": "Hybrid Regret‑Farthest Insertion: at each step compute a composite score combining (a) the regret value of inserting each candidate after current_node versus its best alternative among remaining unvisited nodes plus the eventual return to destination_node, and (b) the candidate’s farthest‑from‑destination penalty; select the unvisited node with the highest score, falling back to pure farthest insertion when regrets are tied within tolerance.",
+        "runtime_s": 2450.074,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": null,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "tocc_corrected",
+        "gen": 1,
+        "pop": 4,
+        "status": "ok",
+        "best": 7.45222,
+        "valid": "4/4",
+        "cards": [
+          "tsp_regret_insertion",
+          "tsp_farthest_insertion"
+        ],
+        "norm_score": null,
+        "delta_pct": null,
+        "code_snippet": "```python\n\n    if len(unvisited_nodes) == 0:\n        raise ValueError(\"No unvisited nodes\")\n    \n    dist_from_current = distance_matrix[current_node, unvisited_nodes]\n    \n    nn_scores = dist_from_current\n    \n```",
+        "algorithm": "A hybrid regret-aware farthest-first algorithm: compute for each unvisited node its direct distance from current, its minimum insertion cost into the tour endpoint via the destination, and its second‑best alternative cost; pick the node maximizing (second‑best − best) * farthest_penalty, where farthest_penalty is proportional to its distance to the destination, falling back to pure nearest neighbor when all regrets are near zero.",
+        "runtime_s": 1329.941,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": null,
+          "failure_reason": null
+        }
+      }
+    ]
+  },
+  "success_funnel": {
+    "total_runs": 2,
+    "proposal_accept": {
+      "passed": 2,
+      "total": 2,
+      "rate": 1.0
+    },
+    "linkage_success": {
+      "passed": 2,
+      "total": 2,
+      "rate": 1.0
+    },
+    "generation_success": {
+      "passed": 2,
+      "total": 2,
+      "rate": 1.0
+    },
+    "objective_success": {
+      "passed": 0,
+      "total": 0,
+      "rate": 0,
+      "note": "insufficient data"
+    },
+    "pure_baselines": {},
+    "per_run": [
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": null,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 6.55479,
+        "pure_baseline": null,
+        "problem": "tsp_construct",
+        "arm": "tocc_corrected",
+        "gen": 1
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": null,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 7.45222,
+        "pure_baseline": null,
+        "problem": "tsp_construct",
+        "arm": "tocc_corrected",
+        "gen": 1
+      }
+    ]
+  }
+}

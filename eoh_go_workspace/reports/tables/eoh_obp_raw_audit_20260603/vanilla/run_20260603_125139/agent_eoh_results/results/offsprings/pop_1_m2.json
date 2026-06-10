@@ -1,0 +1,82 @@
+[
+     {
+          "operator": "m2",
+          "index": 0,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "55be27b9b61d",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    for i, rem := range remaining {\n        gapAfter := rem - item\n        if gapAfter == 0 {\n            scores[i] = 1.0 + float64(capacity)*2.0\n        } else {\n            penalty := float64(gapAfter) / float64(capacity) * 10.0\n            reward := 1.0 / (1.0 + float64(gapAfter*gapAfter)/float64(capacity*capacity))\n            scores[i] = reward * (1.0 - penalty/20.0)\n        }\n    }\n    return scores\n}",
+          "algorithm": "Modified best-fit with a linear penalty and a squared-gap reward: prefers bins leaving minimal remaining space after placement, but penalizes very tight fits more heavily using a linear decay factor, while rewarding near-zero gaps quadratically to balance between tightness and future usability.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    for i, rem := range remaining {\n        gapAfter := rem - item\n        if gapAfter == 0 {\n            scores[i] = 1.0 + float64(capacity)*2.0\n        } else {\n            penalty := float64(gapAfter) / float64(capacity) * 10.0\n            reward := 1.0 / (1.0 + float64(gapAfter*gapAfter)/float64(capacity*capacity))\n            scores[i] = reward * (1.0 - penalty/20.0)\n        }\n    }\n    return scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m2",
+          "index": 1,
+          "objective": 0.11879,
+          "has_code": true,
+          "code_hash": "17513959e9ba",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    target := float64(capacity) / 2.0\n    for i, rem := range remaining {\n        newRem := float64(rem - item)\n        diff := newRem - target\n        if diff < 0 {\n            diff = -diff\n        }\n        scores[i] = -diff / float64(capacity)\n    }\n    return scores\n}",
+          "algorithm": "Prefer the feasible bin where the absolute difference between the new remaining space and half of the bin capacity is minimized, normalized by capacity.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    target := float64(capacity) / 2.0\n    for i, rem := range remaining {\n        newRem := float64(rem - item)\n        diff := newRem - target\n        if diff < 0 {\n            diff = -diff\n        }\n        scores[i] = -diff / float64(capacity)\n    }\n    return scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m2",
+          "index": 2,
+          "objective": 0.09612,
+          "has_code": true,
+          "code_hash": "6a38ece03755",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    avgRem := 0\n    for _, r := range remaining {\n        avgRem += r\n    }\n    if len(remaining) > 0 {\n        avgRem /= len(remaining)\n    }\n    targetGap := float64(avgRem) * 0.35\n    for i, rem := range remaining {\n        gapAfter := float64(rem - item)\n        diff := gapAfter - targetGap\n        var baseScore float64\n        if diff < 0 {\n            baseScore = 1.0 + 0.02*diff\n        } else {\n            baseScore = 1.0 - (diff*diff)/(200000.0 + float64(capacity)*10.0)\n        }\n        scores[i] = baseScore\n    }\n    return scores\n}",
+          "algorithm": "Modified best-fit with linear penalty for tight fits below target gap, squared penalty above, using a dynamic target proportional to current average remaining capacity.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    avgRem := 0\n    for _, r := range remaining {\n        avgRem += r\n    }\n    if len(remaining) > 0 {\n        avgRem /= len(remaining)\n    }\n    targetGap := float64(avgRem) * 0.35\n    for i, rem := range remaining {\n        gapAfter := float64(rem - item)\n        diff := gapAfter - targetGap\n        var baseScore float64\n        if diff < 0 {\n            baseScore = 1.0 + 0.02*diff\n        } else {\n            baseScore = 1.0 - (diff*diff)/(200000.0 + float64(capacity)*10.0)\n        }\n        scores[i] = baseScore\n    }\n    return scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m2",
+          "index": 3,
+          "objective": 0.11879,
+          "has_code": true,
+          "code_hash": "15c4c0f348b1",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    targetFraction := 0.5\n    targetRemaining := int(float64(capacity) * targetFraction)\n    for i, rem := range remaining {\n        newRem := rem - item\n        diff := newRem - targetRemaining\n        scores[i] = float64(-diff*diff)\n    }\n    return scores\n}",
+          "algorithm": "Modified best-fit score: prefer feasible bin with remaining capacity closest to a target fraction (e.g., 0.5) of total capacity after placement, using squared distance penalty.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    targetFraction := 0.5\n    targetRemaining := int(float64(capacity) * targetFraction)\n    for i, rem := range remaining {\n        newRem := rem - item\n        diff := newRem - targetRemaining\n        scores[i] = float64(-diff*diff)\n    }\n    return scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m2",
+          "index": 4,
+          "objective": 0.05903,
+          "has_code": true,
+          "code_hash": "a4a4c46a0b2f",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    targetGap := float64(capacity) / 5.0\n    for i, rem := range remaining {\n        gapAfter := float64(rem - item)\n        diff := gapAfter - targetGap\n        if diff <= 0 {\n            scores[i] = 1.0 + (-diff)*0.05\n        } else {\n            scores[i] = 1.0 - diff*0.02\n        }\n        if scores[i] < 0 {\n            scores[i] = 0\n        }\n    }\n    return scores\n}",
+          "algorithm": "Modified best-fit score with linear penalty for exceeding a quarter-capacity gap, rewarding very tight fits more strongly while moderately discouraging larger leftover gaps.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    targetGap := float64(capacity) / 5.0\n    for i, rem := range remaining {\n        gapAfter := float64(rem - item)\n        diff := gapAfter - targetGap\n        if diff <= 0 {\n            scores[i] = 1.0 + (-diff)*0.05\n        } else {\n            scores[i] = 1.0 - diff*0.02\n        }\n        if scores[i] < 0 {\n            scores[i] = 0\n        }\n    }\n    return scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m2",
+          "index": 5,
+          "objective": 0.11879,
+          "has_code": true,
+          "code_hash": "41c17fafa4f8",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    target := capacity / 2\n    for i, rem := range remaining {\n        leftAfter := rem - item\n        diff := leftAfter - target\n        scores[i] = -math.Exp(float64(diff*diff)/float64(capacity))\n    }\n    return scores\n}",
+          "algorithm": "Prefer bins where the item leaves a balanced remaining capacity: penalize both too little and too much leftover using an exponential penalty based on squared deviation from half capacity.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n    scores := make([]float64, len(remaining))\n    target := capacity / 2\n    for i, rem := range remaining {\n        leftAfter := rem - item\n        diff := leftAfter - target\n        scores[i] = -math.Exp(float64(diff*diff)/float64(capacity))\n    }\n    return scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m2",
+          "index": 6,
+          "objective": 0.11212,
+          "has_code": true,
+          "code_hash": "2bfdd2f6f44b",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tratio := float64(newRem) / float64(capacity)\n\t\ttarget := 0.25\n\t\tdeviation := ratio - target\n\t\tpenalty := math.Exp(-deviation * deviation * 10.0)\n\t\tscores[i] = penalty\n\t}\n\treturn scores\n}",
+          "algorithm": "Prefer the bin where the resulting relative emptiness is closest to a target ratio, using an exponential penalty on deviation.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tnewRem := rem - item\n\t\tratio := float64(newRem) / float64(capacity)\n\t\ttarget := 0.25\n\t\tdeviation := ratio - target\n\t\tpenalty := math.Exp(-deviation * deviation * 10.0)\n\t\tscores[i] = penalty\n\t}\n\treturn scores\n",
+          "other_inf": null
+     },
+     {
+          "operator": "m2",
+          "index": 7,
+          "objective": 0.08279,
+          "has_code": true,
+          "code_hash": "0ab2d353e56d",
+          "code": "func ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tgapAfter := rem - item\n\t\ttarget := float64(capacity) / 6.0\n\t\tdiff := float64(gapAfter) - target\n\t\tif diff > 0 {\n\t\t\tscores[i] = math.Exp(-diff*diff/2500.0) * 0.95\n\t\t} else {\n\t\t\tscores[i] = math.Exp(-diff*diff/2500.0)\n\t\t}\n\t}\n\treturn scores\n}",
+          "algorithm": "Modified best-fit score with symmetric Gaussian preference around a lower target (capacity/6) and sharper peak via smaller denominator, plus slight asymmetry favoring underfilled gaps when positive difference occurs.}\nfunc ScoreBin(item int, remaining []int, capacity int) []float64 {\n\tscores := make([]float64, len(remaining))\n\tfor i, rem := range remaining {\n\t\tgapAfter := rem - item\n\t\ttarget := float64(capacity) / 6.0\n\t\tdiff := float64(gapAfter) - target\n\t\tif diff > 0 {\n\t\t\tscores[i] = math.Exp(-diff*diff/2500.0) * 0.95\n\t\t} else {\n\t\t\tscores[i] = math.Exp(-diff*diff/2500.0)\n\t\t}\n\t}\n\treturn scores\n",
+          "other_inf": null
+     }
+]

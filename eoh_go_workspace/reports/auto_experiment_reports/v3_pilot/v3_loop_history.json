@@ -1,0 +1,14 @@
+[
+  {
+    "iteration": 1,
+    "diagnosis": "no_issue",
+    "cards": [],
+    "status": "no_cards_recommended"
+  },
+  {
+    "iteration": 2,
+    "diagnosis": "no_issue",
+    "cards": [],
+    "status": "no_cards_recommended"
+  }
+]

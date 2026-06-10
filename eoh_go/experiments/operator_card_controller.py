@@ -44,16 +44,8 @@ CARD_QUERIES: dict[str, str] = {
 
 def _get_code_family(code: str | None) -> set[str]:
     """Extract feature keywords from generated code."""
-    if not code:
-        return set()
-    features = {
-        "nearest", "farthest", "regret", "capacity", "residual",
-        "best_fit", "first_fit", "utilization", "savings", "sweep",
-        "cluster", "lookahead", "two_hop", "progress", "tightness",
-        "isolation", "detour", "destination", "depot", "distance",
-    }
-    code_lower = code.lower()
-    return {f for f in features if f in code_lower}
+    from eoh_go.rag.card_synthesis import get_code_family
+    return get_code_family(code)
 
 
 def _card_family(card_ids: list[str]) -> str:

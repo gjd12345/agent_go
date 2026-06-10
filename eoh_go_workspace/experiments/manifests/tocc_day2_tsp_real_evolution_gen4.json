@@ -1,0 +1,32 @@
+{
+  "suite": "tocc_day2_tsp_real_evolution_gen4",
+  "model": "JoyAI-LLM-Pro",
+  "problems": ["tsp_construct"],
+  "arms": [
+    {
+      "name": "pure_eoh",
+      "runner_arm": "pure_eoh",
+      "context_strategy": "none",
+      "problems": ["tsp_construct"]
+    },
+    {
+      "name": "tocc_corrected",
+      "runner_arm": "literature_rag",
+      "context_strategy": "tocc_selected_cards",
+      "rag_query": "tsp construct regret farthest lookahead route length",
+      "selected_card_ids": ["tsp_regret_insertion", "tsp_farthest_insertion"],
+      "problems": ["tsp_construct"]
+    }
+  ],
+  "generations": [4],
+  "pop_size": 4,
+  "repeats": 3,
+  "max_runs": 6,
+  "max_llm_calls_estimate": 144,
+  "require_confirm_for_real_run": true,
+  "operators": "e1,e2,m1,m2",
+  "run_timeout_s": 7200,
+  "rag": { "top_k": 2, "max_chars": 2500 },
+  "python_exe": "/private/tmp/eoh_official_venv/bin/python",
+  "official_root": "/private/tmp/EoH-main"
+}

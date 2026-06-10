@@ -87,6 +87,20 @@ class OfficialEohRunTests(unittest.TestCase):
         self.assertIn("API RULES", context)
         self.assertNotIn("InsertShips", context)
 
+    def test_build_tsp_and_cvrp_literature_context_use_problem_cards(self) -> None:
+        tsp_context, tsp_trace = build_official_rag_context(Path.cwd(), "tsp_construct", "literature_rag", top_k=2, max_chars=1800)
+        cvrp_context, cvrp_trace = build_official_rag_context(Path.cwd(), "cvrp_construct", "literature_rag", top_k=2, max_chars=1800)
+
+        self.assertTrue(all(item["id"].startswith("tsp_") for item in tsp_trace["rag_selected_items"]))
+        self.assertEqual(["tsp_construct_api_skeleton"], [item["id"] for item in tsp_trace["rag_global_items"]])
+        self.assertIn("API RULES", tsp_context)
+        self.assertNotIn("obp_", tsp_context)
+
+        self.assertTrue(all(item["id"].startswith("cvrp_") for item in cvrp_trace["rag_selected_items"]))
+        self.assertEqual(["cvrp_construct_api_skeleton"], [item["id"] for item in cvrp_trace["rag_global_items"]])
+        self.assertIn("API RULES", cvrp_context)
+        self.assertNotIn("obp_", cvrp_context)
+
     def test_run_official_eoh_timeout_reports_without_key_value(self) -> None:
         old_key = os.environ.get("TEST_OFFICIAL_KEY")
         old_endpoint = os.environ.get("TEST_OFFICIAL_ENDPOINT")

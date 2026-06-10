@@ -1,0 +1,108 @@
+{
+  "output": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/local_notes/insertships_to_current_20260604/insertships_to_current_code_evolution.pptx",
+  "outputBytes": 499438,
+  "slideCount": 9,
+  "slideSize": {
+    "width": 1280,
+    "height": 720
+  },
+  "previewDir": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/preview",
+  "previewPaths": [
+    "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/preview/slide-01.png",
+    "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/preview/slide-02.png",
+    "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/preview/slide-03.png",
+    "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/preview/slide-04.png",
+    "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/preview/slide-05.png",
+    "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/preview/slide-06.png",
+    "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/preview/slide-07.png",
+    "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/preview/slide-08.png",
+    "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/preview/slide-09.png"
+  ],
+  "layoutDir": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/layout",
+  "layoutResults": [
+    {
+      "layoutPath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/layout/slide-01.layout.json"
+    },
+    {
+      "layoutPath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/layout/slide-02.layout.json"
+    },
+    {
+      "layoutPath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/layout/slide-03.layout.json"
+    },
+    {
+      "layoutPath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/layout/slide-04.layout.json"
+    },
+    {
+      "layoutPath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/layout/slide-05.layout.json"
+    },
+    {
+      "layoutPath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/layout/slide-06.layout.json"
+    },
+    {
+      "layoutPath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/layout/slide-07.layout.json"
+    },
+    {
+      "layoutPath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/layout/slide-08.layout.json"
+    },
+    {
+      "layoutPath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/layout/slide-09.layout.json"
+    }
+  ],
+  "contactSheet": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/qa/contact-sheet.png",
+  "slides": [
+    {
+      "index": 1,
+      "requestedSlideNumber": 1,
+      "modulePath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/slides/slide-01.mjs",
+      "exportName": "slide01"
+    },
+    {
+      "index": 2,
+      "requestedSlideNumber": 2,
+      "modulePath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/slides/slide-02.mjs",
+      "exportName": "slide02"
+    },
+    {
+      "index": 3,
+      "requestedSlideNumber": 3,
+      "modulePath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/slides/slide-03.mjs",
+      "exportName": "slide03"
+    },
+    {
+      "index": 4,
+      "requestedSlideNumber": 4,
+      "modulePath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/slides/slide-04.mjs",
+      "exportName": "slide04"
+    },
+    {
+      "index": 5,
+      "requestedSlideNumber": 5,
+      "modulePath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/slides/slide-05.mjs",
+      "exportName": "slide05"
+    },
+    {
+      "index": 6,
+      "requestedSlideNumber": 6,
+      "modulePath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/slides/slide-06.mjs",
+      "exportName": "slide06"
+    },
+    {
+      "index": 7,
+      "requestedSlideNumber": 7,
+      "modulePath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/slides/slide-07.mjs",
+      "exportName": "slide07"
+    },
+    {
+      "index": 8,
+      "requestedSlideNumber": 8,
+      "modulePath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/slides/slide-08.mjs",
+      "exportName": "slide08"
+    },
+    {
+      "index": 9,
+      "requestedSlideNumber": 9,
+      "modulePath": "/Users/guojiadong.9/agent_ad/agent_go/outputs/manual-20260604-insertships/presentations/insertships-to-current/slides/slide-09.mjs",
+      "exportName": "slide09"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "tag": "run_tsp_construct_tocc_corrected_g1_r1",
+    "problem": "tsp_construct",
+    "arm": "tocc_corrected",
+    "generation": 1,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 2450.2,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_day2_tsp_gen1_outlier/run_tsp_construct_tocc_corrected_g1_r1",
+    "best_objective": 6.55479,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_tsp_construct_tocc_corrected_g1_r2",
+    "problem": "tsp_construct",
+    "arm": "tocc_corrected",
+    "generation": 1,
+    "repeat": 2,
+    "status": "ok",
+    "runtime_s": 1330.0,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_day2_tsp_gen1_outlier/run_tsp_construct_tocc_corrected_g1_r2",
+    "best_objective": 7.45222,
+    "valid_candidates": 4
+  }
+]

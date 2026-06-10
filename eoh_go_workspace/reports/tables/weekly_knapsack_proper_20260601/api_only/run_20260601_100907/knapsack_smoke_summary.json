@@ -1,0 +1,93 @@
+{
+  "problem_name": "knapsack",
+  "target": "SelectItems",
+  "run_tag": "20260601_100907",
+  "eoh_ok": true,
+  "population_size": 2,
+  "valid_candidates": 1,
+  "best_objective": -283.0,
+  "best_value": 283.0,
+  "population_file": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/tables/weekly_knapsack_proper_20260601/api_only/run_20260601_100907/agent_eoh_results/results/pops/population_generation_1.json",
+  "rag_trace": {
+    "rag_mode": "literature",
+    "rag_query": "dynamic SelectItems heuristic density=d25 arrival_scale=1.0 medium density route capacity insertion cost final cost",
+    "rag_top_k": 0,
+    "rag_corpus_size_before_filter": 25,
+    "rag_corpus_size_after_filter": 12,
+    "rag_global_items": [
+      {
+        "id": "knapsack_api_skeleton",
+        "kind": "api_constraint",
+        "title": "Knapsack SelectItems Go API skeleton"
+      },
+      {
+        "id": "suspicious_low_objective",
+        "kind": "failure_case",
+        "title": "Suspiciously low objective"
+      },
+      {
+        "id": "negative_or_missing_result",
+        "kind": "failure_case",
+        "title": "Negative cost or missing result"
+      },
+      {
+        "id": "timeout_or_unbounded_search",
+        "kind": "failure_case",
+        "title": "Timeout or unbounded search"
+      }
+    ],
+    "rag_all_scores": [
+      {
+        "id": "nearest_insertion",
+        "kind": "algorithm_card",
+        "score": 33
+      },
+      {
+        "id": "solomon_i1",
+        "kind": "algorithm_card",
+        "score": 31
+      },
+      {
+        "id": "regret2_insertion",
+        "kind": "algorithm_card",
+        "score": 30
+      },
+      {
+        "id": "farthest_insertion",
+        "kind": "algorithm_card",
+        "score": 26
+      },
+      {
+        "id": "cw_savings",
+        "kind": "algorithm_card",
+        "score": 7
+      }
+    ],
+    "rag_selected_items": [],
+    "rag_context_chars": 870,
+    "rag_context_truncated": false
+  },
+  "rag_context_chars": 870,
+  "rag_global_items": [
+    {
+      "id": "knapsack_api_skeleton",
+      "kind": "api_constraint",
+      "title": "Knapsack SelectItems Go API skeleton"
+    },
+    {
+      "id": "suspicious_low_objective",
+      "kind": "failure_case",
+      "title": "Suspiciously low objective"
+    },
+    {
+      "id": "negative_or_missing_result",
+      "kind": "failure_case",
+      "title": "Negative cost or missing result"
+    },
+    {
+      "id": "timeout_or_unbounded_search",
+      "kind": "failure_case",
+      "title": "Timeout or unbounded search"
+    }
+  ]
+}

@@ -1,0 +1,263 @@
+{
+  "suite": "phase4_cvrp_targeted_repeat3",
+  "problems": {
+    "cvrp_construct": [
+      {
+        "arm": "pure_eoh",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 13.56507,
+        "valid": "4/4",
+        "cards": [],
+        "norm_score": 1.0017,
+        "delta_pct": -0.2,
+        "code_snippet": "```python\n\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n\n    Args:\n        current_node:    index of the current node (0 = depot)\n        depot:           index of the depot (always 0)\n        unvisited_nodes: array of feasible unvisited customer indices\n```",
+        "algorithm": "At each step, choose the nearest feasible unvisited customer; if none exists within a dynamically adjusted proximity threshold that considers both distance and demand saturation, return to the depot early to potentially enable more efficient future clustering.",
+        "runtime_s": 186.7,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": null,
+          "generation_success": true,
+          "objective_success": true,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "pure_eoh",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 13.61078,
+        "valid": "4/4",
+        "cards": [],
+        "norm_score": 0.9983,
+        "delta_pct": 0.2,
+        "code_snippet": "```python\n\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n\n    Args:\n        current_node:    index of the current node (0 = depot)\n        depot:           index of the depot (always 0)\n        unvisited_nodes: array of feasible unvisited customer indices\n```",
+        "algorithm": "At each step, select the nearest feasible unvisited customer whose demand fits the remaining capacity; if none exists, return to the depot (node 0).",
+        "runtime_s": 344.465,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": null,
+          "generation_success": true,
+          "objective_success": false,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "default_rag",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 13.28321,
+        "valid": "1/1",
+        "cards": [
+          "cvrp_far_first",
+          "cvrp_nearest_capacity"
+        ],
+        "norm_score": 1.0229,
+        "delta_pct": -2.2,
+        "code_snippet": "```python\n\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n    if len(unvisited_nodes) == 0:\n        return depot\n    \n    if current_node == depot:\n        dist_from_depot = distance_matrix[depot][unvisited_nodes]\n```",
+        "algorithm": "The algorithm is a hybrid farthest-then-nearest heuristic that seeds routes by visiting the farthest feasible customer from the depot when at the depot or just after leaving it, then switches to nearest‑neighbor selection for subsequent stops until capacity forces a return to the depot.",
+        "runtime_s": 145.945,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": false,
+          "objective_success": true,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "default_rag",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 13.28321,
+        "valid": "1/1",
+        "cards": [
+          "cvrp_far_first",
+          "cvrp_nearest_capacity"
+        ],
+        "norm_score": 1.0229,
+        "delta_pct": -2.2,
+        "code_snippet": "```python\n\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n\n    Args:\n        current_node:    index of the current node (0 = depot)\n        depot:           index of the depot (always 0)\n        unvisited_nodes: array of feasible unvisited customer indices\n```",
+        "algorithm": "Hybrid CVRP constructor that seeds routes by selecting farthest feasible customer from depot when at/near depot, then switches to nearest-neighbor insertion while capacity allows, returning to depot only when no feasible customers remain.",
+        "runtime_s": 145.034,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": false,
+          "objective_success": true,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "targeted_tocc",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 12.886,
+        "valid": "4/4",
+        "cards": [
+          "cvrp_regret_insertion",
+          "cvrp_far_first"
+        ],
+        "norm_score": 1.0545,
+        "delta_pct": -5.2,
+        "code_snippet": "```python\n\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n    \n    if len(unvisited_nodes) == 0:\n        return depot\n    \n    if current_node == depot:\n```",
+        "algorithm": "A two-phase hybrid that starts a route by picking the farthest feasible customer from the depot to form distant clusters, then switches to a weighted combination of nearest neighbor and regret insertion to balance proximity and future cost while respecting capacity.",
+        "runtime_s": 478.234,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": true,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "targeted_tocc",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 12.92217,
+        "valid": "4/4",
+        "cards": [
+          "cvrp_regret_insertion",
+          "cvrp_far_first"
+        ],
+        "norm_score": 1.0515,
+        "delta_pct": -4.9,
+        "code_snippet": "```python\n\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n    if len(unvisited_nodes) == 0:\n        return depot\n\n    dist_from_current = distance_matrix[current_node, unvisited_nodes]\n\n```",
+        "algorithm": "A hybrid nearest-farthest regret heuristic that starts a route by targeting the farthest feasible customer from the depot to form spatially separated clusters, then switches to a weighted regret-nearest selection while on route, preferring customers with high insertion regret but penalized by immediate distance from the current node, and voluntarily returns to depot only when no capacity‑feasible customers remain.",
+        "runtime_s": 485.152,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": true,
+          "failure_reason": null
+        }
+      }
+    ]
+  },
+  "success_funnel": {
+    "total_runs": 6,
+    "proposal_accept": {
+      "passed": 6,
+      "total": 6,
+      "rate": 1.0
+    },
+    "linkage_success": {
+      "passed": 4,
+      "total": 4,
+      "rate": 1.0
+    },
+    "generation_success": {
+      "passed": 4,
+      "total": 6,
+      "rate": 0.667
+    },
+    "objective_success": {
+      "passed": 5,
+      "total": 6,
+      "rate": 0.833
+    },
+    "pure_baselines": {
+      "cvrp_construct": 13.587925
+    },
+    "per_run": [
+      {
+        "proposal_accept": true,
+        "linkage_success": null,
+        "generation_success": true,
+        "objective_success": true,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 13.56507,
+        "pure_baseline": 13.587925,
+        "problem": "cvrp_construct",
+        "arm": "pure_eoh",
+        "gen": 0
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": null,
+        "generation_success": true,
+        "objective_success": false,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 13.61078,
+        "pure_baseline": 13.587925,
+        "problem": "cvrp_construct",
+        "arm": "pure_eoh",
+        "gen": 0
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": false,
+        "objective_success": true,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 1,
+        "population_size": 1,
+        "best_objective": 13.28321,
+        "pure_baseline": 13.587925,
+        "problem": "cvrp_construct",
+        "arm": "default_rag",
+        "gen": 0
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": false,
+        "objective_success": true,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 1,
+        "population_size": 1,
+        "best_objective": 13.28321,
+        "pure_baseline": 13.587925,
+        "problem": "cvrp_construct",
+        "arm": "default_rag",
+        "gen": 0
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": true,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 12.886,
+        "pure_baseline": 13.587925,
+        "problem": "cvrp_construct",
+        "arm": "targeted_tocc",
+        "gen": 0
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": true,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 12.92217,
+        "pure_baseline": 13.587925,
+        "problem": "cvrp_construct",
+        "arm": "targeted_tocc",
+        "gen": 0
+      }
+    ]
+  }
+}

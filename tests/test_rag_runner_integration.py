@@ -119,6 +119,8 @@ class RagRunnerIntegrationTests(unittest.TestCase):
                 "knapsack_api_skeleton",
                 "mixer_split_api_skeleton",
                 "obp_api_skeleton",
+                "tsp_construct_api_skeleton",
+                "cvrp_construct_api_skeleton",
             },
             {item.id for item in api_items},
         )
