@@ -24,6 +24,7 @@
 | History-card gate v1 | PASS | 复合 history card 默认/显式注入前会被拦截；未来合成卡限制为小 operator |
 | Split history cards | PASS | 已拆出 3 张 CVRP 小 operator cards，可通过 gate 并进入 history/mixed pool |
 | Split-history real LLM smoke | PASS | 4/4 runs OK，均 4/4 valid；literature-only 12.728 最好，split-history mixed 未超过 |
+| History-card prior audit | PASS | 已输出 accept/deprioritize/split 决策表；history prior 暂作为候选而非默认增强 |
 | Architecture v3 | PASS | `reports/figures/architecture_v3.drawio` 已生成 |
 | Literature survey | PASS | HeuriGym/HeurAgenix/CO-Bench 代码深读完成 |
 | Push | PASS | 已推送 |
@@ -448,9 +449,15 @@ eoh_go_workspace/experiments/manifests/tocc_history_mixed_cvrp_smoke.json
    - `split_remaining_alpha_far`: best=12.96129, valid=4/4
    - funnel: proposal/linkage/generation 全部 4/4。
    - 结论边界：拆分卡解决了可控接入和 valid 问题，但本轮 objective 仍由 literature-only 最优；当前不支持“history prior 带来收益”。
-6. 下一步应把 history prior 作为需要被 TOCC 诊断选择的候选，而不是默认增强；优先分析哪些 history card 应被接受/降权/拆分，不继续盲目扩 CVRP repeat。
-7. 若要扩实验，优先选一个新问题或新官方 benchmark，而不是继续堆同一 TSP/CVRP repeat。
-8. 将 `tocc_method_section_draft_20260618.md` 整理进论文初稿。
+6. 已完成 history-card prior audit：
+   - `history_cvrp_construct_*` 旧复合卡：`split_required` 或 `split_or_deprioritize`。
+   - `history_cvrp_far_destination_seed`: `candidate_deprioritized`。
+   - `history_cvrp_capacity_feasible_filter`: `candidate_deprioritized`。
+   - `history_cvrp_remaining_aware_alpha`: `candidate_watchlist`。
+   - 结论边界：history prior 已可控接入，但当前不支持“history prior 带来 objective 收益”。
+7. 下一步应把 `card_prior_decisions.jsonl` 接入 controller：proposal 若选择 `candidate_deprioritized` card，必须给出 trace 证据和显式理由；默认不自动增强。
+8. 若要扩实验，优先选一个新问题或新官方 benchmark，而不是继续堆同一 TSP/CVRP repeat。
+9. 将 `tocc_method_section_draft_20260618.md` 整理进论文初稿。
 ```
 
 ### 5.3 已完成但未提交的新增记录
@@ -486,6 +493,10 @@ eoh_go_workspace/reports/auto_experiment_reports/tocc_split_history_cvrp_smoke/
   - `run_index.json`: 4/4 status=ok。
   - `summary.md`: 中文自动报告，含 best code snippet 与 card-memory 选卡记录。
   - `success_funnel.json`: proposal/linkage/generation 均 4/4。
+
+eoh_go_workspace/reports/auto_experiment_reports/tocc_history_card_audit_20260619/
+  - `history_card_audit.md`: 中文审计报告，说明旧复合 history cards 继续 block/split，拆分卡可控但未带来收益。
+  - `card_prior_decisions.jsonl`: 机器可读 card prior 决策表，可供后续 controller 读取。
 ```
 
 ---
