@@ -144,6 +144,43 @@ class TOCCControllerTests(unittest.TestCase):
         d = diagnose(trace)
         self.assertEqual(d.diagnosis, "valid_collapse")
 
+    def test_diagnose_hard_blocked_history_prior(self) -> None:
+        trace = {
+            "problem": "cvrp_construct",
+            "arm": "mixed_rag",
+            "rag_selected_items": [
+                {"id": "history_cvrp_construct_capacity_destination_farthest_085049"},
+                {"id": "cvrp_regret_insertion"},
+            ],
+            "rag_all_scores": [],
+            "rag_context_chars": 1200,
+            "rag_max_chars": 2500,
+            "valid_candidates": 4,
+            "population_size": 4,
+        }
+        d = diagnose(trace)
+        self.assertEqual(d.diagnosis, "wrong_bias")
+        self.assertIn("cvrp_regret_insertion", d.recommended_cards)
+        self.assertEqual(d.next_action, "replace with split or literature cards")
+
+    def test_diagnose_deprioritized_history_prior(self) -> None:
+        trace = {
+            "problem": "cvrp_construct",
+            "arm": "mixed_rag",
+            "rag_selected_items": [
+                {"id": "history_cvrp_capacity_feasible_filter"},
+                {"id": "cvrp_regret_insertion"},
+            ],
+            "rag_all_scores": [],
+            "rag_context_chars": 1200,
+            "rag_max_chars": 2500,
+            "valid_candidates": 4,
+            "population_size": 4,
+        }
+        d = diagnose(trace)
+        self.assertEqual(d.diagnosis, "weak_negative")
+        self.assertEqual(d.next_action, "manual_review")
+
     def test_diagnose_api_failure(self) -> None:
         trace = {
             "problem": "tsp_construct",

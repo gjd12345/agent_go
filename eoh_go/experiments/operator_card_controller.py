@@ -13,6 +13,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from eoh_go.experiments.card_prior_decisions import (
+    DEPRIORITIZED_DECISIONS,
+    HARD_BLOCK_DECISIONS,
+    WATCHLIST_DECISIONS,
+    load_card_prior_decisions,
+)
+
 
 # --- Problem-specific knowledge ---
 
@@ -131,6 +138,43 @@ def diagnose(trace: dict[str, Any]) -> TOCCDecision:
         d.diagnosis = "no_issue"
         d.why = ["no RAG cards selected"]
         d.next_action = "run default retrieval first"
+        return d
+
+    # --- card-prior audit decisions ---
+    prior_decisions = trace.get("card_prior_decisions") or load_card_prior_decisions()
+    selected_priors = {
+        card_id: prior_decisions.get(card_id)
+        for card_id in selected_ids
+        if prior_decisions.get(card_id)
+    }
+    hard_blocked = [
+        card_id for card_id, prior in selected_priors.items()
+        if str(prior.get("decision", "")) in HARD_BLOCK_DECISIONS
+    ]
+    if hard_blocked:
+        d.diagnosis = "wrong_bias"
+        d.why = [f"selected cards are blocked by history-card audit: {hard_blocked}"]
+        d.risk = "history prior may inject over-composed or observed-negative operator cards"
+        d.next_action = "replace with split or literature cards"
+        candidates = TARGETED_CANDIDATE_CARDS.get(problem, [])
+        d.recommended_cards = candidates[:2]
+        d.recommended_query = f"{problem.replace('_', ' ')} {' '.join(CARD_QUERIES.get(c, c) for c in d.recommended_cards)}".strip()
+        return d
+    deprioritized = [
+        card_id for card_id, prior in selected_priors.items()
+        if str(prior.get("decision", "")) in DEPRIORITIZED_DECISIONS
+    ]
+    watchlist = [
+        card_id for card_id, prior in selected_priors.items()
+        if str(prior.get("decision", "")) in WATCHLIST_DECISIONS
+    ]
+    if deprioritized:
+        d.diagnosis = "weak_negative"
+        d.why = [f"selected cards are deprioritized by prior audit: {deprioritized}"]
+        if watchlist:
+            d.why.append(f"watchlist cards also selected: {watchlist}")
+        d.risk = "bounded smoke required; do not treat history prior as default enhancement"
+        d.next_action = "manual_review"
         return d
 
     # --- baseline_overlap ---

@@ -11,7 +11,16 @@ from eoh_go.experiments.tocc_gatekeeper import (
 
 
 TSP_CARDS = ["tsp_regret_insertion", "tsp_farthest_insertion", "tsp_nearest_neighbor", "tsp_nearest_insertion", "tsp_two_opt_awareness"]
-CVRP_CARDS = ["cvrp_regret_insertion", "cvrp_far_first", "cvrp_nearest_capacity", "cvrp_savings", "cvrp_sweep"]
+CVRP_CARDS = [
+    "cvrp_regret_insertion",
+    "cvrp_far_first",
+    "cvrp_nearest_capacity",
+    "cvrp_savings",
+    "cvrp_sweep",
+    "history_cvrp_far_destination_seed",
+    "history_cvrp_capacity_feasible_filter",
+    "history_cvrp_construct_capacity_destination_farthest_085049",
+]
 
 
 class ToccGatekeeperTests(unittest.TestCase):
@@ -194,6 +203,30 @@ class ToccGatekeeperTests(unittest.TestCase):
         self.assertIn("selected_card_ids", arm)
         self.assertIn("rag_query", arm)
         self.assertEqual(arm["rag_query"], "tsp regret farthest lookahead")
+
+    def test_accepts_history_prefix_for_mixed_cvrp(self):
+        p = self._good_proposal("cvrp_construct")
+        p["cards"] = ["history_cvrp_far_destination_seed", "cvrp_regret_insertion"]
+        p["why"] = ["trace audit supports trying history_cvrp_far_destination_seed despite being deprioritized"]
+        result = validate_proposal(p, problem="cvrp_construct", available_card_ids=CVRP_CARDS, arm="mixed_rag")
+        self.assertTrue(result["accepted"])
+        self.assertEqual(result["safe_arm"]["selected_card_ids"], p["cards"])
+
+    def test_rejects_hard_blocked_history_prior(self):
+        p = self._good_proposal("cvrp_construct")
+        p["cards"] = ["history_cvrp_construct_capacity_destination_farthest_085049", "cvrp_regret_insertion"]
+        p["why"] = ["try old composite history card"]
+        result = validate_proposal(p, problem="cvrp_construct", available_card_ids=CVRP_CARDS, arm="mixed_rag")
+        self.assertFalse(result["accepted"])
+        self.assertIn("R12", str(result["violations"]))
+
+    def test_rejects_deprioritized_history_without_explicit_why(self):
+        p = self._good_proposal("cvrp_construct")
+        p["cards"] = ["history_cvrp_capacity_feasible_filter", "cvrp_regret_insertion"]
+        p["why"] = ["use capacity filter"]
+        result = validate_proposal(p, problem="cvrp_construct", available_card_ids=CVRP_CARDS, arm="mixed_rag")
+        self.assertFalse(result["accepted"])
+        self.assertIn("explicit trace-backed why", str(result["violations"]))
 
 
 if __name__ == "__main__":

@@ -109,5 +109,25 @@ History-card memory can be integrated into the closed loop, but evolved-code pri
 
 1. 不再扩 CVRP split-history repeat，除非有新的 controller 规则需要验证。
 2. 把 `history_cvrp_remaining_aware_alpha` 标为 watchlist，可以在新 benchmark 或 gen>0 小实验中复用。
-3. 把这套 audit 逻辑接到 controller：proposal 中若包含 `candidate_deprioritized` card，需要显式说明为什么仍要尝试。
-4. 论文中把 history-card 结果写成 negative/control finding，而不是主正例。
+3. 论文中把 history-card 结果写成 negative/control finding，而不是主正例。
+
+## Controller 接入状态
+
+已落地：
+
+```text
+eoh_go/experiments/card_prior_decisions.py
+eoh_go/experiments/tocc_gatekeeper.py
+eoh_go/experiments/operator_card_controller.py
+```
+
+规则：
+
+| decision | controller/gatekeeper 行为 |
+|---|---|
+| `split_required` | reject；必须拆分或替换 |
+| `split_or_deprioritize` | reject；必须拆分或替换 |
+| `candidate_deprioritized` | proposal 必须在 `why` 中给出 trace-backed explicit reason，否则 reject |
+| `candidate_watchlist` | warning；只允许 bounded smoke |
+
+同时修正了 history card 前缀规则：`mixed_rag` / `history_rag` proposal 允许 `history_{problem}_*` 与 `history_{family}_*`，例如 `history_cvrp_far_destination_seed`。
