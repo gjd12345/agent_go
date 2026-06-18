@@ -1,0 +1,94 @@
+<mxfile host="app.diagrams.net" modified="2026-06-19T00:00:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram id="tocc-closed-loop" name="TOCC Closed Loop">
+    <mxGraphModel dx="1434" dy="790" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="860" math="0" shadow="0" adaptiveColors="auto">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="Trace-Conditioned Operator-Card Controller (TOCC)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=28;fontStyle=1;fontColor=#0B1324;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="70" y="38" width="760" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="subtitle" value="Search steering layer for LLM-based heuristic evolution: choose card priors from trace evidence, then run bounded EOH." style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;fontColor=#475569;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="70" y="76" width="1040" height="34" as="geometry"/>
+        </mxCell>
+        <mxCell id="lane_observe" value="OBSERVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF2F8;strokeColor=#7BA7C7;fontColor=#0B1324;fontStyle=1;fontSize=15;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="55" y="145" width="300" height="585" as="geometry"/>
+        </mxCell>
+        <mxCell id="lane_control" value="CONTROL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4E8;strokeColor=#E07A2D;fontColor=#0B1324;fontStyle=1;fontSize=15;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="380" y="145" width="440" height="585" as="geometry"/>
+        </mxCell>
+        <mxCell id="lane_execute" value="EXECUTE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF7F2;strokeColor=#16845B;fontColor=#0B1324;fontStyle=1;fontSize=15;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="845" y="145" width="300" height="585" as="geometry"/>
+        </mxCell>
+        <mxCell id="lane_memory" value="MEMORY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F7FA;strokeColor=#94A3B8;fontColor=#0B1324;fontStyle=1;fontSize=15;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="1170" y="145" width="270" height="585" as="geometry"/>
+        </mxCell>
+        <mxCell id="run_trace" value="Run trace&#xa;objective, valid rate, cards, code family, failure reason" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#7BA7C7;fontColor=#0B1324;fontSize=14;spacing=10;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="85" y="220" width="240" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="summary" value="Auto summary&#xa;success_funnel.json&#xa;best code snippet" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#7BA7C7;fontColor=#0B1324;fontSize=14;spacing=10;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="85" y="515" width="240" height="92" as="geometry"/>
+        </mxCell>
+        <mxCell id="diagnose" value="Diagnose bias&#xa;baseline_overlap, wrong_bias, valid_collapse, context_truncated" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E07A2D;fontColor=#0B1324;fontSize=14;spacing=10;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="420" y="215" width="170" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="select_cards" value="Select cards&#xa;selected_card_ids&#xa;query, arm_config" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E07A2D;fontColor=#0B1324;fontSize=14;spacing=10;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="620" y="215" width="170" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="gatekeeper" value="Gatekeeper&#xa;card exists, problem prefix, prior decisions, no forbidden fields" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E07A2D;fontColor=#0B1324;fontSize=14;spacing=10;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="500" y="390" width="210" height="115" as="geometry"/>
+        </mxCell>
+        <mxCell id="manifest" value="Manifest runner&#xa;bounded runs&#xa;pure/default/tocc/history/mixed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#16845B;fontColor=#0B1324;fontSize=14;spacing=10;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="890" y="220" width="210" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="eoh" value="Official EOH run&#xa;LLM code generation&#xa;evaluator + guard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#16845B;fontColor=#0B1324;fontSize=14;spacing=10;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="890" y="390" width="210" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="corpus" value="Operator-card corpus&#xa;literature cards&#xa;history cards&#xa;API rules" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#94A3B8;fontColor=#0B1324;fontSize=14;spacing=10;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1205" y="220" width="200" height="115" as="geometry"/>
+        </mxCell>
+        <mxCell id="synthesis" value="Card memory&#xa;best_code -&gt; features&#xa;-&gt; history_* card" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#94A3B8;fontColor=#0B1324;fontSize=14;spacing=10;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1205" y="415" width="200" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="audit" value="Prior audit&#xa;block, split, deprioritize, watchlist" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B42318;fontColor=#0B1324;fontSize=14;spacing=10;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1205" y="585" width="200" height="85" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend" value="Legend: blue = observed evidence, orange = TOCC control, green = bounded execution, gray = memory, red = prior-risk gate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CBD5E1;fontColor=#475569;fontSize=13;spacing=8;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="70" y="760" width="1040" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#334155;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="run_trace" target="diagnose">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#334155;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="diagnose" target="select_cards">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#334155;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="select_cards" target="gatekeeper">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#334155;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="gatekeeper" target="manifest">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#334155;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="manifest" target="eoh">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#334155;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="eoh" target="summary">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e7" value="best code" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=2;dashed=1;endArrow=block;endFill=1;fontColor=#475569;fontSize=12;" edge="1" parent="1" source="summary" target="synthesis">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e8" value="new history card" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;strokeWidth=2;dashed=1;endArrow=block;endFill=1;fontColor=#475569;fontSize=12;" edge="1" parent="1" source="synthesis" target="corpus">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e9" value="cards + decisions" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#B45309;strokeWidth=2;dashed=1;endArrow=block;endFill=1;fontColor=#B45309;fontSize=12;" edge="1" parent="1" source="corpus" target="select_cards">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e10" value="prior policy" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#B42318;strokeWidth=2;dashed=1;endArrow=block;endFill=1;fontColor=#B42318;fontSize=12;" edge="1" parent="1" source="audit" target="gatekeeper">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e11" value="next trace" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#334155;strokeWidth=2;endArrow=block;endFill=1;fontColor=#334155;fontSize=12;" edge="1" parent="1" source="summary" target="run_trace">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
