@@ -18,7 +18,7 @@ from typing import Any
 
 # Reuse existing EOH runner CLI directly
 RUNNER_MODULE = "eoh_go.experiments.official_eoh_run"
-VALID_ARMS = {"pure_eoh", "api_only", "literature_rag", "history_rag", "context_file"}
+VALID_ARMS = {"pure_eoh", "api_only", "literature_rag", "history_rag", "mixed_rag", "context_file"}
 
 
 def _validate_manifest(manifest: dict[str, Any]) -> list[str]:
@@ -86,7 +86,7 @@ def _build_cmd(
         "--python", manifest.get("python_exe", "/private/tmp/eoh_official_venv/bin/python"),
     ]
     rag = manifest.get("rag", {})
-    if arm["runner_arm"] in ("literature_rag", "history_rag"):
+    if arm["runner_arm"] in ("literature_rag", "history_rag", "mixed_rag"):
         cmd.extend(["--rag-top-k", str(rag.get("top_k", 2))])
         cmd.extend(["--rag-max-chars", str(rag.get("max_chars", 2500))])
         if arm.get("rag_query"):

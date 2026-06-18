@@ -1,0 +1,254 @@
+{
+  "suite": "tocc_split_history_cvrp_smoke",
+  "problems": {
+    "cvrp_construct": [
+      {
+        "arm": "literature_regret_far",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 12.72795,
+        "valid": "4/4",
+        "cards": [
+          "cvrp_regret_insertion",
+          "cvrp_far_first"
+        ],
+        "card_source": "literature",
+        "history_card_ids": [],
+        "best_code_record_id": "cvrp_construct:literature_regret_far:g0:r1",
+        "synthesized_card_id": null,
+        "norm_score": null,
+        "delta_pct": null,
+        "code_snippet": "```python\ndef select_next_node(current_node: int, depot: int, unvisited_nodes: np.ndarray,\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n    if len(unvisited_nodes) == 0:\n        return depot\n    dist_from_current = distance_matrix[current_node, unvisited_nodes]\n    dist_from_depot = distance_matrix[depot, unvisited_nodes]\n    max_curr_dist = np.max(dist_from_current) if len(dist_from_current) > 0 else 1.0\n    min_curr_dist = np.min(dist_from_current) if len(dist_from_current) > 0 else 0.0\n    range_curr = max_curr_dist - min_curr_dist\n    if range_curr == 0:\n        range_curr = 1.0\n```",
+        "algorithm": "A hybrid farthest-first seeding with regret-based tie-breaking to balance cluster targeting and insertion urgency while respecting capacity.",
+        "runtime_s": 132.473,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": null,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "split_far_seed_regret",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 13.00458,
+        "valid": "4/4",
+        "cards": [
+          "history_cvrp_far_destination_seed",
+          "cvrp_regret_insertion"
+        ],
+        "card_source": "mixed",
+        "history_card_ids": [
+          "history_cvrp_far_destination_seed"
+        ],
+        "best_code_record_id": "cvrp_construct:split_far_seed_regret:g0:r1",
+        "synthesized_card_id": null,
+        "norm_score": null,
+        "delta_pct": null,
+        "code_snippet": "```python\ndef select_next_node(current_node: int, depot: int, unvisited_nodes: np.ndarray,\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n    if len(unvisited_nodes) == 0:\n        return depot\n    if current_node == depot:\n        distances_from_depot = distance_matrix[depot][unvisited_nodes]\n        farthest_idx = np.argmax(distances_from_depot)\n        return unvisited_nodes[farthest_idx]\n    n_candidates = len(unvisited_nodes)\n    if n_candidates == 1:\n        return unvisited_nodes[0]\n```",
+        "algorithm": "Use a hybrid strategy: at route start from depot, select the farthest feasible customer to seed remote clusters; during route continuation, apply regret insertion based on distance detour, falling back to nearest feasible if regrets are equal or no candidate exists, always respecting capacity feasibility and returning depot only when necessary.",
+        "runtime_s": 112.233,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": null,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "split_capacity_filter_regret",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 13.23646,
+        "valid": "4/4",
+        "cards": [
+          "history_cvrp_capacity_feasible_filter",
+          "cvrp_regret_insertion"
+        ],
+        "card_source": "mixed",
+        "history_card_ids": [
+          "history_cvrp_capacity_feasible_filter"
+        ],
+        "best_code_record_id": "cvrp_construct:split_capacity_filter_regret:g0:r1",
+        "synthesized_card_id": null,
+        "norm_score": null,
+        "delta_pct": null,
+        "code_snippet": "```python\ndef select_next_node(current_node: int, depot: int, unvisited_nodes: np.ndarray,\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n    if len(unvisited_nodes) == 0:\n        return depot\n    feasible_mask = demands[unvisited_nodes] <= rest_capacity + 1e-9\n    feasible_nodes = unvisited_nodes[feasible_mask]\n    if len(feasible_nodes) == 0:\n        return depot\n    dist_from_current = distance_matrix[current_node][feasible_nodes]\n    nearest_idx = np.argmin(dist_from_current)\n    nearest_dist = dist_from_current[nearest_idx]\n```",
+        "algorithm": "At each step, among capacity-feasible unvisited customers, select the one with the largest regret (difference between the second‑nearest and nearest distances from the current node), falling back to the nearest feasible customer if regrets are equal or undefined, and return to depot when no feasible customer remains.",
+        "runtime_s": 116.562,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": null,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "split_remaining_alpha_far",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 12.96129,
+        "valid": "4/4",
+        "cards": [
+          "history_cvrp_remaining_aware_alpha",
+          "cvrp_far_first"
+        ],
+        "card_source": "mixed",
+        "history_card_ids": [
+          "history_cvrp_remaining_aware_alpha"
+        ],
+        "best_code_record_id": "cvrp_construct:split_remaining_alpha_far:g0:r1",
+        "synthesized_card_id": null,
+        "norm_score": null,
+        "delta_pct": null,
+        "code_snippet": "```python\ndef select_next_node(current_node: int, depot: int, unvisited_nodes: np.ndarray,\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n    if len(unvisited_nodes) == 0:\n        return depot\n    total_customers = len(demands) - 1  # exclude depot\n    remaining_ratio = len(unvisited_nodes) / total_customers if total_customers > 0 else 0.5\n    alpha = min(1.0, max(0.0, remaining_ratio))\n    if current_node == depot:\n        dist_from_depot = distance_matrix[depot][unvisited_nodes]\n        median_dist = np.median(dist_from_depot)\n        far_candidates = unvisited_nodes[dist_from_depot >= median_dist]\n```",
+        "algorithm": "An adaptive nearest-farthest hybrid that starts routes by targeting distant clusters when at the depot, then switches to a weighted score combining proximity and remaining-capacity urgency, dynamically shifting emphasis as fewer customers remain.",
+        "runtime_s": 73.849,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": null,
+          "failure_reason": null
+        }
+      }
+    ]
+  },
+  "success_funnel": {
+    "total_runs": 4,
+    "proposal_accept": {
+      "passed": 4,
+      "total": 4,
+      "rate": 1.0
+    },
+    "linkage_success": {
+      "passed": 4,
+      "total": 4,
+      "rate": 1.0
+    },
+    "generation_success": {
+      "passed": 4,
+      "total": 4,
+      "rate": 1.0
+    },
+    "objective_success": {
+      "passed": 0,
+      "total": 0,
+      "rate": 0,
+      "note": "insufficient data"
+    },
+    "pure_baselines": {},
+    "per_run": [
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": null,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 12.72795,
+        "pure_baseline": null,
+        "card_source": "literature",
+        "selected_card_ids": [
+          "cvrp_regret_insertion",
+          "cvrp_far_first"
+        ],
+        "history_card_ids": [],
+        "problem": "cvrp_construct",
+        "arm": "literature_regret_far",
+        "gen": 0,
+        "best_code_record_id": "cvrp_construct:literature_regret_far:g0:r1",
+        "synthesized_card_id": null,
+        "synthesized_card_written": false
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": null,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 13.00458,
+        "pure_baseline": null,
+        "card_source": "mixed",
+        "selected_card_ids": [
+          "history_cvrp_far_destination_seed",
+          "cvrp_regret_insertion"
+        ],
+        "history_card_ids": [
+          "history_cvrp_far_destination_seed"
+        ],
+        "problem": "cvrp_construct",
+        "arm": "split_far_seed_regret",
+        "gen": 0,
+        "best_code_record_id": "cvrp_construct:split_far_seed_regret:g0:r1",
+        "synthesized_card_id": null,
+        "synthesized_card_written": false
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": null,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 13.23646,
+        "pure_baseline": null,
+        "card_source": "mixed",
+        "selected_card_ids": [
+          "history_cvrp_capacity_feasible_filter",
+          "cvrp_regret_insertion"
+        ],
+        "history_card_ids": [
+          "history_cvrp_capacity_feasible_filter"
+        ],
+        "problem": "cvrp_construct",
+        "arm": "split_capacity_filter_regret",
+        "gen": 0,
+        "best_code_record_id": "cvrp_construct:split_capacity_filter_regret:g0:r1",
+        "synthesized_card_id": null,
+        "synthesized_card_written": false
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": null,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 12.96129,
+        "pure_baseline": null,
+        "card_source": "mixed",
+        "selected_card_ids": [
+          "history_cvrp_remaining_aware_alpha",
+          "cvrp_far_first"
+        ],
+        "history_card_ids": [
+          "history_cvrp_remaining_aware_alpha"
+        ],
+        "problem": "cvrp_construct",
+        "arm": "split_remaining_alpha_far",
+        "gen": 0,
+        "best_code_record_id": "cvrp_construct:split_remaining_alpha_far:g0:r1",
+        "synthesized_card_id": null,
+        "synthesized_card_written": false
+      }
+    ]
+  }
+}

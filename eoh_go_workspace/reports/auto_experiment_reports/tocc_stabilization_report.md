@@ -28,26 +28,37 @@
 ### TSP 结论
 
 - gen=0 方差过大（outlier 9.656 与 best 6.189 使用相同 card），card 方向正确但 gen=0 无选择压
-- gen=4 pure baseline 进行中（r1=6.269），需等 3 repeat 完成后对比 tocc 历史锚点 6.287
+- gen=4 已完成同口径 repeat，对比见下一节。gen=0 不作为主要 evidence。
 
-## TSP gen=4（新增，2026-06-09）
+## TSP gen=4（更新，2026-06-18）
 
 | arm | n | mean | min | max | spread |
 |---|---:|---:|---:|---:|---:|
 | pure_eoh gen=0 | 3 | 6.751 | 6.590 | 7.057 | 0.467 |
 | tocc_corrected gen=0 | 5 | 7.372 | 6.189 | 9.656 | 3.467 |
-| **pure_eoh gen=4** | **3** | **6.469** | **6.268** | **6.678** | **0.409** |
-| tocc_corrected gen=4 (pop=8) | 1 | 6.287 | — | — | — |
+| **pure_eoh gen=4** | **3** | **6.548** | **6.430** | **6.608** | **0.178** |
+| **tocc_corrected gen=4** | **3** | **6.456** | **6.292** | **6.615** | **0.323** |
 
 ### TSP 结论
 
-1. **gen=4 本身就是强改善。** pure gen=0→gen=4 改善 -4.2%（6.751→6.469），与 CVRP tocc 在 gen=0 上的改善幅度相同。进化深度是此前被低估的关键变量。
+1. **gen=4 本身带来明显改善。** pure gen=0→gen=4 改善约 -3.0%（6.751→6.548）。进化深度是此前被低估的关键变量。
 
-2. **gen=4 压缩方差 8.5×。** spread 从 3.467 降到 0.409，验证了"TSP 需要 gen=4 压方差"的诊断。
+2. **TOCC gen=4 有 exploratory 正向信号。** 同口径 gen=4 pop=4 repeat=3 下，tocc_corrected mean=6.456，相比 pure mean=6.548 改善约 -1.4%；3 次中 2 次优于 pure mean。
 
-3. **tocc 在 gen=4 的增量待验证。** pure gen=4 best (6.269) 已接近 tocc 历史 gen=4 pop=8 (6.287)。需要同口径 (pop=4, repeat=3) 跑 tocc gen=4 才能下结论。
+3. **不能写成稳定证明。** tocc_corrected r2=6.615 劣于 pure mean，说明仍有生成方差。当前可写为“gen=4 下 TOCC 方向从 gen=0 的不稳定转为小幅正向信号”，不能写“稳定优于”。
 
-4. **TOCC 价值区间明确。** 在 shallow search (gen=0) 下 TOCC 价值最大——精准选卡避免坍缩并引导方向；在 deep search (gen=4) 下纯进化已足够强，TOCC 角色可能从方向引导转为效率提升。
+4. **TOCC 价值区间更清楚。** CVRP 上 TOCC 主要解决错误 card 导致的 valid collapse；TSP 上 TOCC 主要在足够进化深度下提供方向偏置，效果较小但可观察。
+
+### TSP gen=4 Success Funnel
+
+| 层级 | 通过 | 总数 | 率 |
+|---|---:|---:|---:|
+| Proposal Accept | 6 | 6 | 100% |
+| Linkage (RAG arms) | 3 | 3 | 100% |
+| Generation | 6 | 6 | 100% |
+| Objective | 3 | 6 | 50% |
+
+注：Objective 层按“是否优于 pure gen=4 mean=6.548”逐 run 计算；pure 自身也参与该层统计，因此 6 次中 3 次通过。
 
 ## BP/其他
 
@@ -65,4 +76,4 @@ Generation 层的失败全部来自 default_rag 的 valid collapse。
 
 ---
 
-*本报告由 summarize_manifest_runs.py 自动生成，更新时间 2026-06-09*
+*本报告由 summarize_manifest_runs.py 结果人工汇总更新，更新时间 2026-06-18*

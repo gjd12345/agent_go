@@ -120,8 +120,8 @@ def diagnose(trace: dict[str, Any]) -> TOCCDecision:
         d.next_action = "switch to api_only or simpler cards"
         return d
 
-    # --- Only run card-level diagnosis for literature_rag arms ---
-    if arm not in ("literature_rag",):
+    # --- Only run card-level diagnosis for arms that use RAG cards ---
+    if arm not in ("literature_rag", "history_rag", "mixed_rag"):
         d.diagnosis = "no_issue"
         d.why = [f"arm {arm} does not use RAG cards"]
         d.next_action = "no card change needed"

@@ -1,0 +1,77 @@
+{
+  "total_runs": 2,
+  "proposal_accept": {
+    "passed": 2,
+    "total": 2,
+    "rate": 1.0
+  },
+  "linkage_success": {
+    "passed": 2,
+    "total": 2,
+    "rate": 1.0
+  },
+  "generation_success": {
+    "passed": 2,
+    "total": 2,
+    "rate": 1.0
+  },
+  "objective_success": {
+    "passed": 0,
+    "total": 0,
+    "rate": 0,
+    "note": "insufficient data"
+  },
+  "pure_baselines": {},
+  "per_run": [
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": true,
+      "objective_success": null,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 13.09441,
+      "pure_baseline": null,
+      "card_source": "literature",
+      "selected_card_ids": [
+        "cvrp_regret_insertion",
+        "cvrp_far_first"
+      ],
+      "history_card_ids": [],
+      "problem": "cvrp_construct",
+      "arm": "literature_regret_far",
+      "gen": 0,
+      "best_code_record_id": "cvrp_construct:literature_regret_far:g0:r1",
+      "synthesized_card_id": null,
+      "synthesized_card_written": false
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": true,
+      "objective_success": null,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 14.20996,
+      "pure_baseline": null,
+      "card_source": "mixed",
+      "selected_card_ids": [
+        "history_cvrp_construct_capacity_destination_farthest_085049",
+        "cvrp_regret_insertion"
+      ],
+      "history_card_ids": [
+        "history_cvrp_construct_capacity_destination_farthest_085049"
+      ],
+      "problem": "cvrp_construct",
+      "arm": "mixed_history_far_regret",
+      "gen": 0,
+      "best_code_record_id": "cvrp_construct:mixed_history_far_regret:g0:r1",
+      "synthesized_card_id": null,
+      "synthesized_card_written": false
+    }
+  ]
+}

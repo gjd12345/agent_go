@@ -79,11 +79,11 @@ def get_code_family(code: str | None) -> set[str]:
 
 # Human-readable descriptions per feature, used to build Skill Card content.
 _FEATURE_DO: dict[str, str] = {
-    "destination": "score each candidate by d(current,u) + α·d(u,dest); increase α as fewer nodes remain",
+    "destination": "minimize d(current,u) + alpha*d(u,dest), increasing alpha as fewer nodes remain",
     "normalize": "normalize forward and backward distances to [0,1] before combining",
     "adaptive_weights": "use remaining_ratio to dynamically adjust forward vs backward weights",
-    "regret": "for each candidate, compute regret = second_best - best; prefer high regret",
-    "farthest": "seed distant clusters/regions early; prefer candidates far from current position",
+    "regret": "maximize regret = second_best - best and prefer high regret candidates",
+    "farthest": "maximize depot/current distance early to seed distant clusters",
     "clustering": "identify unvisited node clusters; visit distant clusters before nearby ones",
     "centrality": "prefer nodes with high closeness centrality or high MST edge weight",
     "penalty": "penalize candidates very close to destination unless few nodes remain",
@@ -141,6 +141,31 @@ def _feature_hash(features: set[str], max_features: int = 3) -> str:
     return f"{key}_{short}"
 
 
+_CARD_FEATURE_PRIORITY: list[str] = [
+    "regret",
+    "farthest",
+    "savings",
+    "clustering",
+    "centrality",
+    "destination",
+    "capacity",
+    "normalize",
+    "adaptive_weights",
+    "lookahead",
+    "remaining_aware",
+    "nearest",
+    "forward_score",
+    "penalty",
+]
+
+
+def _select_card_features(features: set[str], max_features: int = 3) -> set[str]:
+    """Keep a history card as a small operator, not a full-code summary."""
+    selected = [feature for feature in _CARD_FEATURE_PRIORITY if feature in features]
+    selected.extend(feature for feature in sorted(features) if feature not in selected)
+    return set(selected[:max_features])
+
+
 def _build_title(problem: str, features: set[str]) -> str:
     """Generate a human-readable card title."""
     prefix = problem.split("_")[0].upper()  # TSP, CVRP, etc.
@@ -182,7 +207,7 @@ def _build_content(problem: str, features: set[str]) -> str:
     for f in sorted(features):
         if f in _FEATURE_DO:
             do_parts.append(_FEATURE_DO[f])
-    do = "; ".join(do_parts[:4]) if do_parts else "apply the evolved scoring formula from best code."
+    do = ". ".join(do_parts[:4]) if do_parts else "apply the evolved scoring formula from best code."
 
     return (
         f"Skill: {prefix.lower()}_evolved_{'_'.join(sorted(features)[:3])}\n"
@@ -216,21 +241,22 @@ def synthesize_card(
         features = extract_strategy_features(code)
     if not features:
         raise ValueError("No strategy features detected in code; cannot synthesize card.")
+    card_features = _select_card_features(features)
 
     run_info = run_info or {}
-    feature_hash = _feature_hash(features)
+    feature_hash = _feature_hash(card_features)
     card_id = f"history_{problem}_{feature_hash}"
     source_path = str(run_info.get("run_dir", "auto_synthesized"))
 
     return CorpusItem(
         id=card_id,
         kind="algorithm_card",
-        title=_build_title(problem, features),
-        tags=[problem.split("_")[0], "construct", "evolved"] + sorted(features),
+        title=_build_title(problem, card_features),
+        tags=[problem.split("_")[0], "construct", "evolved"] + sorted(card_features),
         source_path=source_path,
-        summary=_build_summary(problem, features),
+        summary=_build_summary(problem, card_features),
         constraints=_PROBLEM_CONSTRAINTS.get(problem, []),
-        content=_build_content(problem, features),
+        content=_build_content(problem, card_features),
     )
 
 

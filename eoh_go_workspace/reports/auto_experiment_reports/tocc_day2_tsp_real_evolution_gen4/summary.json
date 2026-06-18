@@ -10,9 +10,13 @@
         "best": 6.60788,
         "valid": "4/4",
         "cards": [],
+        "card_source": "none",
+        "history_card_ids": [],
+        "best_code_record_id": "tsp_construct:pure_eoh:g4:r1",
+        "synthesized_card_id": null,
         "norm_score": 0.991,
         "delta_pct": 0.9,
-        "code_snippet": "```python\n\n\n    Args:\n        current_node: ID of the current node\n        destination_node: ID of the destination (return) node\n        unvisited_nodes: array of unvisited node IDs\n        distance_matrix: pairwise distance matrix between all nodes\n    Returns:\n```",
+        "code_snippet": "```python\ndef select_next_node(current_node: int, destination_node: int, unvisited_nodes: np.ndarray, distance_matrix: np.ndarray) -> int:\n    if len(unvisited_nodes) == 1:\n        return unvisited_nodes[0]\n    n_rem = len(unvisited_nodes)\n    max_depth = min(5, max(2, int(np.ceil(np.sqrt(n_rem)))))\n    discount_base = 0.65  # base discount per hop\n    scores = np.zeros(len(unvisited_nodes), dtype=float)\n    for idx, cand in enumerate(unvisited_nodes):\n        imm_cost = distance_matrix[current_node][cand]\n        others = unvisited_nodes[unvisited_nodes != cand]\n        if len(others) == 0:\n            diffused_value = 0.0\n```",
         "algorithm": "A diffusion‑process‑inspired algorithm where each candidate’s score is computed as the discounted sum of its influence propagating outward through the network of unvisited nodes, with the discount factor adapting to the remaining tour length to balance local greediness and global connectivity.",
         "runtime_s": 765.568,
         "funnel": {
@@ -31,9 +35,13 @@
         "best": 6.60788,
         "valid": "4/4",
         "cards": [],
+        "card_source": "none",
+        "history_card_ids": [],
+        "best_code_record_id": "tsp_construct:pure_eoh:g4:r2",
+        "synthesized_card_id": null,
         "norm_score": 0.991,
         "delta_pct": 0.9,
-        "code_snippet": "```python\n\n    if len(unvisited_nodes) == 1:\n        return unvisited_nodes[0]\n\n    n_unvisited = len(unvisited_nodes)\n    sub_indices = list(unvisited_nodes)\n    idx_map = {node: i for i, node in enumerate(sub_indices)}\n    \n```",
+        "code_snippet": "```python\ndef select_next_node(current_node: int, destination_node: int, unvisited_nodes: np.ndarray, distance_matrix: np.ndarray) -> int:\n    if len(unvisited_nodes) == 1:\n        return unvisited_nodes[0]\n    n_unvisited = len(unvisited_nodes)\n    sub_indices = list(unvisited_nodes)\n    idx_map = {node: i for i, node in enumerate(sub_indices)}\n    sub_dist = distance_matrix[np.ix_(sub_indices, sub_indices)]\n    np.fill_diagonal(sub_dist, np.inf)\n    closeness = np.sum(sub_dist, axis=1)\n    centrality = closeness / np.max(closeness)\n    k = min(3, n_unvisited - 1)\n    sorted_dists = np.partition(sub_dist, kth=k, axis=1)[:, :k+1]\n```",
         "algorithm": "\"A graph‑topology driven selection that scores each candidate by its centrality within the unvisited subgraph, its marginal contribution to a minimum‐spanning‐tree of the unvisited set, and a dynamic regret term that penalizes choices far from a learned centroid direction, balancing local connectivity, structural efficiency, and directional bias.\"",
         "runtime_s": 530.761,
         "funnel": {
@@ -52,9 +60,13 @@
         "best": 6.42951,
         "valid": "4/4",
         "cards": [],
+        "card_source": "none",
+        "history_card_ids": [],
+        "best_code_record_id": "tsp_construct:pure_eoh:g4:r3",
+        "synthesized_card_id": null,
         "norm_score": 1.0185,
         "delta_pct": -1.8,
-        "code_snippet": "```python\n\n\n    Args:\n        current_node: ID of the current node\n        destination_node: ID of the destination (return) node\n        unvisited_nodes: array of unvisited node IDs\n        distance_matrix: pairwise distance matrix between all nodes\n    Returns:\n```",
+        "code_snippet": "```python\ndef select_next_node(current_node: int, destination_node: int, unvisited_nodes: np.ndarray, distance_matrix: np.ndarray) -> int:\n    if len(unvisited_nodes) == 0:\n        return destination_node\n    if len(unvisited_nodes) == 1:\n        return unvisited_nodes[0]\n    idx = unvisited_nodes\n    curr_dist = distance_matrix[current_node, idx]\n    alpha = 0.8          # weight for forward progress vs. exploration\n    beta = 0.5           # sensitivity to local sparsity\n    gamma = 0.3          # influence of angular separation\n    eps = 1e-12\n    d_min = np.min(curr_dist)\n```",
         "algorithm": "Iteratively select the next node by maximizing a score based on the ratio of inverse normalized forward distance and an exploration factor combining local sparsity and global angular separation relative to the start‑to‑destination axis, preferring locally near but globally diversifying choices.",
         "runtime_s": 540.367,
         "funnel": {
@@ -76,9 +88,13 @@
           "tsp_regret_insertion",
           "tsp_farthest_insertion"
         ],
+        "card_source": "literature",
+        "history_card_ids": [],
+        "best_code_record_id": "tsp_construct:tocc_corrected:g4:r1",
+        "synthesized_card_id": null,
         "norm_score": 1.0408,
         "delta_pct": -3.9,
-        "code_snippet": "```python\n\n    n_unvisited = len(unvisited_nodes)\n    if n_unvisited <= 2:\n        return unvisited_nodes[np.argmin(distance_matrix[current_node][unvisited_nodes])]\n\n    dist_from_current = distance_matrix[current_node][unvisited_nodes]\n    dist_to_dest = distance_matrix[destination_node][unvisited_nodes]\n\n```",
+        "code_snippet": "```python\ndef select_next_node(current_node: int, destination_node: int, unvisited_nodes: np.ndarray, distance_matrix: np.ndarray) -> int:\n    n_unvisited = len(unvisited_nodes)\n    if n_unvisited <= 2:\n        return unvisited_nodes[np.argmin(distance_matrix[current_node][unvisited_nodes])]\n    dist_from_current = distance_matrix[current_node][unvisited_nodes]\n    dist_to_dest = distance_matrix[destination_node][unvisited_nodes]\n    regrets = []\n    for i, u in enumerate(unvisited_nodes):\n        d_curr = dist_from_current[i]\n        d_dest = dist_to_dest[i]\n        others = np.concatenate([unvisited_nodes[:i], unvisited_nodes[i+1:]])\n        avg_dist_to_others = np.mean(distance_matrix[u][others])\n```",
         "algorithm": "The proposed \"Cluster-Aware Regret Insertion\" algorithm selects the next node by balancing two factors: (1) the immediate cost from the current node, and (2) a combined penalty based on both the regret value (difference between the closest and second‑closest connections among the current node, destination, and already chosen candidates) and a long‑term clustering measure (the maximum distance from any other unvisited node), thereby prioritizing nodes that are expensive to defer while also preventing distant clusters from being left isolated at the end of the tour.",
         "runtime_s": 657.876,
         "funnel": {
@@ -100,9 +116,13 @@
           "tsp_regret_insertion",
           "tsp_farthest_insertion"
         ],
+        "card_source": "literature",
+        "history_card_ids": [],
+        "best_code_record_id": "tsp_construct:tocc_corrected:g4:r2",
+        "synthesized_card_id": null,
         "norm_score": 0.9899,
         "delta_pct": 1.0,
-        "code_snippet": "```python\n\n    if len(unvisited_nodes) == 0:\n        raise ValueError(\"No unvisited nodes\")\n    \n    if len(unvisited_nodes) <= 2:\n        return unvisited_nodes[np.argmin(distance_matrix[current_node][unvisited_nodes])]\n    \n    dest_dists = distance_matrix[destination_node][unvisited_nodes]\n```",
+        "code_snippet": "```python\ndef select_next_node(current_node: int, destination_node: int, unvisited_nodes: np.ndarray, distance_matrix: np.ndarray) -> int:\n    if len(unvisited_nodes) == 0:\n        raise ValueError(\"No unvisited nodes\")\n    if len(unvisited_nodes) <= 2:\n        return unvisited_nodes[np.argmin(distance_matrix[current_node][unvisited_nodes])]\n    dest_dists = distance_matrix[destination_node][unvisited_nodes]\n    max_dest_dist_idx = np.argmax(dest_dists)\n    farthest_from_dest = unvisited_nodes[max_dest_dist_idx]\n    regrets = np.zeros(len(unvisited_nodes))\n    current_costs = np.zeros(len(unvisited_nodes))\n    for i, cand in enumerate(unvisited_nodes):\n        d_current = distance_matrix[current_node][cand]\n```",
         "algorithm": "A hybrid regret-farthest insertion algorithm that selects the next node by maximizing a weighted score combining immediate distance savings, regret cost of delaying the node, and proximity to the farthest unvisited cluster centroid from the destination, while keeping lookahead limited to two-step evaluations.",
         "runtime_s": 666.697,
         "funnel": {
@@ -124,9 +144,13 @@
           "tsp_regret_insertion",
           "tsp_farthest_insertion"
         ],
+        "card_source": "literature",
+        "history_card_ids": [],
+        "best_code_record_id": "tsp_construct:tocc_corrected:g4:r3",
+        "synthesized_card_id": null,
         "norm_score": 1.0137,
         "delta_pct": -1.4,
-        "code_snippet": "```python\n\n    uv = np.asarray(unvisited_nodes, dtype=int)\n    n = len(uv)\n    if n == 1:\n        return uv[0].item()\n\n    dist_cur = distance_matrix[current_node, uv]\n    dist_dest = distance_matrix[uv, destination_node]\n```",
+        "code_snippet": "```python\ndef select_next_node(current_node: int, destination_node: int, unvisited_nodes: np.ndarray, distance_matrix: np.ndarray) -> int:\n    uv = np.asarray(unvisited_nodes, dtype=int)\n    n = len(uv)\n    if n == 1:\n        return uv[0].item()\n    dist_cur = distance_matrix[current_node, uv]\n    dist_dest = distance_matrix[uv, destination_node]\n    base_score = dist_cur + dist_dest\n    min_base = base_score.min()\n    threshold_impact = min_base * 2.0\n    impact_mask = base_score <= threshold_impact\n    filtered_idx = np.where(impact_mask)[0] if np.any(impact_mask) else np.arange(n)\n```",
         "algorithm": "A three-phase adaptive selection that prioritizes nodes with balanced forward-cost impact, geometric dispersion, and efficient tie-breaking via minimal combined detour.",
         "runtime_s": 651.305,
         "funnel": {
@@ -176,9 +200,15 @@
         "population_size": 4,
         "best_objective": 6.60788,
         "pure_baseline": 6.548423333333333,
+        "card_source": "none",
+        "selected_card_ids": [],
+        "history_card_ids": [],
         "problem": "tsp_construct",
         "arm": "pure_eoh",
-        "gen": 4
+        "gen": 4,
+        "best_code_record_id": "tsp_construct:pure_eoh:g4:r1",
+        "synthesized_card_id": null,
+        "synthesized_card_written": false
       },
       {
         "proposal_accept": true,
@@ -191,9 +221,15 @@
         "population_size": 4,
         "best_objective": 6.60788,
         "pure_baseline": 6.548423333333333,
+        "card_source": "none",
+        "selected_card_ids": [],
+        "history_card_ids": [],
         "problem": "tsp_construct",
         "arm": "pure_eoh",
-        "gen": 4
+        "gen": 4,
+        "best_code_record_id": "tsp_construct:pure_eoh:g4:r2",
+        "synthesized_card_id": null,
+        "synthesized_card_written": false
       },
       {
         "proposal_accept": true,
@@ -206,9 +242,15 @@
         "population_size": 4,
         "best_objective": 6.42951,
         "pure_baseline": 6.548423333333333,
+        "card_source": "none",
+        "selected_card_ids": [],
+        "history_card_ids": [],
         "problem": "tsp_construct",
         "arm": "pure_eoh",
-        "gen": 4
+        "gen": 4,
+        "best_code_record_id": "tsp_construct:pure_eoh:g4:r3",
+        "synthesized_card_id": null,
+        "synthesized_card_written": false
       },
       {
         "proposal_accept": true,
@@ -221,9 +263,18 @@
         "population_size": 4,
         "best_objective": 6.29166,
         "pure_baseline": 6.548423333333333,
+        "card_source": "literature",
+        "selected_card_ids": [
+          "tsp_regret_insertion",
+          "tsp_farthest_insertion"
+        ],
+        "history_card_ids": [],
         "problem": "tsp_construct",
         "arm": "tocc_corrected",
-        "gen": 4
+        "gen": 4,
+        "best_code_record_id": "tsp_construct:tocc_corrected:g4:r1",
+        "synthesized_card_id": null,
+        "synthesized_card_written": false
       },
       {
         "proposal_accept": true,
@@ -236,9 +287,18 @@
         "population_size": 4,
         "best_objective": 6.61498,
         "pure_baseline": 6.548423333333333,
+        "card_source": "literature",
+        "selected_card_ids": [
+          "tsp_regret_insertion",
+          "tsp_farthest_insertion"
+        ],
+        "history_card_ids": [],
         "problem": "tsp_construct",
         "arm": "tocc_corrected",
-        "gen": 4
+        "gen": 4,
+        "best_code_record_id": "tsp_construct:tocc_corrected:g4:r2",
+        "synthesized_card_id": null,
+        "synthesized_card_written": false
       },
       {
         "proposal_accept": true,
@@ -251,9 +311,18 @@
         "population_size": 4,
         "best_objective": 6.45989,
         "pure_baseline": 6.548423333333333,
+        "card_source": "literature",
+        "selected_card_ids": [
+          "tsp_regret_insertion",
+          "tsp_farthest_insertion"
+        ],
+        "history_card_ids": [],
         "problem": "tsp_construct",
         "arm": "tocc_corrected",
-        "gen": 4
+        "gen": 4,
+        "best_code_record_id": "tsp_construct:tocc_corrected:g4:r3",
+        "synthesized_card_id": null,
+        "synthesized_card_written": false
       }
     ]
   }

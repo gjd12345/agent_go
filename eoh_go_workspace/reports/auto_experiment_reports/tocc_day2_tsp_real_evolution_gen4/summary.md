@@ -5,54 +5,61 @@
 
 ## 汇总表
 
-| problem | arm | gen | pop | best | norm | Δ% | valid | cards | status |
-|---|---|---:|---:|---:|---:|---:|---|---|---|
-| tsp_construct | pure_eoh | 4 | 4 | 6.60788 | 0.991 | +0.9% | 4/4 | - | OK |
-| tsp_construct | pure_eoh | 4 | 4 | 6.60788 | 0.991 | +0.9% | 4/4 | - | OK |
-| tsp_construct | pure_eoh | 4 | 4 | 6.42951 | 1.018 | -1.8% | 4/4 | - | OK |
-| tsp_construct | tocc_corrected | 4 | 4 | 6.29166 | 1.041 | -3.9% | 4/4 | tsp_regret_insertion, tsp_farthest_insertion | OK |
-| tsp_construct | tocc_corrected | 4 | 4 | 6.61498 | 0.990 | +1.0% | 4/4 | tsp_regret_insertion, tsp_farthest_insertion | OK |
-| tsp_construct | tocc_corrected | 4 | 4 | 6.45989 | 1.014 | -1.4% | 4/4 | tsp_regret_insertion, tsp_farthest_insertion | OK |
+| problem | arm | gen | pop | best | norm | Δ% | valid | card_source | cards | status |
+|---|---|---:|---:|---:|---:|---:|---|---|---|---|
+| tsp_construct | pure_eoh | 4 | 4 | 6.60788 | 0.991 | +0.9% | 4/4 | none | - | OK |
+| tsp_construct | pure_eoh | 4 | 4 | 6.60788 | 0.991 | +0.9% | 4/4 | none | - | OK |
+| tsp_construct | pure_eoh | 4 | 4 | 6.42951 | 1.018 | -1.8% | 4/4 | none | - | OK |
+| tsp_construct | tocc_corrected | 4 | 4 | 6.29166 | 1.041 | -3.9% | 4/4 | literature | tsp_regret_insertion, tsp_farthest_insertion | OK |
+| tsp_construct | tocc_corrected | 4 | 4 | 6.61498 | 0.990 | +1.0% | 4/4 | literature | tsp_regret_insertion, tsp_farthest_insertion | OK |
+| tsp_construct | tocc_corrected | 4 | 4 | 6.45989 | 1.014 | -1.4% | 4/4 | literature | tsp_regret_insertion, tsp_farthest_insertion | OK |
 
 ## 代码片段
 
 ### tsp_construct
 
-**pure_eoh** (gen=4, best=6.60788):
+**tocc_corrected** (gen=4, best=6.29166):
 ```python
-
-
-    Args:
-        current_node: ID of the current node
-        destination_node: ID of the destination (return) node
-        unvisited_nodes: array of unvisited node IDs
-        distance_matrix: pairwise distance matrix between all nodes
-    Returns:
-```
-
-**pure_eoh** (gen=4, best=6.60788):
-```python
-
-    if len(unvisited_nodes) == 1:
-        return unvisited_nodes[0]
-
+def select_next_node(current_node: int, destination_node: int, unvisited_nodes: np.ndarray, distance_matrix: np.ndarray) -> int:
     n_unvisited = len(unvisited_nodes)
-    sub_indices = list(unvisited_nodes)
-    idx_map = {node: i for i, node in enumerate(sub_indices)}
-    
+    if n_unvisited <= 2:
+        return unvisited_nodes[np.argmin(distance_matrix[current_node][unvisited_nodes])]
+    dist_from_current = distance_matrix[current_node][unvisited_nodes]
+    dist_to_dest = distance_matrix[destination_node][unvisited_nodes]
+    regrets = []
+    for i, u in enumerate(unvisited_nodes):
+        d_curr = dist_from_current[i]
+        d_dest = dist_to_dest[i]
+        others = np.concatenate([unvisited_nodes[:i], unvisited_nodes[i+1:]])
+        avg_dist_to_others = np.mean(distance_matrix[u][others])
 ```
 
 **pure_eoh** (gen=4, best=6.42951):
 ```python
-
-
-    Args:
-        current_node: ID of the current node
-        destination_node: ID of the destination (return) node
-        unvisited_nodes: array of unvisited node IDs
-        distance_matrix: pairwise distance matrix between all nodes
-    Returns:
+def select_next_node(current_node: int, destination_node: int, unvisited_nodes: np.ndarray, distance_matrix: np.ndarray) -> int:
+    if len(unvisited_nodes) == 0:
+        return destination_node
+    if len(unvisited_nodes) == 1:
+        return unvisited_nodes[0]
+    idx = unvisited_nodes
+    curr_dist = distance_matrix[current_node, idx]
+    alpha = 0.8          # weight for forward progress vs. exploration
+    beta = 0.5           # sensitivity to local sparsity
+    gamma = 0.3          # influence of angular separation
+    eps = 1e-12
+    d_min = np.min(curr_dist)
 ```
+
+## Card-memory / 选卡记录
+
+| problem | arm | gen | card_source | selected_card_ids | history_card_ids | best_code_record_id | synthesized_card_id |
+|---|---|---:|---|---|---|---|---|
+| tsp_construct | pure_eoh | 4 | none | - | - | tsp_construct:pure_eoh:g4:r1 | - |
+| tsp_construct | pure_eoh | 4 | none | - | - | tsp_construct:pure_eoh:g4:r2 | - |
+| tsp_construct | pure_eoh | 4 | none | - | - | tsp_construct:pure_eoh:g4:r3 | - |
+| tsp_construct | tocc_corrected | 4 | literature | tsp_regret_insertion, tsp_farthest_insertion | - | tsp_construct:tocc_corrected:g4:r1 | - |
+| tsp_construct | tocc_corrected | 4 | literature | tsp_regret_insertion, tsp_farthest_insertion | - | tsp_construct:tocc_corrected:g4:r2 | - |
+| tsp_construct | tocc_corrected | 4 | literature | tsp_regret_insertion, tsp_farthest_insertion | - | tsp_construct:tocc_corrected:g4:r3 | - |
 
 ## 下一步建议
 

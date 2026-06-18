@@ -35,9 +35,15 @@
       "population_size": 4,
       "best_objective": 6.60788,
       "pure_baseline": 6.548423333333333,
+      "card_source": "none",
+      "selected_card_ids": [],
+      "history_card_ids": [],
       "problem": "tsp_construct",
       "arm": "pure_eoh",
-      "gen": 4
+      "gen": 4,
+      "best_code_record_id": "tsp_construct:pure_eoh:g4:r1",
+      "synthesized_card_id": null,
+      "synthesized_card_written": false
     },
     {
       "proposal_accept": true,
@@ -50,9 +56,15 @@
       "population_size": 4,
       "best_objective": 6.60788,
       "pure_baseline": 6.548423333333333,
+      "card_source": "none",
+      "selected_card_ids": [],
+      "history_card_ids": [],
       "problem": "tsp_construct",
       "arm": "pure_eoh",
-      "gen": 4
+      "gen": 4,
+      "best_code_record_id": "tsp_construct:pure_eoh:g4:r2",
+      "synthesized_card_id": null,
+      "synthesized_card_written": false
     },
     {
       "proposal_accept": true,
@@ -65,9 +77,15 @@
       "population_size": 4,
       "best_objective": 6.42951,
       "pure_baseline": 6.548423333333333,
+      "card_source": "none",
+      "selected_card_ids": [],
+      "history_card_ids": [],
       "problem": "tsp_construct",
       "arm": "pure_eoh",
-      "gen": 4
+      "gen": 4,
+      "best_code_record_id": "tsp_construct:pure_eoh:g4:r3",
+      "synthesized_card_id": null,
+      "synthesized_card_written": false
     },
     {
       "proposal_accept": true,
@@ -80,9 +98,18 @@
       "population_size": 4,
       "best_objective": 6.29166,
       "pure_baseline": 6.548423333333333,
+      "card_source": "literature",
+      "selected_card_ids": [
+        "tsp_regret_insertion",
+        "tsp_farthest_insertion"
+      ],
+      "history_card_ids": [],
       "problem": "tsp_construct",
       "arm": "tocc_corrected",
-      "gen": 4
+      "gen": 4,
+      "best_code_record_id": "tsp_construct:tocc_corrected:g4:r1",
+      "synthesized_card_id": null,
+      "synthesized_card_written": false
     },
     {
       "proposal_accept": true,
@@ -95,9 +122,18 @@
       "population_size": 4,
       "best_objective": 6.61498,
       "pure_baseline": 6.548423333333333,
+      "card_source": "literature",
+      "selected_card_ids": [
+        "tsp_regret_insertion",
+        "tsp_farthest_insertion"
+      ],
+      "history_card_ids": [],
       "problem": "tsp_construct",
       "arm": "tocc_corrected",
-      "gen": 4
+      "gen": 4,
+      "best_code_record_id": "tsp_construct:tocc_corrected:g4:r2",
+      "synthesized_card_id": null,
+      "synthesized_card_written": false
     },
     {
       "proposal_accept": true,
@@ -110,9 +146,18 @@
       "population_size": 4,
       "best_objective": 6.45989,
       "pure_baseline": 6.548423333333333,
+      "card_source": "literature",
+      "selected_card_ids": [
+        "tsp_regret_insertion",
+        "tsp_farthest_insertion"
+      ],
+      "history_card_ids": [],
       "problem": "tsp_construct",
       "arm": "tocc_corrected",
-      "gen": 4
+      "gen": 4,
+      "best_code_record_id": "tsp_construct:tocc_corrected:g4:r3",
+      "synthesized_card_id": null,
+      "synthesized_card_written": false
     }
   ]
 }

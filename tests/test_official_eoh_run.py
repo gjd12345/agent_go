@@ -13,11 +13,13 @@ from eoh_go.experiments.official_eoh_run import (
     _runner_script,
     _tail_text,
     build_official_rag_context,
+    history_card_gate_reasons,
     normalize_api_endpoint,
     redact_log_tail,
     run_official_eoh,
     summarize_run,
 )
+from eoh_go.rag.card_synthesis import synthesize_card
 
 
 class OfficialEohRunTests(unittest.TestCase):
@@ -33,10 +35,10 @@ class OfficialEohRunTests(unittest.TestCase):
         self.assertIn("api_url(self.api_endpoint)", script)
 
     def test_redact_log_tail_removes_endpoint_and_bearer_token(self) -> None:
-        text = "LLM @ https://api.example.com/v1/chat endpoint=api.example.com Bearer SECRET_TOKEN"
+        text = "LLM @ https://api.example.com/v1/chat endpoint=api.example.com Bearer TOKEN"
         redacted = redact_log_tail(text)
         self.assertNotIn("api.example.com", redacted)
-        self.assertNotIn("SECRET_TOKEN", redacted)
+        self.assertNotIn("TOKEN", redacted)
         self.assertIn("[api-endpoint-redacted]", redacted)
         self.assertIn("[api-key-redacted]", redacted)
 
@@ -92,14 +94,102 @@ class OfficialEohRunTests(unittest.TestCase):
         cvrp_context, cvrp_trace = build_official_rag_context(Path.cwd(), "cvrp_construct", "literature_rag", top_k=2, max_chars=1800)
 
         self.assertTrue(all(item["id"].startswith("tsp_") for item in tsp_trace["rag_selected_items"]))
+        self.assertTrue(all(not item["id"].startswith("history_") for item in tsp_trace["rag_selected_items"]))
         self.assertEqual(["tsp_construct_api_skeleton"], [item["id"] for item in tsp_trace["rag_global_items"]])
         self.assertIn("API RULES", tsp_context)
         self.assertNotIn("obp_", tsp_context)
 
         self.assertTrue(all(item["id"].startswith("cvrp_") for item in cvrp_trace["rag_selected_items"]))
+        self.assertTrue(all(not item["id"].startswith("history_") for item in cvrp_trace["rag_selected_items"]))
         self.assertEqual(["cvrp_construct_api_skeleton"], [item["id"] for item in cvrp_trace["rag_global_items"]])
         self.assertIn("API RULES", cvrp_context)
         self.assertNotIn("obp_", cvrp_context)
+
+    def test_build_history_rag_context_uses_synthesized_history_cards(self) -> None:
+        context, trace = build_official_rag_context(
+            Path.cwd(),
+            "tsp_construct",
+            "history_rag",
+            top_k=2,
+            max_chars=1800,
+            query="tsp construct evolved adaptive destination centrality",
+        )
+        selected_ids = [item["id"] for item in trace["rag_selected_items"]]
+
+        self.assertTrue(all(item_id.startswith("history_tsp_construct_") for item_id in selected_ids))
+        self.assertEqual(trace["rag_strategy_pool_size"], len(trace["rag_all_scores"]))
+        self.assertGreater(trace["rag_history_pool_size_before_gate"], 0)
+        self.assertEqual(trace["rag_history_pool_size_after_gate"], len(selected_ids))
+        self.assertTrue(trace["rag_blocked_history_items"])
+        self.assertIn("API RULES", context)
+
+    def test_build_mixed_rag_context_blocks_overcompound_history_cards(self) -> None:
+        from eoh_go.rag.build_corpus import _is_history_card, load_all_corpora
+
+        history_id = next(
+            item.id
+            for item in load_all_corpora(Path.cwd())
+            if _is_history_card(item) and item.id.startswith("history_tsp_construct_")
+        )
+        with self.assertRaisesRegex(ValueError, "failed gate"):
+            build_official_rag_context(
+                Path.cwd(),
+                "tsp_construct",
+                "mixed_rag",
+                top_k=2,
+                max_chars=1800,
+                query="tsp construct regret evolved",
+                selected_card_ids=[
+                    "tsp_regret_insertion",
+                    history_id,
+                ],
+            )
+
+    def test_build_mixed_rag_context_can_use_split_history_but_not_blocked_history(self) -> None:
+        context, trace = build_official_rag_context(
+            Path.cwd(),
+            "cvrp_construct",
+            "mixed_rag",
+            top_k=5,
+            max_chars=1800,
+            query="cvrp construct regret evolved farthest",
+        )
+        selected_ids = [item["id"] for item in trace["rag_selected_items"]]
+        blocked_ids = {item["id"] for item in trace["rag_blocked_history_items"]}
+
+        self.assertTrue(selected_ids)
+        self.assertTrue(any(item_id.startswith("history_") for item_id in selected_ids))
+        self.assertTrue(all(item_id not in blocked_ids for item_id in selected_ids))
+        self.assertGreater(trace["rag_history_pool_size_before_gate"], 0)
+        self.assertGreater(trace["rag_history_pool_size_after_gate"], 0)
+        self.assertTrue(trace["rag_blocked_history_items"])
+        self.assertIn("RETRIEVED STRATEGY CARDS", context)
+
+    def test_newly_synthesized_history_card_passes_gate(self) -> None:
+        code = "regret = second_best - best; dest = distance_matrix[u, destination]; alpha = remaining_ratio; capacity = rest_capacity"
+        card = synthesize_card("cvrp_construct", code)
+        self.assertEqual([], history_card_gate_reasons(card))
+
+    def test_split_history_cards_can_be_selected_explicitly(self) -> None:
+        selected = [
+            "history_cvrp_far_destination_seed",
+            "history_cvrp_capacity_feasible_filter",
+            "cvrp_regret_insertion",
+        ]
+        context, trace = build_official_rag_context(
+            Path.cwd(),
+            "cvrp_construct",
+            "mixed_rag",
+            top_k=3,
+            max_chars=3000,
+            query="cvrp construct far capacity regret",
+            selected_card_ids=selected,
+        )
+        selected_ids = {item["id"] for item in trace["rag_selected_items"]}
+
+        self.assertEqual(set(selected), selected_ids)
+        self.assertEqual(3, trace["rag_history_pool_size_after_gate"])
+        self.assertIn("history_cvrp_far_destination_seed", context)
 
     def test_run_official_eoh_timeout_reports_without_key_value(self) -> None:
         old_key = os.environ.get("TEST_OFFICIAL_KEY")

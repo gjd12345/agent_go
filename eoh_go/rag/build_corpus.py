@@ -41,7 +41,7 @@ LITERATURE_IDS = VRP_LITERATURE_IDS | OBP_LITERATURE_IDS | TSP_LITERATURE_IDS | 
 
 def _is_history_card(item: CorpusItem) -> bool:
     """Check if a card was synthesized from best code (not hand-curated)."""
-    return item.kind == "algorithm_card" and item.source_path != "curated"
+    return item.kind == "algorithm_card" and item.id.startswith("history_")
 
 _STANDARD_INSERTSHIPS_CONSTRAINTS = [
     "Never skip orders unless no feasible assignment exists.",

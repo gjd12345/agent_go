@@ -1,0 +1,129 @@
+{
+  "total_runs": 4,
+  "proposal_accept": {
+    "passed": 4,
+    "total": 4,
+    "rate": 1.0
+  },
+  "linkage_success": {
+    "passed": 4,
+    "total": 4,
+    "rate": 1.0
+  },
+  "generation_success": {
+    "passed": 4,
+    "total": 4,
+    "rate": 1.0
+  },
+  "objective_success": {
+    "passed": 0,
+    "total": 0,
+    "rate": 0,
+    "note": "insufficient data"
+  },
+  "pure_baselines": {},
+  "per_run": [
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": true,
+      "objective_success": null,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 12.72795,
+      "pure_baseline": null,
+      "card_source": "literature",
+      "selected_card_ids": [
+        "cvrp_regret_insertion",
+        "cvrp_far_first"
+      ],
+      "history_card_ids": [],
+      "problem": "cvrp_construct",
+      "arm": "literature_regret_far",
+      "gen": 0,
+      "best_code_record_id": "cvrp_construct:literature_regret_far:g0:r1",
+      "synthesized_card_id": null,
+      "synthesized_card_written": false
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": true,
+      "objective_success": null,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 13.00458,
+      "pure_baseline": null,
+      "card_source": "mixed",
+      "selected_card_ids": [
+        "history_cvrp_far_destination_seed",
+        "cvrp_regret_insertion"
+      ],
+      "history_card_ids": [
+        "history_cvrp_far_destination_seed"
+      ],
+      "problem": "cvrp_construct",
+      "arm": "split_far_seed_regret",
+      "gen": 0,
+      "best_code_record_id": "cvrp_construct:split_far_seed_regret:g0:r1",
+      "synthesized_card_id": null,
+      "synthesized_card_written": false
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": true,
+      "objective_success": null,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 13.23646,
+      "pure_baseline": null,
+      "card_source": "mixed",
+      "selected_card_ids": [
+        "history_cvrp_capacity_feasible_filter",
+        "cvrp_regret_insertion"
+      ],
+      "history_card_ids": [
+        "history_cvrp_capacity_feasible_filter"
+      ],
+      "problem": "cvrp_construct",
+      "arm": "split_capacity_filter_regret",
+      "gen": 0,
+      "best_code_record_id": "cvrp_construct:split_capacity_filter_regret:g0:r1",
+      "synthesized_card_id": null,
+      "synthesized_card_written": false
+    },
+    {
+      "proposal_accept": true,
+      "linkage_success": true,
+      "generation_success": true,
+      "objective_success": null,
+      "diagnosis_success": null,
+      "failure_reason": null,
+      "valid_candidates": 4,
+      "population_size": 4,
+      "best_objective": 12.96129,
+      "pure_baseline": null,
+      "card_source": "mixed",
+      "selected_card_ids": [
+        "history_cvrp_remaining_aware_alpha",
+        "cvrp_far_first"
+      ],
+      "history_card_ids": [
+        "history_cvrp_remaining_aware_alpha"
+      ],
+      "problem": "cvrp_construct",
+      "arm": "split_remaining_alpha_far",
+      "gen": 0,
+      "best_code_record_id": "cvrp_construct:split_remaining_alpha_far:g0:r1",
+      "synthesized_card_id": null,
+      "synthesized_card_written": false
+    }
+  ]
+}

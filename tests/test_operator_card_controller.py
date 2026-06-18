@@ -39,6 +39,24 @@ class TOCCControllerTests(unittest.TestCase):
         self.assertIn("tsp_farthest_insertion", d.recommended_cards)
         self.assertEqual(d.next_action, "run_init_only")
 
+    def test_diagnose_baseline_overlap_for_mixed_rag(self) -> None:
+        trace = {
+            "problem": "tsp_construct",
+            "arm": "mixed_rag",
+            "rag_selected_items": [
+                {"id": "tsp_nearest_insertion"},
+                {"id": "history_tsp_construct_adaptive_weights_destination_abc123"},
+            ],
+            "rag_all_scores": [],
+            "rag_context_chars": 1500,
+            "rag_max_chars": 2500,
+            "valid_candidates": 4,
+            "population_size": 4,
+        }
+        d = diagnose(trace)
+        self.assertEqual(d.diagnosis, "baseline_overlap")
+        self.assertIn("tsp_regret_insertion", d.recommended_cards)
+
     def test_diagnose_baseline_overlap_cvrp(self) -> None:
         trace = {
             "problem": "cvrp_construct",

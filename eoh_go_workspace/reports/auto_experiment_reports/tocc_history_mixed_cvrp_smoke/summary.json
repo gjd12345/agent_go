@@ -1,0 +1,142 @@
+{
+  "suite": "tocc_history_mixed_cvrp_smoke",
+  "problems": {
+    "cvrp_construct": [
+      {
+        "arm": "literature_regret_far",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 13.09441,
+        "valid": "4/4",
+        "cards": [
+          "cvrp_regret_insertion",
+          "cvrp_far_first"
+        ],
+        "card_source": "literature",
+        "history_card_ids": [],
+        "best_code_record_id": "cvrp_construct:literature_regret_far:g0:r1",
+        "synthesized_card_id": null,
+        "norm_score": null,
+        "delta_pct": null,
+        "code_snippet": "```python\ndef select_next_node(current_node: int, depot: int, unvisited_nodes: np.ndarray,\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n    if len(unvisited_nodes) == 0:\n        return depot\n    feasible_mask = demands[unvisited_nodes] <= rest_capacity + 1e-9\n    feasible_nodes = unvisited_nodes[feasible_mask]\n    if len(feasible_nodes) == 0:\n        return depot\n    if current_node == depot:\n        depot_distances = distance_matrix[depot][feasible_nodes]\n        return feasible_nodes[np.argmax(depot_distances)]\n```",
+        "algorithm": "A hybrid regret-based heuristic that prioritizes high-regret customers when multiple are feasible, but switches to a farthest-first seeding rule when starting at the depot, always respecting capacity constraints.",
+        "runtime_s": 1046.695,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": null,
+          "failure_reason": null
+        }
+      },
+      {
+        "arm": "mixed_history_far_regret",
+        "gen": 0,
+        "pop": 4,
+        "status": "ok",
+        "best": 14.20996,
+        "valid": "4/4",
+        "cards": [
+          "history_cvrp_construct_capacity_destination_farthest_085049",
+          "cvrp_regret_insertion"
+        ],
+        "card_source": "mixed",
+        "history_card_ids": [
+          "history_cvrp_construct_capacity_destination_farthest_085049"
+        ],
+        "best_code_record_id": "cvrp_construct:mixed_history_far_regret:g0:r1",
+        "synthesized_card_id": null,
+        "norm_score": null,
+        "delta_pct": null,
+        "code_snippet": "```python\ndef select_next_node(current_node: int, depot: int, unvisited_nodes: np.ndarray,\n                     rest_capacity: float, demands: np.ndarray,\n                     distance_matrix: np.ndarray) -> int:\n    if len(unvisited_nodes) == 0:\n        return depot\n    feasible_mask = demands[unvisited_nodes] <= rest_capacity + 1e-9\n    feasible = unvisited_nodes[feasible_mask]\n    if len(feasible) == 0:\n        return depot\n    n_remaining = len(unvisited_nodes)\n    alpha = min(2.0, 0.5 + 1.5 * (n_remaining / max(len(demands) - 1, 1)))\n    base_scores = distance_matrix[current_node, feasible] + alpha * distance_matrix[feasible, depot]\n```",
+        "algorithm": "A hybrid farthest‑destination with adaptive regret scoring heuristic that picks the customer maximizing a weighted combination of forward distance savings, estimated future cost via 2‑step look‑ahead, and capacity‑normalized regret while gradually shifting priority toward serving nearby leftovers as the route nears capacity exhaustion.",
+        "runtime_s": 493.686,
+        "funnel": {
+          "proposal_accept": true,
+          "linkage_success": true,
+          "generation_success": true,
+          "objective_success": null,
+          "failure_reason": null
+        }
+      }
+    ]
+  },
+  "success_funnel": {
+    "total_runs": 2,
+    "proposal_accept": {
+      "passed": 2,
+      "total": 2,
+      "rate": 1.0
+    },
+    "linkage_success": {
+      "passed": 2,
+      "total": 2,
+      "rate": 1.0
+    },
+    "generation_success": {
+      "passed": 2,
+      "total": 2,
+      "rate": 1.0
+    },
+    "objective_success": {
+      "passed": 0,
+      "total": 0,
+      "rate": 0,
+      "note": "insufficient data"
+    },
+    "pure_baselines": {},
+    "per_run": [
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": null,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 13.09441,
+        "pure_baseline": null,
+        "card_source": "literature",
+        "selected_card_ids": [
+          "cvrp_regret_insertion",
+          "cvrp_far_first"
+        ],
+        "history_card_ids": [],
+        "problem": "cvrp_construct",
+        "arm": "literature_regret_far",
+        "gen": 0,
+        "best_code_record_id": "cvrp_construct:literature_regret_far:g0:r1",
+        "synthesized_card_id": null,
+        "synthesized_card_written": false
+      },
+      {
+        "proposal_accept": true,
+        "linkage_success": true,
+        "generation_success": true,
+        "objective_success": null,
+        "diagnosis_success": null,
+        "failure_reason": null,
+        "valid_candidates": 4,
+        "population_size": 4,
+        "best_objective": 14.20996,
+        "pure_baseline": null,
+        "card_source": "mixed",
+        "selected_card_ids": [
+          "history_cvrp_construct_capacity_destination_farthest_085049",
+          "cvrp_regret_insertion"
+        ],
+        "history_card_ids": [
+          "history_cvrp_construct_capacity_destination_farthest_085049"
+        ],
+        "problem": "cvrp_construct",
+        "arm": "mixed_history_far_regret",
+        "gen": 0,
+        "best_code_record_id": "cvrp_construct:mixed_history_far_regret:g0:r1",
+        "synthesized_card_id": null,
+        "synthesized_card_written": false
+      }
+    ]
+  }
+}

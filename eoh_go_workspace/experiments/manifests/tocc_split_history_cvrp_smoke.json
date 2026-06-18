@@ -1,0 +1,53 @@
+{
+  "suite": "tocc_split_history_cvrp_smoke",
+  "model": "JoyAI-LLM-Pro",
+  "problems": ["cvrp_construct"],
+  "arms": [
+    {
+      "name": "literature_regret_far",
+      "runner_arm": "literature_rag",
+      "context_strategy": "controlled_literature_cards",
+      "rag_query": "cvrp construct regret farthest capacity route depot",
+      "selected_card_ids": ["cvrp_regret_insertion", "cvrp_far_first"],
+      "problems": ["cvrp_construct"]
+    },
+    {
+      "name": "split_far_seed_regret",
+      "runner_arm": "mixed_rag",
+      "context_strategy": "split_history_plus_literature",
+      "rag_query": "cvrp construct far destination seed regret route depot",
+      "selected_card_ids": ["history_cvrp_far_destination_seed", "cvrp_regret_insertion"],
+      "problems": ["cvrp_construct"]
+    },
+    {
+      "name": "split_capacity_filter_regret",
+      "runner_arm": "mixed_rag",
+      "context_strategy": "split_history_plus_literature",
+      "rag_query": "cvrp construct capacity feasible filter regret route",
+      "selected_card_ids": ["history_cvrp_capacity_feasible_filter", "cvrp_regret_insertion"],
+      "problems": ["cvrp_construct"]
+    },
+    {
+      "name": "split_remaining_alpha_far",
+      "runner_arm": "mixed_rag",
+      "context_strategy": "split_history_plus_literature",
+      "rag_query": "cvrp construct remaining aware alpha farthest route depot",
+      "selected_card_ids": ["history_cvrp_remaining_aware_alpha", "cvrp_far_first"],
+      "problems": ["cvrp_construct"]
+    }
+  ],
+  "generations": [0],
+  "pop_size": 4,
+  "repeats": 1,
+  "max_runs": 4,
+  "max_llm_calls_estimate": 32,
+  "require_confirm_for_real_run": true,
+  "operators": "e1,e2,m1,m2",
+  "run_timeout_s": 3600,
+  "rag": {
+    "top_k": 2,
+    "max_chars": 2500
+  },
+  "python_exe": "/private/tmp/eoh_official_venv/bin/python",
+  "official_root": "/private/tmp/EoH-main-zip/EoH-main"
+}

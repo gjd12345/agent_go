@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from eoh_go.experiments.official_eoh_smoke import PROBLEMS
-from eoh_go.rag.build_corpus import load_all_corpora
+from eoh_go.rag.build_corpus import _is_history_card, load_all_corpora
 from eoh_go.rag.prompt_context import format_prompt_context
 from eoh_go.rag.retriever import retrieve, score_corpus
 from eoh_go.rag.schemas import CorpusItem
@@ -78,7 +78,62 @@ def _tail_text(value: str | bytes | None, max_lines: int = 80) -> str:
 
 def _matches_problem_strategy(item: CorpusItem, problem: str) -> bool:
     prefixes = OFFICIAL_RAG_PROBLEM_CONFIG[problem]["strategy_prefixes"]
-    return item.kind == "algorithm_card" and item.id.startswith(prefixes)
+    return item.kind == "algorithm_card" and item.id.startswith(prefixes) and not _is_history_card(item)
+
+
+def _matches_problem_history(item: CorpusItem, problem: str) -> bool:
+    if not _is_history_card(item):
+        return False
+    if item.id.startswith(f"history_{problem}_"):
+        return True
+    family = problem.split("_", 1)[0]
+    return item.id.startswith(f"history_{family}_") and family in item.tags and "construct" in item.tags
+
+
+_NON_STRATEGY_HISTORY_TAGS = {
+    "bp",
+    "obp",
+    "tsp",
+    "cvrp",
+    "construct",
+    "online",
+    "evolved",
+    "history",
+}
+
+
+def history_card_gate_reasons(item: CorpusItem) -> list[str]:
+    """Return hard-block reasons for a synthesized history card.
+
+    History cards are derived from concrete best code, so they can easily
+    collapse several unrelated signals into one prompt card. For mixed RAG we
+    only allow cards that still look like a small operator, not a compressed
+    full program.
+    """
+    if not _is_history_card(item):
+        return []
+    strategy_tags = [
+        tag for tag in item.tags
+        if tag.lower() not in _NON_STRATEGY_HISTORY_TAGS
+    ]
+    reasons: list[str] = []
+    if len(strategy_tags) > 4:
+        reasons.append(f"too_many_strategy_signals:{len(strategy_tags)}")
+    do_section = (item.content or "").split("Fallback:", 1)[0]
+    do_steps = do_section.count(";") + 1 if "Do:" in do_section else 0
+    if do_steps > 5:
+        reasons.append(f"too_many_do_steps:{do_steps}")
+    return reasons
+
+
+def history_card_gate_warnings(item: CorpusItem) -> list[str]:
+    if not _is_history_card(item):
+        return []
+    text = f"{item.summary}\n{item.content}".lower()
+    warnings: list[str] = []
+    if "score" in text and not any(token in text for token in ("maximize", "minimize", "higher is better", "lower is better")):
+        warnings.append("score_direction_not_explicit")
+    return warnings
 
 
 def build_official_rag_context(
@@ -92,7 +147,7 @@ def build_official_rag_context(
 ) -> tuple[str, dict[str, Any]]:
     if problem not in OFFICIAL_RAG_PROBLEM_CONFIG:
         raise ValueError(f"Unsupported official RAG problem: {problem}")
-    if mode not in {"literature_rag", "history_rag"}:
+    if mode not in {"literature_rag", "history_rag", "mixed_rag"}:
         raise ValueError(f"Unsupported official RAG mode: {mode}")
 
     config = OFFICIAL_RAG_PROBLEM_CONFIG[problem]
@@ -100,16 +155,38 @@ def build_official_rag_context(
     api_ids = set(config["api_ids"])
     global_items = [item for item in corpus if item.kind == "api_constraint" and item.id in api_ids]
     query_text = query or str(config["query"])
+    literature_pool = [item for item in corpus if _matches_problem_strategy(item, problem)]
+    raw_history_pool = [item for item in corpus if _matches_problem_history(item, problem)]
+    blocked_history_items = [
+        {"id": item.id, "kind": item.kind, "title": item.title, "reasons": history_card_gate_reasons(item)}
+        for item in raw_history_pool
+        if history_card_gate_reasons(item)
+    ]
+    history_gate_warnings = [
+        {"id": item.id, "kind": item.kind, "title": item.title, "warnings": history_card_gate_warnings(item)}
+        for item in raw_history_pool
+        if history_card_gate_warnings(item)
+    ]
+    blocked_history_ids = {item["id"] for item in blocked_history_items}
+    history_pool = [item for item in raw_history_pool if item.id not in blocked_history_ids]
     if mode == "literature_rag":
-        strategy_pool = [item for item in corpus if _matches_problem_strategy(item, problem)]
+        strategy_pool = literature_pool
+    elif mode == "history_rag":
+        strategy_pool = history_pool
     else:
-        strategy_pool = [
-            item
-            for item in corpus
-            if item.kind == "code_example" and any(tag in {"obp", "bp_online", "binpacking"} for tag in item.tags)
-        ]
+        strategy_pool = []
+        seen_ids: set[str] = set()
+        for item in literature_pool + history_pool:
+            if item.id in seen_ids:
+                continue
+            strategy_pool.append(item)
+            seen_ids.add(item.id)
     if selected_card_ids:
         id_set = set(selected_card_ids)
+        blocked_selected = sorted(id_set & blocked_history_ids)
+        if blocked_selected:
+            reason_map = {item["id"]: item["reasons"] for item in blocked_history_items}
+            raise ValueError(f"Selected history cards failed gate: {[(item_id, reason_map[item_id]) for item_id in blocked_selected]}")
         strategy_pool = [item for item in strategy_pool if item.id in id_set]
         if not strategy_pool:
             raise ValueError(f"No matching cards for IDs: {selected_card_ids}")
@@ -123,6 +200,10 @@ def build_official_rag_context(
         "rag_max_chars": max_chars,
         "rag_corpus_size": len(corpus),
         "rag_strategy_pool_size": len(strategy_pool),
+        "rag_history_pool_size_before_gate": len(raw_history_pool),
+        "rag_history_pool_size_after_gate": len(history_pool),
+        "rag_blocked_history_items": blocked_history_items,
+        "rag_history_gate_warnings": history_gate_warnings,
         "rag_global_items": [{"id": item.id, "kind": item.kind, "title": item.title} for item in global_items],
         "rag_selected_items": [
             {"id": item.id, "kind": item.kind, "title": item.title} for item in retrieved
@@ -392,7 +473,7 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
     runner_path.write_text(_runner_script(), encoding="utf-8")
     context_file = args.context_file
     rag_trace: dict[str, Any] | None = None
-    if args.arm in {"literature_rag", "history_rag"}:
+    if args.arm in {"literature_rag", "history_rag", "mixed_rag"}:
         selected_ids = [sid.strip() for sid in args.selected_card_ids.split(",") if sid.strip()] if args.selected_card_ids else None
         context, rag_trace = build_official_rag_context(
             Path.cwd().resolve(),
@@ -451,7 +532,7 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
         "--problem",
         args.problem,
         "--arm",
-        "context_file" if args.arm in {"literature_rag", "history_rag"} else args.arm,
+        "context_file" if args.arm in {"literature_rag", "history_rag", "mixed_rag"} else args.arm,
         "--output-dir",
         str(run_dir),
         "--pop-size",
@@ -572,7 +653,7 @@ def main() -> None:
     parser.add_argument("--problem", choices=sorted(PROBLEMS), default="bp_online")
     parser.add_argument(
         "--arm",
-        choices=["pure_eoh", "api_only", "literature_rag", "history_rag", "context_file"],
+        choices=["pure_eoh", "api_only", "literature_rag", "history_rag", "mixed_rag", "context_file"],
         default="pure_eoh",
     )
     parser.add_argument("--context-file", default="")

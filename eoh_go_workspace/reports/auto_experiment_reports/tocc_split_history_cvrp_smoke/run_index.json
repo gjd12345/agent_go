@@ -1,0 +1,50 @@
+[
+  {
+    "tag": "run_cvrp_construct_literature_regret_far_g0_r1",
+    "problem": "cvrp_construct",
+    "arm": "literature_regret_far",
+    "generation": 0,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 132.6,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_split_history_cvrp_smoke/run_cvrp_construct_literature_regret_far_g0_r1",
+    "best_objective": 12.72795,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_split_far_seed_regret_g0_r1",
+    "problem": "cvrp_construct",
+    "arm": "split_far_seed_regret",
+    "generation": 0,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 112.3,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_split_history_cvrp_smoke/run_cvrp_construct_split_far_seed_regret_g0_r1",
+    "best_objective": 13.00458,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_split_capacity_filter_regret_g0_r1",
+    "problem": "cvrp_construct",
+    "arm": "split_capacity_filter_regret",
+    "generation": 0,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 116.6,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_split_history_cvrp_smoke/run_cvrp_construct_split_capacity_filter_regret_g0_r1",
+    "best_objective": 13.23646,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_split_remaining_alpha_far_g0_r1",
+    "problem": "cvrp_construct",
+    "arm": "split_remaining_alpha_far",
+    "generation": 0,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 73.9,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_split_history_cvrp_smoke/run_cvrp_construct_split_remaining_alpha_far_g0_r1",
+    "best_objective": 12.96129,
+    "valid_candidates": 4
+  }
+]

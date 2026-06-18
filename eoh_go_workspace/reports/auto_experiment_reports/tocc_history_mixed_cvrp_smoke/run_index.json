@@ -1,0 +1,26 @@
+[
+  {
+    "tag": "run_cvrp_construct_literature_regret_far_g0_r1",
+    "problem": "cvrp_construct",
+    "arm": "literature_regret_far",
+    "generation": 0,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 1046.8,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_history_mixed_cvrp_smoke/run_cvrp_construct_literature_regret_far_g0_r1",
+    "best_objective": 13.09441,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_mixed_history_far_regret_g0_r1",
+    "problem": "cvrp_construct",
+    "arm": "mixed_history_far_regret",
+    "generation": 0,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 493.7,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/tocc_history_mixed_cvrp_smoke/run_cvrp_construct_mixed_history_far_regret_g0_r1",
+    "best_objective": 14.20996,
+    "valid_candidates": 4
+  }
+]

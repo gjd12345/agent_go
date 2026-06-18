@@ -108,6 +108,23 @@ class TestSynthesizeCard:
         assert "regret" in card.tags
         assert "normalize" in card.tags
 
+    def test_synthesis_limits_history_card_to_small_operator(self):
+        code = """
+        regret = second_best - best
+        farthest = argmax(dist_from_depot)
+        dest = distance_matrix[u, destination]
+        alpha = remaining_ratio
+        lookahead = future_cost
+        normalize = (x - min) / range
+        capacity_check = demand <= rest_capacity
+        """
+        card = synthesize_card("cvrp_construct", code)
+        strategy_tags = [tag for tag in card.tags if tag not in {"cvrp", "construct", "evolved"}]
+        assert len(strategy_tags) <= 3
+        assert "alpha" in card.content
+        assert "α" not in card.content
+        assert card.content.count(";") <= 4
+
     def test_cvrp_synthesis(self):
         code = "farthest = argmax(dist_depot); capacity_check = demand <= rest"
         card = synthesize_card("cvrp_construct", code)
@@ -197,6 +214,18 @@ class TestHistoryCardPreservation:
             content="Skill: tsp_nearest_neighbor\nWhen: constructing.\nDo: argmin.\nFallback: none.\nSafety: valid.",
         )
         assert _is_history_card(curated) is False
+
+        external_literature = CorpusItem(
+            id="tsp_external_reference",
+            kind="algorithm_card",
+            title="External TSP reference",
+            tags=["tsp", "construct", "reference"],
+            source_path="papers/tsp_external.md",
+            summary="External reference card should not be treated as history.",
+            constraints=[],
+            content="Skill: external\nWhen: constructing.\nDo: use reference.\nFallback: nearest.\nSafety: valid.",
+        )
+        assert _is_history_card(external_literature) is False
 
         # Write both to corpus
         save_corpus([curated, card], tmp_path / "algorithm_cards.jsonl")

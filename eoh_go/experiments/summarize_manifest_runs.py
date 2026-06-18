@@ -37,16 +37,42 @@ def _load_summary(path: Path) -> dict[str, Any] | None:
     return json.loads(summary_path.read_text(encoding="utf-8"))
 
 
-def _best_code_snippet(code: str | None, max_lines: int = 8) -> str:
+def _best_code_snippet(code: str | None, max_lines: int = 12) -> str:
     if not code:
         return "（无代码）"
     lines = code.strip().split("\n")
-    # Pick the middle 8 lines (skip import statements)
-    body = [l for l in lines if not l.strip().startswith(("import ", "from ", "def ", '"""', "#"))]
+    body: list[str] = []
+    in_docstring = False
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith(("import ", "from ", "#")):
+            continue
+        if '"""' in stripped or "'''" in stripped:
+            marker = '"""' if '"""' in stripped else "'''"
+            if stripped.count(marker) % 2 == 1:
+                in_docstring = not in_docstring
+            continue
+        if in_docstring:
+            continue
+        if stripped in {"Args:", "Returns:"} or stripped.endswith(": ID of the current node"):
+            continue
+        body.append(line.rstrip())
     if len(body) < 3:
-        body = lines[-max_lines:]
+        body = [line.rstrip() for line in lines if line.strip()][:max_lines]
     snippet = "\n".join(body[:max_lines])
     return f"```python\n{snippet}\n```"
+
+
+def _card_source_from_ids(card_ids: list[str]) -> str:
+    if not card_ids:
+        return "none"
+    has_history = any(card_id.startswith("history_") for card_id in card_ids)
+    has_non_history = any(not card_id.startswith("history_") for card_id in card_ids)
+    if has_history and has_non_history:
+        return "mixed"
+    if has_history:
+        return "history"
+    return "literature"
 
 
 def _compute_success_funnel(
@@ -77,6 +103,7 @@ def _compute_success_funnel(
 
     # Layer 2: Linkage success — cards actually injected match requested
     linkage_success = None  # unknown by default
+    selected = []
     if rag_trace and isinstance(rag_trace, dict):
         selected = [item.get("id", "") for item in rag_trace.get("rag_selected_items", [])]
         if selected:
@@ -107,6 +134,9 @@ def _compute_success_funnel(
         "population_size": pop,
         "best_objective": best,
         "pure_baseline": pure_baseline,
+        "card_source": _card_source_from_ids(selected),
+        "selected_card_ids": selected,
+        "history_card_ids": [card_id for card_id in selected if card_id.startswith("history_")],
     }
 
 
@@ -182,6 +212,10 @@ def summarize(input_dir: str, no_card_memory: bool = False) -> dict[str, Any]:
             funnel["problem"] = problem
             funnel["arm"] = run["arm"]
             funnel["gen"] = run["generation"]
+            best_code_record_id = f"{problem}:{run['arm']}:g{run['generation']}:r{run.get('repeat', '?')}"
+            funnel["best_code_record_id"] = best_code_record_id
+            funnel["synthesized_card_id"] = None
+            funnel["synthesized_card_written"] = False
             all_funnels.append(funnel)
 
             best_val = run_sum.get("best_objective")
@@ -199,6 +233,10 @@ def summarize(input_dir: str, no_card_memory: bool = False) -> dict[str, Any]:
                 "best": best_val,
                 "valid": f"{run_sum.get('valid_candidates',0)}/{run_sum.get('population_size',0)}",
                 "cards": cards,
+                "card_source": funnel["card_source"],
+                "history_card_ids": funnel["history_card_ids"],
+                "best_code_record_id": best_code_record_id,
+                "synthesized_card_id": None,
                 "norm_score": norm_score,
                 "delta_pct": delta_pct,
                 "code_snippet": _best_code_snippet(run_sum.get("best_code")),
@@ -237,6 +275,9 @@ def summarize(input_dir: str, no_card_memory: bool = False) -> dict[str, Any]:
                             project_root = _find_project_root(run.get("output_dir", str(root)))
                             corpus_dir = default_corpus_dir(project_root)
                             written = append_card_to_corpus(card, corpus_dir)
+                            funnel["synthesized_card_id"] = card.id
+                            funnel["synthesized_card_written"] = written
+                            rows[-1]["synthesized_card_id"] = card.id
                             if written:
                                 print(f"  [card-synthesis] New card: {card.id}")
                     except Exception as exc:
@@ -266,8 +307,8 @@ def _write_markdown(summary: dict[str, Any], output_path: str) -> None:
         "",
         "## 汇总表",
         "",
-        "| problem | arm | gen | pop | best | norm | Δ% | valid | cards | status |",
-        "|---|---|---:|---:|---:|---:|---:|---|---|---|",
+        "| problem | arm | gen | pop | best | norm | Δ% | valid | card_source | cards | status |",
+        "|---|---|---:|---:|---:|---:|---:|---|---|---|---|",
     ]
 
     for problem, rows in sorted(summary.get("problems", {}).items()):
@@ -283,7 +324,7 @@ def _write_markdown(summary: dict[str, Any], output_path: str) -> None:
             lines.append(
                 f"| {problem} | {row['arm']} | {row.get('gen','')} | {row.get('pop','')} | "
                 f"{row.get('best','') or '-'} | {norm_str} | {delta_str} | "
-                f"{row.get('valid','')} | {cards_str} | {status} |"
+                f"{row.get('valid','')} | {row.get('card_source','none')} | {cards_str} | {status} |"
             )
 
     lines.extend([
@@ -296,10 +337,33 @@ def _write_markdown(summary: dict[str, Any], output_path: str) -> None:
         if code_rows:
             lines.append(f"### {problem}")
             lines.append("")
-            for row in code_rows[:3]:  # top 3
+            best_by_arm: dict[str, dict[str, Any]] = {}
+            for row in code_rows:
+                arm = row["arm"]
+                current = best_by_arm.get(arm)
+                if current is None or (row.get("best") is not None and row.get("best") < current.get("best", float("inf"))):
+                    best_by_arm[arm] = row
+            for row in sorted(best_by_arm.values(), key=lambda r: (r.get("best") is None, r.get("best", float("inf")))):
                 lines.append(f"**{row['arm']}** (gen={row.get('gen','')}, best={row.get('best','')}):")
                 lines.append(row["code_snippet"])
                 lines.append("")
+
+    lines.extend([
+        "## Card-memory / 选卡记录",
+        "",
+        "| problem | arm | gen | card_source | selected_card_ids | history_card_ids | best_code_record_id | synthesized_card_id |",
+        "|---|---|---:|---|---|---|---|---|",
+    ])
+    for problem, rows in sorted(summary.get("problems", {}).items()):
+        for row in rows:
+            selected = ", ".join(row.get("cards", [])) or "-"
+            history_ids = ", ".join(row.get("history_card_ids", [])) or "-"
+            synthesized = row.get("synthesized_card_id") or "-"
+            lines.append(
+                f"| {problem} | {row['arm']} | {row.get('gen','')} | {row.get('card_source','none')} | "
+                f"{selected} | {history_ids} | {row.get('best_code_record_id','-')} | {synthesized} |"
+            )
+    lines.append("")
 
     lines.extend([
         "## 下一步建议",
