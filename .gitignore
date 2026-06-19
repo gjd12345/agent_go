@@ -26,9 +26,14 @@ build_slides.js
 
 # Raw experiment outputs (never tracked)
 eoh_go_workspace/local_runs/
+eoh_go_workspace/local_notes/
 eoh_go_workspace/reports/official_eoh_runs/
 eoh_go_workspace/reports/auto_experiment_reports/**/run_*/
+archived_experiments/raw_runs_*/
+archived_experiments/ignored_artifacts_*/
 outputs/
+**/*.pptx.inspect.ndjson
+**/~$*.pptx
 
 # macOS
 .DS_Store

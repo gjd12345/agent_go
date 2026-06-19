@@ -1,36 +1,34 @@
 # agent_go
 
-Minimal EOH-Go workspace for evolving Go insertion heuristics in a dynamic dispatch benchmark.
+Research workspace for LLM-based heuristic evolution and TOCC (Trace-Conditioned Operator-Card Controller).
 
-This repository contains the smallest publishable subset of the local experiment:
+The current codebase is organized around two layers:
 
 - Go dynamic dispatch solver: `main.go`, `routing.go`, `go.mod`, `go.sum`
-- EOH-Go experiment wrapper: `eoh_go/`
+- Python experiment/control layer: `eoh_go/`
 - Patched Agent_EOH core and Go `InsertShips` example: `Agent_EOH/eoh/src/eoh/`
 - Dynamic Solomon-style source data for RC101-RC105: `solomon_benchmark_d25/`, `solomon_benchmark_d50/`, `solomon_benchmark_d75/`
-- Cleaned experiment tables and repeat validation: `eoh_go_workspace/reports/tables/`
 - Candidate Go heuristics used during the EOH-Go experiments: `eoh_go_workspace/candidate_sources/`
-- Paper-style figures and comparison charts: `eoh_go_workspace/reports/figures/`
-- Full Chinese LaTeX draft and compiled PDF: `eoh_go_workspace/reports/paper_draft_full_20260426/`
+- Current TOCC reports and decks: `eoh_go_workspace/reports/auto_experiment_reports/`
+- Paper notes and related-work drafts: `eoh_go_workspace/reports/paper_notes/`
+- Historical reports and figures: `archived_experiments/reports_20260619/`
 
 ## Main Artifacts
 
-- Full Chinese draft PDF: `eoh_go_workspace/reports/paper_draft_full_20260426/build/guarded_eoh_go_full_draft_cn.pdf`
-- Full Chinese draft source: `eoh_go_workspace/reports/paper_draft_full_20260426/guarded_eoh_go_full_draft_cn.tex`
-- Paper-style comparison tables: `eoh_go_workspace/reports/figures/paper_style_tables_20260426/`
-- Valid comparison charts: `eoh_go_workspace/reports/figures/valid_comparison_charts_20260426/`
-- Cleaned RC101-RC105 summary: `eoh_go_workspace/reports/tables/eoh_grid_cleaned_summary_rc101_105/clean_summary.md`
-- Repeat validation summary: `eoh_go_workspace/reports/tables/eoh_selected_repeats_summary_20260426/selected_repeat_summary.md`
+- Current TOCC progress report: `eoh_go_workspace/reports/auto_experiment_reports/tocc_current_progress_20260619.md`
+- Current TOCC progress deck: `eoh_go_workspace/reports/auto_experiment_reports/tocc_current_progress_20260619.pptx`
+- Best evolved code records: `eoh_go_workspace/reports/auto_experiment_reports/tocc_best_code_records.md`
+- Current auto-experiment report index: `eoh_go_workspace/reports/auto_experiment_reports/README.md`
+- Reports layout guide: `eoh_go_workspace/reports/README.md`
+- Historical Guarded EOH-Go tables, figures, and paper drafts: `archived_experiments/reports_20260619/`
 - Phase summary: `eoh_go/eoh_go_phase0_summary.md`
 
 ## Quick Checks
 
 ```powershell
 go build -o mainbin_sa.exe .
-python -m pytest tests/test_candidate_guard.py -q
-python -m eoh_go.experiments.build_paper_style_table_image
-python -m eoh_go.experiments.build_paper_style_table_image --repeat-only
-python -m eoh_go.experiments.build_full_paper_draft
+python -m pytest tests/ -q
+python -m unittest discover -s tests -q
 ```
 
 To run a small EOH grid, configure the DeepSeek/OpenAI-compatible API key in your environment first, then use:
@@ -43,7 +41,7 @@ python -m eoh_go.experiments.eoh_arrival_grid `
   --arrival-scale 1.0 --arrival-scale 0.9 --arrival-scale 0.8 --arrival-scale 0.7 --arrival-scale 0.6 `
   --use-density-source-dirs `
   --llm-model deepseek-v4-flash `
-  --output-dir eoh_go_workspace/reports/tables/eoh_arrival_grid_flash_dynamic_full `
+  --output-dir eoh_go_workspace/reports/auto_experiment_reports/manual_eoh_arrival_grid `
   --generations 1 `
   --pop-size 4 `
   --eva-timeout 120 `

@@ -1,8 +1,8 @@
 # agent_go 中文说明
 
-本仓库是 EOH-Go 实验的最小可复现实现，用于研究大语言模型驱动的 Evolution of Heuristics (EOH) 是否能够自动进化 Go 实时动态调度程序中的插入启发式代码。
+本仓库是 LLM 启发式进化与 TOCC（Trace-Conditioned Operator-Card Controller）实验工作区，用于研究如何用运行 trace 选择 operator card，从而引导 EOH 在组合优化问题上生成更有效的启发式代码。
 
-项目的核心对象是 Go 程序里的 `InsertShips` 函数。实验从已有 SA 插入基线出发，让 LLM 生成和变异 Go 代码，然后经过 Go 编译、动态源仿真、候选过滤和 filtered-best 选择，得到可以和 SA 进行对比的结果。
+早期主线是 Go 程序里的 `InsertShips` 函数。当前主线已经扩展为 TOCC 自动化实验闭环：manifest 生成实验、RAG/operator card 注入、EOH 执行、trace 汇总、best code 记录和下一轮 card 选择。
 
 ## 当前结论
 
@@ -19,18 +19,18 @@
 - 必要的 Agent_EOH 核心与 Go `InsertShips` 示例：`Agent_EOH/eoh/src/eoh/`
 - 动态 Solomon-style 数据源：`solomon_benchmark_d25/`、`solomon_benchmark_d50/`、`solomon_benchmark_d75/`
 - 候选 Go 启发式代码：`eoh_go_workspace/candidate_sources/`
-- 清洗后的实验表格与 repeat validation：`eoh_go_workspace/reports/tables/`
-- 论文风格图表：`eoh_go_workspace/reports/figures/`
-- 中文 LaTeX 论文草稿与编译 PDF：`eoh_go_workspace/reports/paper_draft_full_20260426/`
+- 当前 TOCC 报告、PPT 和实验摘要：`eoh_go_workspace/reports/auto_experiment_reports/`
+- 论文阅读、related work 和方法笔记：`eoh_go_workspace/reports/paper_notes/`
+- 历史 Guarded EOH-Go 表格、图和论文草稿归档：`archived_experiments/reports_20260619/`
 
 ## 主要产物
 
-- 中文论文草稿 PDF：`eoh_go_workspace/reports/paper_draft_full_20260426/build/guarded_eoh_go_full_draft_cn.pdf`
-- 中文论文 LaTeX 源文件：`eoh_go_workspace/reports/paper_draft_full_20260426/guarded_eoh_go_full_draft_cn.tex`
-- 有效 SA-vs-EOH 对比图表：`eoh_go_workspace/reports/figures/valid_comparison_charts_20260426/`
-- 论文风格主表与 repeat 表：`eoh_go_workspace/reports/figures/paper_style_tables_20260426/`
-- 清洗后主结果：`eoh_go_workspace/reports/tables/eoh_grid_cleaned_summary_rc101_105/clean_summary.md`
-- repeat validation 结果：`eoh_go_workspace/reports/tables/eoh_selected_repeats_summary_20260426/selected_repeat_summary.md`
+- 当前 TOCC 进展报告：`eoh_go_workspace/reports/auto_experiment_reports/tocc_current_progress_20260619.md`
+- 当前 TOCC 进展 PPT：`eoh_go_workspace/reports/auto_experiment_reports/tocc_current_progress_20260619.pptx`
+- 最优进化代码与 verified score 记录：`eoh_go_workspace/reports/auto_experiment_reports/tocc_best_code_records.md`
+- 当前实验报告索引：`eoh_go_workspace/reports/auto_experiment_reports/README.md`
+- reports 目录说明：`eoh_go_workspace/reports/README.md`
+- 旧版 Guarded EOH-Go 表格、图表和论文草稿：`archived_experiments/reports_20260619/`
 - 阶段总结：`eoh_go/eoh_go_phase0_summary.md`
 
 ## 快速验证
@@ -39,17 +39,8 @@
 
 ```powershell
 go build -o mainbin_sa.exe .
-python -m pytest tests/test_candidate_guard.py -q
-python -m eoh_go.experiments.build_paper_style_table_image
-python -m eoh_go.experiments.build_paper_style_table_image --repeat-only
-python -m eoh_go.experiments.build_full_paper_draft
-```
-
-如果需要重新编译中文论文 PDF，可以使用 Tectonic：
-
-```powershell
-cd eoh_go_workspace/reports/paper_draft_full_20260426
-tectonic --outdir build guarded_eoh_go_full_draft_cn.tex
+python -m pytest tests/ -q
+python -m unittest discover -s tests -q
 ```
 
 ## 开发工作流
@@ -108,7 +99,7 @@ python -m eoh_go.experiments.eoh_arrival_grid `
   --arrival-scale 1.0 --arrival-scale 0.9 --arrival-scale 0.8 --arrival-scale 0.7 --arrival-scale 0.6 `
   --use-density-source-dirs `
   --llm-model deepseek-v4-flash `
-  --output-dir eoh_go_workspace/reports/tables/eoh_arrival_grid_flash_dynamic_full `
+  --output-dir eoh_go_workspace/reports/auto_experiment_reports/manual_eoh_arrival_grid `
   --generations 1 `
   --pop-size 4 `
   --eva-timeout 120 `
