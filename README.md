@@ -25,6 +25,14 @@ The current codebase is organized around two layers:
 
 ## Quick Checks
 
+After cloning, install the project Codex skills:
+
+```bash
+bash scripts/install_codex_skills.sh
+```
+
+This installs the project-local TOCC workflow, presentation, and pseudocode skills into `$CODEX_HOME/skills`. See `docs/codex_skills.md`.
+
 ```powershell
 go build -o mainbin_sa.exe .
 python -m pytest tests/ -q

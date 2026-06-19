@@ -35,6 +35,14 @@
 
 ## 快速验证
 
+clone 仓库后，先安装项目 Codex skills：
+
+```bash
+bash scripts/install_codex_skills.sh
+```
+
+这个脚本会把项目内的 TOCC 实验、PPT/画图、伪代码 skills 安装到 `$CODEX_HOME/skills`。说明见 `docs/codex_skills.md`。
+
 在仓库根目录运行：
 
 ```powershell
