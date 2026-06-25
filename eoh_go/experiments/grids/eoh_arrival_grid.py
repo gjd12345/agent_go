@@ -7,14 +7,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from ..benchmark import parse_numeric_cost, run_test
-from ..candidates import add_candidate, load_candidate
-from ..eoh_runner import EOHConfig, run_v0_eoh
-from ..eoh_runner.candidate_guard import best_raw_candidate, classify_candidate, select_best_candidate
-from ..evolution import _prepare_candidate_project
-from ..paths import EOHGoPaths
-from .arrival_scale_table import prepare_instance, resolve_source_path
-from .summarize_rag_ablation import summarize as summarize_rag_ablation
+from eoh_go.benchmark import parse_numeric_cost, run_test
+from eoh_go.candidates import add_candidate, load_candidate
+from eoh_go.eoh_runner import EOHConfig, run_v0_eoh
+from eoh_go.eoh_runner.candidate_guard import best_raw_candidate, classify_candidate, select_best_candidate
+from eoh_go.evolution import _prepare_candidate_project
+from eoh_go.paths import EOHGoPaths
+from eoh_go.experiments.reports.arrival_scale_table import prepare_instance, resolve_source_path
+from eoh_go.experiments.reports.summarize_rag_ablation import summarize as summarize_rag_ablation
 
 
 def _safe_float(value: Any) -> float | None:

@@ -7,25 +7,61 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from ..benchmark import parse_numeric_cost, run_test
-from .arrival_scale_table import prepare_instance, resolve_source_path
-from .efficiency_table import best_cost_name, best_res_name, fmt_num
+from eoh_go.benchmark import parse_numeric_cost, run_test
+from .efficiency_table import best_cost_name, best_res_name, fmt_num, parse_algorithms
 
 
-def _is_dynamic_instance(path: Path) -> bool:
-    data = json.loads(path.read_text(encoding="utf-8"))
-    return len(data.get("batch", [])) > 1
+def _density_pct(density: str) -> float:
+    text = density.lower().strip()
+    if text.startswith("d"):
+        return int(text[1:]) / 100.0
+    return float(text)
 
 
-def _resolve_path(root: Path, raw_path: str) -> str:
-    path = Path(raw_path)
-    if not path.is_absolute():
-        path = root / path
-    return str(path.resolve())
+def _t_label(value: float) -> str:
+    text = f"{value:.3f}".rstrip("0").rstrip(".")
+    return text.replace(".", "p")
+
+
+def prepare_instance(src_path: Path, dst_dir: Path, density: str, arrival_scale: float) -> Path:
+    data = json.loads(src_path.read_text(encoding="utf-8"))
+    pct = _density_pct(density)
+    changed = False
+    for batch in data.get("batch", []):
+        for key in ("ori", "des"):
+            arr = batch.get(key, [])
+            if arr:
+                keep = max(1, int(len(arr) * pct))
+                if keep < len(arr):
+                    batch[key] = arr[:keep]
+                    changed = True
+        if "timeReady" in batch and abs(arrival_scale - 1.0) > 1e-9:
+            batch["timeReady"] = max(0, int(round(float(batch.get("timeReady", 0)) * arrival_scale)))
+            changed = True
+
+    if not changed:
+        return src_path
+    dst_path = dst_dir / f"{src_path.stem}_{density}_ta{_t_label(arrival_scale)}.json"
+    dst_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    return dst_path
+
+
+def resolve_source_path(root: Path, source_dir: Path, problem: str, density: str, use_density_dirs: bool) -> Path:
+    if not use_density_dirs:
+        return source_dir / problem
+    suffix = density.lower().removeprefix("d")
+    candidates = [
+        root / f"solomon_benchmark_d{suffix}" / problem,
+        root / "solomon_benchmark" / problem,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return source_dir / problem
 
 
 def build_markdown_table(rows: list[dict[str, Any]], algorithms: list[str]) -> str:
-    header = ["Inst.", "d", "t", "Policy"]
+    header = ["Inst.", "d", "t"]
     for name in algorithms:
         header.extend([f"{name} Res.", f"{name} J"])
     lines = ["| " + " | ".join(header) + " |"]
@@ -33,7 +69,7 @@ def build_markdown_table(rows: list[dict[str, Any]], algorithms: list[str]) -> s
     for row in rows:
         best_j = best_cost_name(row, algorithms)
         best_r = best_res_name(row, algorithms)
-        cells = [row["problem"], row["density"], f"{row['arrival_scale']:.1f}", row["policy_kind"]]
+        cells = [row["problem"], row["density"], f"{row['arrival_scale']:.1f}"]
         for name in algorithms:
             res = fmt_num(row.get(name, {}).get("Res"), 3)
             raw_cost = row.get(name, {}).get("J")
@@ -47,20 +83,52 @@ def build_markdown_table(rows: list[dict[str, Any]], algorithms: list[str]) -> s
     return "\n".join(lines) + "\n"
 
 
+def build_compact_markdown(rows: list[dict[str, Any]], algorithms: list[str]) -> str:
+    lines = ["| Cell | " + " | ".join(algorithms) + " | Observation |"]
+    lines.append("| " + " | ".join(["---"] * (len(algorithms) + 2)) + " |")
+    for row in rows:
+        cells = [f"{row['problem'].replace('.json', '').upper()},{row['density']},t{row['arrival_scale']:.1f}"]
+        for name in algorithms:
+            item = row.get(name, {})
+            res = fmt_num(item.get("Res"), 3)
+            raw_cost = item.get("J")
+            cost = "-" if raw_cost is not None and raw_cost < 0 else fmt_num(raw_cost, 2)
+            cells.append(f"Res {res}, J {cost}")
+        obs = ""
+        if len(algorithms) >= 2:
+            a0, a1 = algorithms[0], algorithms[1]
+            j0 = row.get(a0, {}).get("J")
+            j1 = row.get(a1, {}).get("J")
+            r0 = row.get(a0, {}).get("Res")
+            r1 = row.get(a1, {}).get("Res")
+            if j0 is not None and j1 is not None and j0 >= 0 and j1 >= 0:
+                if abs(j1 - j0) < 1e-9:
+                    obs = f"{a1} matches {a0} quality"
+                elif j1 < j0:
+                    obs = f"{a1} improves quality"
+                else:
+                    obs = f"{a1} worsens quality"
+                if r0 is not None and r1 is not None:
+                    obs += " and is faster" if r1 < r0 else " but is slower"
+        cells.append(obs)
+        lines.append("| " + " | ".join(cells) + " |")
+    return "\n".join(lines) + "\n"
+
+
 def build_latex_table(rows: list[dict[str, Any]], algorithms: list[str]) -> str:
-    col_spec = "lccc" + "rr" * len(algorithms)
+    col_spec = "lcc" + "rr" * len(algorithms)
     lines = [
         r"\begin{table}[t]",
         r"\centering",
-        r"\caption{Experiment-Layer Policy Router under Arrival-Time Scaling}",
+        r"\caption{Sensitivity Comparison under Density and Arrival-Time Scaling}",
         rf"\begin{{tabular}}{{{col_spec}}}",
         r"\toprule",
     ]
-    group = ["Inst.", "$d$", "$t$", "Policy"]
+    group = ["Inst.", "$d$", "$t$"]
     for name in algorithms:
         group.extend([rf"\multicolumn{{2}}{{c}}{{{name}}}"])
     lines.append(" & ".join(group) + r" \\")
-    sub = ["", "", "", ""]
+    sub = ["", "", ""]
     for _ in algorithms:
         sub.extend(["Res.", "$J$"])
     lines.append(" & ".join(sub) + r" \\")
@@ -68,12 +136,7 @@ def build_latex_table(rows: list[dict[str, Any]], algorithms: list[str]) -> str:
     for row in rows:
         best_j = best_cost_name(row, algorithms)
         best_r = best_res_name(row, algorithms)
-        cells = [
-            row["problem"].replace(".json", "").upper(),
-            row["density"],
-            f"{row['arrival_scale']:.1f}",
-            row["policy_kind"],
-        ]
+        cells = [row["problem"].replace(".json", "").upper(), row["density"], f"{row['arrival_scale']:.1f}"]
         for name in algorithms:
             res = fmt_num(row.get(name, {}).get("Res"), 3)
             raw_cost = row.get(name, {}).get("J")
@@ -89,14 +152,14 @@ def build_latex_table(rows: list[dict[str, Any]], algorithms: list[str]) -> str:
 
 
 def write_csv(path: Path, rows: list[dict[str, Any]], algorithms: list[str]) -> None:
-    fields = ["problem", "density", "arrival_scale", "policy_kind", "policy_bin"]
+    fields = ["problem", "density", "arrival_scale"]
     for name in algorithms:
         fields.extend([f"{name}_Res", f"{name}_J", f"{name}_wall", f"{name}_return_code"])
     with path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
         for row in rows:
-            flat = {key: row[key] for key in ("problem", "density", "arrival_scale", "policy_kind", "policy_bin")}
+            flat = {key: row[key] for key in ("problem", "density", "arrival_scale")}
             for name in algorithms:
                 item = row.get(name, {})
                 flat[f"{name}_Res"] = item.get("Res")
@@ -108,41 +171,33 @@ def write_csv(path: Path, rows: list[dict[str, Any]], algorithms: list[str]) -> 
 
 def run_table(args: argparse.Namespace) -> dict[str, Any]:
     root = Path(args.root).resolve()
+    algorithms = parse_algorithms(root, args.algorithm)
+    problems = args.problem or ["rc101.json"]
+    densities = args.density or ["d25", "d50", "d75", "d100"]
+    scales = args.arrival_scale or [1.0, 0.9, 0.8, 0.7, 0.6]
     source_dir = (root / args.source_dir).resolve()
     base_out_dir = (root / args.output_dir).resolve()
     base_out_dir.mkdir(parents=True, exist_ok=True)
     out_dir = base_out_dir / f"run_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}"
     out_dir.mkdir(parents=True, exist_ok=False)
 
-    sa_bin = _resolve_path(root, args.sa_bin)
-    dynamic_policy_bin = _resolve_path(root, args.dynamic_policy_bin)
-    static_policy_bin = _resolve_path(root, args.static_policy_bin)
-    algorithms = ["SA", "PolicyRouter"]
-    problems = args.problem or ["rc101.json"]
-    densities = args.density or ["d25", "d50", "d75", "d100"]
-    scales = args.arrival_scale or [1.0, 0.9, 0.8, 0.7, 0.6]
-
     rows: list[dict[str, Any]] = []
     raw_results: list[dict[str, Any]] = []
     tmp_dir = out_dir / "generated_instances"
     tmp_dir.mkdir(parents=True, exist_ok=True)
     for problem in problems:
+        src = source_dir / problem
         for density in densities:
-            src = resolve_source_path(root, source_dir, problem, density, args.density_source_dirs)
-            dynamic = _is_dynamic_instance(src)
-            policy_bin = dynamic_policy_bin if dynamic else static_policy_bin
-            policy_kind = "dynamic-robust" if dynamic else "static-router"
-            density_arg = "d100" if args.density_source_dirs else density
             for scale in scales:
+                src = resolve_source_path(root, source_dir, problem, density, args.density_source_dirs)
+                density_arg = "d100" if args.density_source_dirs else density
                 data_path = prepare_instance(src, tmp_dir, density_arg, float(scale))
                 row: dict[str, Any] = {
                     "problem": problem,
                     "density": density,
                     "arrival_scale": float(scale),
-                    "policy_kind": policy_kind,
-                    "policy_bin": policy_bin,
                 }
-                for name, bin_path in (("SA", sa_bin), ("PolicyRouter", policy_bin)):
+                for name, bin_path in algorithms.items():
                     result = run_test(
                         bin_path,
                         str(data_path),
@@ -164,17 +219,17 @@ def run_table(args: argparse.Namespace) -> dict[str, Any]:
                             "algorithm": name,
                             "bin_path": bin_path,
                             "data_path": str(data_path),
-                            "policy_kind": policy_kind,
                             **item,
                             "stdout": result.get("stdout"),
                             "stderr": result.get("stderr"),
                         }
                     )
                 rows.append(row)
-                (out_dir / "policy_arrival_scale_partial.json").write_text(
+                (out_dir / "arrival_scale_table_partial.json").write_text(
                     json.dumps(
                         {
                             "output_dir": str(out_dir),
+                            "algorithms": algorithms,
                             "problems": problems,
                             "densities": densities,
                             "arrival_scales": scales,
@@ -189,48 +244,49 @@ def run_table(args: argparse.Namespace) -> dict[str, Any]:
 
     payload = {
         "output_dir": str(out_dir),
+        "algorithms": algorithms,
         "problems": problems,
         "densities": densities,
         "arrival_scales": scales,
         "rows": rows,
         "raw_results": raw_results,
-        "sa_bin": sa_bin,
-        "dynamic_policy_bin": dynamic_policy_bin,
-        "static_policy_bin": static_policy_bin,
     }
-    (out_dir / "policy_arrival_scale_results.json").write_text(
+    (out_dir / "arrival_scale_table_results.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
-    (out_dir / "policy_arrival_scale_table.md").write_text(
-        build_markdown_table(rows, algorithms),
+    algorithms_list = list(algorithms)
+    (out_dir / "arrival_scale_table.md").write_text(
+        build_markdown_table(rows, algorithms_list),
         encoding="utf-8",
     )
-    (out_dir / "policy_arrival_scale_table.tex").write_text(
-        build_latex_table(rows, algorithms),
+    (out_dir / "arrival_scale_compact.md").write_text(
+        build_compact_markdown(rows, algorithms_list),
         encoding="utf-8",
     )
-    write_csv(out_dir / "policy_arrival_scale_table.csv", rows, algorithms)
+    (out_dir / "arrival_scale_table.tex").write_text(
+        build_latex_table(rows, algorithms_list),
+        encoding="utf-8",
+    )
+    write_csv(out_dir / "arrival_scale_table.csv", rows, algorithms_list)
     return payload
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run an experiment-layer policy router under arrival-time scaling.")
+    parser = argparse.ArgumentParser(description="Generate Res/J tables under arrival-time scaling.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--source-dir", default="solomon_benchmark")
-    parser.add_argument("--density-source-dirs", action="store_true")
-    parser.add_argument("--output-dir", default="eoh_go_workspace/reports/tables/policy_arrival_scale")
+    parser.add_argument("--density-source-dirs", action="store_true", help="Read solomon_benchmark_d25/d50/d75 by density when available.")
+    parser.add_argument("--output-dir", default="eoh_go_workspace/reports/tables/arrival_scale")
     parser.add_argument("--problem", action="append")
     parser.add_argument("--density", action="append")
     parser.add_argument("--arrival-scale", action="append", type=float)
-    parser.add_argument("--sa-bin", default="mainbin_sa.exe")
-    parser.add_argument("--dynamic-policy-bin", default="eoh_go_workspace/generated/bins/eoh_robust_002_sa_exact.exe")
-    parser.add_argument("--static-policy-bin", default="eoh_go_workspace/generated/bins/eoh_router_004_density_window_switch.exe")
+    parser.add_argument("--algorithm", action="append", help="Algorithm as NAME=path/to/bin.exe")
     parser.add_argument("--sim-time-multi", type=int, default=1)
     parser.add_argument("--timeout", type=int, default=180)
     args = parser.parse_args()
     payload = run_table(args)
-    print(build_markdown_table(payload["rows"], ["SA", "PolicyRouter"]))
+    print(build_markdown_table(payload["rows"], list(payload["algorithms"])))
     print(f"Wrote table files to {payload['output_dir']}")
 
 

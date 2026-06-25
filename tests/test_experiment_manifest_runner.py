@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from eoh_go.experiments.run_experiment_manifest import _build_cmd, _validate_manifest
+from eoh_go.experiments.manifest_runner import _build_cmd, _validate_manifest
 
 
 class ExperimentManifestRunnerTests(unittest.TestCase):
@@ -56,7 +56,7 @@ class ExperimentManifestRunnerTests(unittest.TestCase):
                 [
                     sys.executable,
                     "-m",
-                    "eoh_go.experiments.run_experiment_manifest",
+                    "eoh_go.experiments.manifest_runner",
                     "--manifest",
                     str(manifest_path),
                     "--output-dir",
@@ -81,7 +81,7 @@ class ExperimentManifestRunnerTests(unittest.TestCase):
                 [
                     sys.executable,
                     "-m",
-                    "eoh_go.experiments.run_experiment_manifest",
+                    "eoh_go.experiments.manifest_runner",
                     "--manifest",
                     str(manifest_path),
                     "--output-dir",

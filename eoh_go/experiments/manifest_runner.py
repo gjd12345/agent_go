@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -18,6 +19,9 @@ from typing import Any
 
 # Reuse existing EOH runner CLI directly
 RUNNER_MODULE = "eoh_go.experiments.official_eoh_run"
+
+_DEFAULT_PYTHON = os.environ.get("EOH_OFFICIAL_PYTHON", "")
+_DEFAULT_ROOT = os.environ.get("EOH_OFFICIAL_ROOT", "")
 VALID_ARMS = {"pure_eoh", "api_only", "literature_rag", "history_rag", "mixed_rag", "context_file"}
 
 
@@ -69,7 +73,7 @@ def _build_cmd(
     output_dir: str,
 ) -> list[str]:
     cmd = [
-        manifest.get("python_exe", "/private/tmp/eoh_official_venv/bin/python"),
+        manifest.get("python_exe") or _DEFAULT_PYTHON or sys.executable,
         "-m",
         RUNNER_MODULE,
         "--problem", problem,
@@ -82,8 +86,8 @@ def _build_cmd(
         "--llm-timeout-s", "180",
         "--run-timeout-s", str(manifest.get("run_timeout_s", 1800)),
         "--output-dir", output_dir,
-        "--official-root", manifest.get("official_root", "/private/tmp/EoH-main"),
-        "--python", manifest.get("python_exe", "/private/tmp/eoh_official_venv/bin/python"),
+        "--official-root", manifest.get("official_root") or _DEFAULT_ROOT,
+        "--python", manifest.get("python_exe") or _DEFAULT_PYTHON or sys.executable,
     ]
     rag = manifest.get("rag", {})
     if arm["runner_arm"] in ("literature_rag", "history_rag", "mixed_rag"):

@@ -17,8 +17,8 @@ from eoh_go.rag.retriever import retrieve, score_corpus
 from eoh_go.rag.schemas import CorpusItem
 
 
-DEFAULT_OFFICIAL_ROOT = "/private/tmp/EoH-main"
-DEFAULT_OFFICIAL_PYTHON = "/private/tmp/eoh_official_venv/bin/python"
+DEFAULT_OFFICIAL_ROOT = os.environ.get("EOH_OFFICIAL_ROOT", "")
+DEFAULT_OFFICIAL_PYTHON = os.environ.get("EOH_OFFICIAL_PYTHON", "")
 
 
 OFFICIAL_RAG_PROBLEM_CONFIG = {
@@ -647,8 +647,8 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--official-root", default=os.environ.get("EOH_OFFICIAL_ROOT", DEFAULT_OFFICIAL_ROOT))
-    parser.add_argument("--python", default=os.environ.get("EOH_OFFICIAL_PYTHON", DEFAULT_OFFICIAL_PYTHON))
+    parser.add_argument("--official-root", default=DEFAULT_OFFICIAL_ROOT)
+    parser.add_argument("--python", default=DEFAULT_OFFICIAL_PYTHON)
     parser.add_argument("--output-dir", default="eoh_go_workspace/reports/official_eoh_runs")
     parser.add_argument("--problem", choices=sorted(PROBLEMS), default="bp_online")
     parser.add_argument(

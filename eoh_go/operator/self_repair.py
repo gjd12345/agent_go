@@ -44,51 +44,26 @@ Available types and methods:
 """
 
 
-def _call_llm(prompt: str, api_key: str = "", api_endpoint: str = "api.deepseek.com",
-              model: str = "deepseek-v4-flash", timeout: int = 60) -> str | None:
+def _call_llm(prompt: str, api_key: str = "", api_endpoint: str = "",
+              model: str = "", timeout: int = 60) -> str | None:
     """Call LLM API and return response text."""
-    import http.client
+    from eoh_go.llm.client import chat_completion
 
-    if not api_key:
-        api_key = os.environ.get("DEEPSEEK_API_KEY", "")
-    if not api_endpoint:
-        api_endpoint = os.environ.get("DEEPSEEK_API_ENDPOINT", "api.deepseek.com")
-    if not model:
-        model = os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-flash")
-
-    if not api_key:
+    try:
+        return chat_completion(
+            messages=[
+                {"role": "system", "content": REPAIR_SYSTEM_PROMPT},
+                {"role": "user", "content": prompt},
+            ],
+            api_key=api_key,
+            endpoint=api_endpoint,
+            model=model or "deepseek-v4-flash",
+            temperature=0.2,
+            timeout_s=timeout,
+            max_retries=3,
+        )
+    except RuntimeError:
         return None
-
-    endpoint = api_endpoint.strip().rstrip("/")
-    endpoint = re.sub(r"^https?://", "", endpoint)
-
-    payload = json.dumps({
-        "model": model,
-        "messages": [
-            {"role": "system", "content": REPAIR_SYSTEM_PROMPT},
-            {"role": "user", "content": prompt},
-        ],
-        "temperature": 0.2,
-    })
-
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
-
-    for attempt in range(3):
-        try:
-            conn = http.client.HTTPSConnection(endpoint, timeout=timeout)
-            conn.request("POST", "/v1/chat/completions", payload, headers)
-            res = conn.getresponse()
-            data = json.loads(res.read())
-            return data["choices"][0]["message"]["content"]
-        except Exception:
-            if attempt == 2:
-                return None
-            continue
-
-    return None
 
 
 def _extract_code_from_response(response: str) -> str | None:

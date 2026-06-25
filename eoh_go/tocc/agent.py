@@ -8,11 +8,10 @@ from __future__ import annotations
 
 import json
 import os
-import urllib.request
 from pathlib import Path
 from typing import Any
 
-from eoh_go.experiments.operator_card_controller import (
+from eoh_go.tocc.controller import (
     BASELINE_OVERLAP_CARDS,
     TARGETED_CANDIDATE_CARDS,
     CARD_QUERIES,
@@ -151,6 +150,8 @@ def propose(
 
     Returns: {"proposal": {...}, "gatekeeper": {...}, "error": None}
     """
+    from eoh_go.llm.client import chat_completion
+
     model = model or os.environ.get("DEEPSEEK_MODEL", "JoyAI-LLM-Pro")
     api_key = api_key or os.environ.get("DEEPSEEK_API_KEY", "")
     endpoint = endpoint or os.environ.get("DEEPSEEK_API_ENDPOINT", "")
@@ -166,47 +167,29 @@ def propose(
         {"role": "user", "content": user_prompt},
     ]
 
-    payload = json.dumps({
-        "model": model,
-        "messages": messages,
-        "temperature": temperature,
-        "response_format": {"type": "json_object"},
-        "max_tokens": 1024,
-    }).encode("utf-8")
+    try:
+        content = chat_completion(
+            messages,
+            api_key=api_key,
+            endpoint=endpoint,
+            model=model,
+            temperature=temperature,
+            timeout_s=timeout_s,
+            max_retries=max_retries,
+            response_format={"type": "json_object"},
+            max_tokens=1024,
+        )
+    except RuntimeError as e:
+        return {"proposal": None, "gatekeeper": None, "error": str(e)}
 
-    if "/" in endpoint and not endpoint.startswith("http"):
-        endpoint = "https://" + endpoint
-    if not endpoint.rstrip("/").endswith("/chat/completions"):
-        endpoint = endpoint.rstrip("/") + "/v1/chat/completions"
+    # Handle case where LLM wraps JSON in markdown code block
+    if "```" in content:
+        content = content.split("```")[1]
+        if content.startswith("json"):
+            content = content[4:]
+    try:
+        proposal = json.loads(content.strip())
+    except json.JSONDecodeError as e:
+        return {"proposal": None, "gatekeeper": None, "error": f"JSON parse failed: {e}"}
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
-
-    for attempt in range(max_retries):
-        try:
-            req = urllib.request.Request(endpoint, data=payload, headers=headers, method="POST")
-            with urllib.request.urlopen(req, timeout=timeout_s) as resp:
-                parsed = json.loads(resp.read().decode("utf-8", "replace"))
-            choices = parsed.get("choices")
-            if not choices:
-                if attempt < max_retries - 1:
-                    continue
-                return {"proposal": None, "gatekeeper": None, "error": "API returned no choices"}
-            content = choices[0]["message"]["content"]
-            # Handle case where LLM wraps JSON in markdown code block
-            if "```" in content:
-                content = content.split("```")[1]
-                if content.startswith("json"):
-                    content = content[4:]
-            proposal = json.loads(content.strip())
-            return {"proposal": proposal, "gatekeeper": None, "error": None}
-        except json.JSONDecodeError as e:
-            if attempt == max_retries - 1:
-                return {"proposal": None, "gatekeeper": None, "error": f"JSON parse failed: {e}"}
-        except Exception as e:
-            if attempt == max_retries - 1:
-                return {"proposal": None, "gatekeeper": None, "error": f"API call failed: {e}"}
-
-    return {"proposal": None, "gatekeeper": None, "error": "max retries exhausted"}
+    return {"proposal": proposal, "gatekeeper": None, "error": None}

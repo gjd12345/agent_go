@@ -1,0 +1,6 @@
+# Optional: only needed when running official EOH experiments (not for unit tests)
+# These are dependencies of Agent_EOH/, not of eoh_go/ itself.
+requests
+torch
+numba
+python-docx

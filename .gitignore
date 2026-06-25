@@ -1,5 +1,6 @@
 __pycache__/
 *.py[cod]
+*.egg-info/
 .pytest_cache/
 .idea/
 .vscode/
@@ -35,11 +36,23 @@ outputs/
 **/*.pptx.inspect.ndjson
 **/~$*.pptx
 
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Makefile benchmark outputs
+final_result.txt
+final_result_genetic.txt
+
 # macOS
 .DS_Store
 
 # Virtual env
 .venv/
+
+# Build artifacts
+*.egg-info/
 
 # External repos (re-clone as needed)
 external_repos/

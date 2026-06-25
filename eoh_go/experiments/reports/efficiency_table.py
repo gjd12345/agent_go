@@ -7,8 +7,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from ..benchmark import parse_numeric_cost, run_test
-from .efficiency_table import best_cost_name, best_res_name, fmt_num, parse_algorithms
+from eoh_go.benchmark import parse_numeric_cost, run_test
+
+
+DEFAULT_ALGORITHMS = {
+    "SA": "mainbin_sa.exe",
+    "EOH": "eoh_go_workspace/generated/bins/clean3gen_nonseed_1_20260424_103910.exe",
+}
 
 
 def _density_pct(density: str) -> float:
@@ -18,12 +23,7 @@ def _density_pct(density: str) -> float:
     return float(text)
 
 
-def _t_label(value: float) -> str:
-    text = f"{value:.3f}".rstrip("0").rstrip(".")
-    return text.replace(".", "p")
-
-
-def prepare_instance(src_path: Path, dst_dir: Path, density: str, arrival_scale: float) -> Path:
+def prepare_instance(src_path: Path, dst_dir: Path, density: str, time_interval: int) -> Path:
     data = json.loads(src_path.read_text(encoding="utf-8"))
     pct = _density_pct(density)
     changed = False
@@ -35,29 +35,66 @@ def prepare_instance(src_path: Path, dst_dir: Path, density: str, arrival_scale:
                 if keep < len(arr):
                     batch[key] = arr[:keep]
                     changed = True
-        if "timeReady" in batch and abs(arrival_scale - 1.0) > 1e-9:
-            batch["timeReady"] = max(0, int(round(float(batch.get("timeReady", 0)) * arrival_scale)))
-            changed = True
-
+        if time_interval > 1:
+            for key in ("ori", "des"):
+                for item in batch.get(key, []):
+                    item["timeEnd"] = max(1, int(item.get("timeEnd", 0) / time_interval))
+                    changed = True
     if not changed:
         return src_path
-    dst_path = dst_dir / f"{src_path.stem}_{density}_ta{_t_label(arrival_scale)}.json"
+    dst_path = dst_dir / f"{src_path.stem}_{density}_t{time_interval}.json"
     dst_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     return dst_path
 
 
-def resolve_source_path(root: Path, source_dir: Path, problem: str, density: str, use_density_dirs: bool) -> Path:
-    if not use_density_dirs:
-        return source_dir / problem
-    suffix = density.lower().removeprefix("d")
-    candidates = [
-        root / f"solomon_benchmark_d{suffix}" / problem,
-        root / "solomon_benchmark" / problem,
-    ]
-    for candidate in candidates:
-        if candidate.exists():
-            return candidate
-    return source_dir / problem
+def parse_algorithms(root: Path, values: list[str]) -> dict[str, str]:
+    if not values:
+        return {name: str((root / rel).resolve()) for name, rel in DEFAULT_ALGORITHMS.items()}
+    out = {}
+    for item in values:
+        if "=" not in item:
+            raise ValueError(f"algorithm must be NAME=PATH, got {item!r}")
+        name, raw_path = item.split("=", 1)
+        path = Path(raw_path)
+        if not path.is_absolute():
+            path = root / path
+        out[name] = str(path.resolve())
+    return out
+
+
+def fmt_num(value: Any, digits: int = 3) -> str:
+    if value is None:
+        return "-"
+    try:
+        return f"{float(value):.{digits}f}"
+    except Exception:
+        return str(value)
+
+
+def best_cost_name(row: dict[str, Any], algorithms: list[str]) -> str | None:
+    best_name = None
+    best_cost = None
+    for name in algorithms:
+        cost = row.get(name, {}).get("J")
+        if cost is None or cost < 0:
+            continue
+        if best_cost is None or cost < best_cost:
+            best_cost = cost
+            best_name = name
+    return best_name
+
+
+def best_res_name(row: dict[str, Any], algorithms: list[str]) -> str | None:
+    best_name = None
+    best_res = None
+    for name in algorithms:
+        res = row.get(name, {}).get("Res")
+        if res is None:
+            continue
+        if best_res is None or res < best_res:
+            best_res = res
+            best_name = name
+    return best_name
 
 
 def build_markdown_table(rows: list[dict[str, Any]], algorithms: list[str]) -> str:
@@ -69,7 +106,7 @@ def build_markdown_table(rows: list[dict[str, Any]], algorithms: list[str]) -> s
     for row in rows:
         best_j = best_cost_name(row, algorithms)
         best_r = best_res_name(row, algorithms)
-        cells = [row["problem"], row["density"], f"{row['arrival_scale']:.1f}"]
+        cells = [row["problem"], row["density"], str(row["time_interval"])]
         for name in algorithms:
             res = fmt_num(row.get(name, {}).get("Res"), 3)
             raw_cost = row.get(name, {}).get("J")
@@ -83,44 +120,12 @@ def build_markdown_table(rows: list[dict[str, Any]], algorithms: list[str]) -> s
     return "\n".join(lines) + "\n"
 
 
-def build_compact_markdown(rows: list[dict[str, Any]], algorithms: list[str]) -> str:
-    lines = ["| Cell | " + " | ".join(algorithms) + " | Observation |"]
-    lines.append("| " + " | ".join(["---"] * (len(algorithms) + 2)) + " |")
-    for row in rows:
-        cells = [f"{row['problem'].replace('.json', '').upper()},{row['density']},t{row['arrival_scale']:.1f}"]
-        for name in algorithms:
-            item = row.get(name, {})
-            res = fmt_num(item.get("Res"), 3)
-            raw_cost = item.get("J")
-            cost = "-" if raw_cost is not None and raw_cost < 0 else fmt_num(raw_cost, 2)
-            cells.append(f"Res {res}, J {cost}")
-        obs = ""
-        if len(algorithms) >= 2:
-            a0, a1 = algorithms[0], algorithms[1]
-            j0 = row.get(a0, {}).get("J")
-            j1 = row.get(a1, {}).get("J")
-            r0 = row.get(a0, {}).get("Res")
-            r1 = row.get(a1, {}).get("Res")
-            if j0 is not None and j1 is not None and j0 >= 0 and j1 >= 0:
-                if abs(j1 - j0) < 1e-9:
-                    obs = f"{a1} matches {a0} quality"
-                elif j1 < j0:
-                    obs = f"{a1} improves quality"
-                else:
-                    obs = f"{a1} worsens quality"
-                if r0 is not None and r1 is not None:
-                    obs += " and is faster" if r1 < r0 else " but is slower"
-        cells.append(obs)
-        lines.append("| " + " | ".join(cells) + " |")
-    return "\n".join(lines) + "\n"
-
-
 def build_latex_table(rows: list[dict[str, Any]], algorithms: list[str]) -> str:
     col_spec = "lcc" + "rr" * len(algorithms)
     lines = [
         r"\begin{table}[t]",
         r"\centering",
-        r"\caption{Sensitivity Comparison under Density and Arrival-Time Scaling}",
+        r"\caption{Algorithm Efficiency Comparison under Density and Time-Window Variants}",
         rf"\begin{{tabular}}{{{col_spec}}}",
         r"\toprule",
     ]
@@ -136,7 +141,7 @@ def build_latex_table(rows: list[dict[str, Any]], algorithms: list[str]) -> str:
     for row in rows:
         best_j = best_cost_name(row, algorithms)
         best_r = best_res_name(row, algorithms)
-        cells = [row["problem"].replace(".json", "").upper(), row["density"], f"{row['arrival_scale']:.1f}"]
+        cells = [row["problem"].replace(".json", "").upper(), row["density"], str(row["time_interval"])]
         for name in algorithms:
             res = fmt_num(row.get(name, {}).get("Res"), 3)
             raw_cost = row.get(name, {}).get("J")
@@ -152,14 +157,14 @@ def build_latex_table(rows: list[dict[str, Any]], algorithms: list[str]) -> str:
 
 
 def write_csv(path: Path, rows: list[dict[str, Any]], algorithms: list[str]) -> None:
-    fields = ["problem", "density", "arrival_scale"]
+    fields = ["problem", "density", "time_interval"]
     for name in algorithms:
         fields.extend([f"{name}_Res", f"{name}_J", f"{name}_wall", f"{name}_return_code"])
     with path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
         for row in rows:
-            flat = {key: row[key] for key in ("problem", "density", "arrival_scale")}
+            flat = {key: row[key] for key in ("problem", "density", "time_interval")}
             for name in algorithms:
                 item = row.get(name, {})
                 flat[f"{name}_Res"] = item.get("Res")
@@ -174,11 +179,14 @@ def run_table(args: argparse.Namespace) -> dict[str, Any]:
     algorithms = parse_algorithms(root, args.algorithm)
     problems = args.problem or ["rc101.json"]
     densities = args.density or ["d25", "d50", "d75", "d100"]
-    scales = args.arrival_scale or [1.0, 0.9, 0.8, 0.7, 0.6]
+    intervals = args.time_interval or [1, 2, 3]
     source_dir = (root / args.source_dir).resolve()
     base_out_dir = (root / args.output_dir).resolve()
     base_out_dir.mkdir(parents=True, exist_ok=True)
-    out_dir = base_out_dir / f"run_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}"
+    if args.no_run_subdir:
+        out_dir = base_out_dir
+    else:
+        out_dir = base_out_dir / f"run_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}"
     out_dir.mkdir(parents=True, exist_ok=False)
 
     rows: list[dict[str, Any]] = []
@@ -188,14 +196,12 @@ def run_table(args: argparse.Namespace) -> dict[str, Any]:
     for problem in problems:
         src = source_dir / problem
         for density in densities:
-            for scale in scales:
-                src = resolve_source_path(root, source_dir, problem, density, args.density_source_dirs)
-                density_arg = "d100" if args.density_source_dirs else density
-                data_path = prepare_instance(src, tmp_dir, density_arg, float(scale))
+            for interval in intervals:
+                data_path = prepare_instance(src, tmp_dir, density, int(interval))
                 row: dict[str, Any] = {
                     "problem": problem,
                     "density": density,
-                    "arrival_scale": float(scale),
+                    "time_interval": int(interval),
                 }
                 for name, bin_path in algorithms.items():
                     result = run_test(
@@ -215,7 +221,7 @@ def run_table(args: argparse.Namespace) -> dict[str, Any]:
                         {
                             "problem": problem,
                             "density": density,
-                            "arrival_scale": float(scale),
+                            "time_interval": int(interval),
                             "algorithm": name,
                             "bin_path": bin_path,
                             "data_path": str(data_path),
@@ -225,14 +231,15 @@ def run_table(args: argparse.Namespace) -> dict[str, Any]:
                         }
                     )
                 rows.append(row)
-                (out_dir / "arrival_scale_table_partial.json").write_text(
+                (out_dir / "efficiency_table_partial.json").write_text(
                     json.dumps(
                         {
                             "output_dir": str(out_dir),
                             "algorithms": algorithms,
                             "problems": problems,
                             "densities": densities,
-                            "arrival_scales": scales,
+                            "time_intervals": intervals,
+                            "sim_time_multi": args.sim_time_multi,
                             "rows": rows,
                             "raw_results": raw_results,
                         },
@@ -247,40 +254,36 @@ def run_table(args: argparse.Namespace) -> dict[str, Any]:
         "algorithms": algorithms,
         "problems": problems,
         "densities": densities,
-        "arrival_scales": scales,
+        "time_intervals": intervals,
+        "sim_time_multi": args.sim_time_multi,
         "rows": rows,
         "raw_results": raw_results,
     }
-    (out_dir / "arrival_scale_table_results.json").write_text(
+    (out_dir / "efficiency_table_results.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
-    algorithms_list = list(algorithms)
-    (out_dir / "arrival_scale_table.md").write_text(
-        build_markdown_table(rows, algorithms_list),
+    (out_dir / "efficiency_table.md").write_text(
+        build_markdown_table(rows, list(algorithms)),
         encoding="utf-8",
     )
-    (out_dir / "arrival_scale_compact.md").write_text(
-        build_compact_markdown(rows, algorithms_list),
+    (out_dir / "efficiency_table.tex").write_text(
+        build_latex_table(rows, list(algorithms)),
         encoding="utf-8",
     )
-    (out_dir / "arrival_scale_table.tex").write_text(
-        build_latex_table(rows, algorithms_list),
-        encoding="utf-8",
-    )
-    write_csv(out_dir / "arrival_scale_table.csv", rows, algorithms_list)
+    write_csv(out_dir / "efficiency_table.csv", rows, list(algorithms))
     return payload
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate Res/J tables under arrival-time scaling.")
+    parser = argparse.ArgumentParser(description="Generate paper-style Res/J efficiency tables.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--source-dir", default="solomon_benchmark")
-    parser.add_argument("--density-source-dirs", action="store_true", help="Read solomon_benchmark_d25/d50/d75 by density when available.")
-    parser.add_argument("--output-dir", default="eoh_go_workspace/reports/tables/arrival_scale")
+    parser.add_argument("--output-dir", default="eoh_go_workspace/reports/tables/efficiency")
+    parser.add_argument("--no-run-subdir", action="store_true", help="Write directly to output-dir instead of a timestamped run_* subdirectory.")
     parser.add_argument("--problem", action="append")
     parser.add_argument("--density", action="append")
-    parser.add_argument("--arrival-scale", action="append", type=float)
+    parser.add_argument("--time-interval", action="append", type=int)
     parser.add_argument("--algorithm", action="append", help="Algorithm as NAME=path/to/bin.exe")
     parser.add_argument("--sim-time-multi", type=int, default=1)
     parser.add_argument("--timeout", type=int, default=180)

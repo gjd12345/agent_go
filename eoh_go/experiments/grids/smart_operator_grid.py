@@ -18,7 +18,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from ..operator import SmartOperator
+from eoh_go.operator import SmartOperator
 
 
 def _estimate_cost(

@@ -3,7 +3,7 @@
 import json
 import unittest
 
-from eoh_go.experiments.operator_card_controller import (
+from eoh_go.tocc.controller import (
     BASELINE_OVERLAP_CARDS,
     TARGETED_CANDIDATE_CARDS,
     TOCCDecision,

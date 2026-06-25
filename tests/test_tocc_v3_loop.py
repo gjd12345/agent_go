@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch, MagicMock
 
-from eoh_go.experiments.tocc_v3_loop import run_v3_loop, MAX_ITERATIONS
+from eoh_go.tocc.loop import run_v3_loop, MAX_ITERATIONS
 
 
 class ToccV3LoopTests(unittest.TestCase):
@@ -22,7 +22,7 @@ class ToccV3LoopTests(unittest.TestCase):
             run_v3_loop(self.trace, problem=self.problem, available_cards=self.cards,
                         output_dir=self.output, max_iterations=5)
 
-    @patch("eoh_go.experiments.tocc_v3_loop.subprocess.run")
+    @patch("eoh_go.tocc.loop.subprocess.run")
     def test_dry_run_no_cards_marks_rejected(self, mock_run):
         mock_proc = MagicMock()
         mock_proc.returncode = 0
@@ -37,7 +37,7 @@ class ToccV3LoopTests(unittest.TestCase):
         self.assertEqual(len(history), 1)
         self.assertEqual(history[0]["status"], "no_cards_recommended")
 
-    @patch("eoh_go.experiments.tocc_v3_loop.subprocess.run")
+    @patch("eoh_go.tocc.loop.subprocess.run")
     def test_dry_run_with_cards_accepted(self, mock_run):
         mock_proc = MagicMock()
         mock_proc.returncode = 0
@@ -55,7 +55,7 @@ class ToccV3LoopTests(unittest.TestCase):
         self.assertTrue(history[0]["accepted"])
         self.assertEqual(history[0]["cards"], ["tsp_regret_insertion", "tsp_farthest_insertion"])
 
-    @patch("eoh_go.experiments.tocc_v3_loop.subprocess.run")
+    @patch("eoh_go.tocc.loop.subprocess.run")
     def test_real_run_uses_force(self, mock_run):
         mock_proc = MagicMock()
         mock_proc.returncode = 0
@@ -78,7 +78,7 @@ class ToccV3LoopTests(unittest.TestCase):
         self.assertTrue(len(force_calls) > 0, "real-run should pass --force to manifest runner")
 
     def test_prompt_contains_baseline_objectives(self):
-        from eoh_go.experiments.tocc_agent import _flatten_trace, _build_user_prompt
+        from eoh_go.tocc.agent import _flatten_trace, _build_user_prompt
 
         trace = {
             "problem": "cvrp_construct", "arm": "literature_rag",

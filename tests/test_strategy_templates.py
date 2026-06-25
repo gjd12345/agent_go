@@ -165,7 +165,7 @@ def test_smart_operator_template_mode_generates_without_api(tmp_path):
 
 
 def test_template_mode_estimates_zero_llm_calls():
-    from eoh_go.experiments.smart_operator_grid import _estimate_cost
+    from eoh_go.experiments.grids.smart_operator_grid import _estimate_cost
 
     est = _estimate_cost(cells=5, generations=2, pop_size=3, mutation_mode="templates")
 
@@ -173,7 +173,7 @@ def test_template_mode_estimates_zero_llm_calls():
 
 
 def test_summary_markdown_uses_generation_counts():
-    from eoh_go.experiments.smart_operator_grid import build_summary_markdown
+    from eoh_go.experiments.grids.smart_operator_grid import build_summary_markdown
 
     args = SimpleNamespace(generations=1, pop_size=2, llm_model="test-model")
     md = build_summary_markdown(

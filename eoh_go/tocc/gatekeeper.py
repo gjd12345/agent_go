@@ -10,11 +10,11 @@ from typing import Any
 
 import json
 
-from eoh_go.experiments.operator_card_controller import (
+from eoh_go.tocc.controller import (
     BASELINE_OVERLAP_CARDS,
     CARD_QUERIES,
 )
-from eoh_go.experiments.card_prior_decisions import (
+from eoh_go.tocc.card_decisions import (
     DEPRIORITIZED_DECISIONS,
     HARD_BLOCK_DECISIONS,
     WATCHLIST_DECISIONS,

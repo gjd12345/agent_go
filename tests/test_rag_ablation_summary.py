@@ -51,7 +51,7 @@ class RagAblationSummaryTests(unittest.TestCase):
         return path
 
     def test_summarize_pairs_rows_by_problem_density_and_arrival_scale(self) -> None:
-        from eoh_go.experiments.summarize_rag_ablation import summarize
+        from eoh_go.experiments.reports.summarize_rag_ablation import summarize
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -82,7 +82,7 @@ class RagAblationSummaryTests(unittest.TestCase):
         self.assertEqual(summary["stats"]["rag_j_improved"], 2)
 
     def test_unpaired_rows_are_reported_without_crashing(self) -> None:
-        from eoh_go.experiments.summarize_rag_ablation import summarize
+        from eoh_go.experiments.reports.summarize_rag_ablation import summarize
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -96,7 +96,7 @@ class RagAblationSummaryTests(unittest.TestCase):
         self.assertEqual({cell["side"] for cell in summary["unpaired_cells"]}, {"baseline", "rag"})
 
     def test_incomplete_cells_handle_zero_population_and_null_metrics(self) -> None:
-        from eoh_go.experiments.summarize_rag_ablation import summarize
+        from eoh_go.experiments.reports.summarize_rag_ablation import summarize
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -119,7 +119,7 @@ class RagAblationSummaryTests(unittest.TestCase):
         self.assertEqual(summary["stats"]["rag_j_improved"], 0)
 
     def test_res_ratio_direction_labels_are_reported(self) -> None:
-        from eoh_go.experiments.summarize_rag_ablation import summarize
+        from eoh_go.experiments.reports.summarize_rag_ablation import summarize
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -133,7 +133,7 @@ class RagAblationSummaryTests(unittest.TestCase):
         self.assertEqual(cell["res_direction_rag"], "faster")
 
     def test_seed_mismatch_notes_use_relative_threshold_without_blocking_complete_cell(self) -> None:
-        from eoh_go.experiments.summarize_rag_ablation import summarize
+        from eoh_go.experiments.reports.summarize_rag_ablation import summarize
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -150,7 +150,7 @@ class RagAblationSummaryTests(unittest.TestCase):
         self.assertEqual(summary["stats"]["seed_res_mismatch_count"], 0)
 
     def test_empty_inputs_write_reports_and_do_not_crash(self) -> None:
-        from eoh_go.experiments.summarize_rag_ablation import summarize
+        from eoh_go.experiments.reports.summarize_rag_ablation import summarize
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -165,7 +165,7 @@ class RagAblationSummaryTests(unittest.TestCase):
         self.assertEqual(summary["stats"]["paired_count"], 0)
 
     def test_run_ablation_pair_reuses_grid_with_baseline_and_auto_rag_variants(self) -> None:
-        from eoh_go.experiments.eoh_arrival_grid import run_ablation_pair
+        from eoh_go.experiments.grids.eoh_arrival_grid import run_ablation_pair
 
         args = Namespace(
             root="/repo",
@@ -179,8 +179,8 @@ class RagAblationSummaryTests(unittest.TestCase):
             suffix = "rag" if run_args.use_rag_context else "baseline"
             return {"output_dir": f"/tmp/{suffix}"}
 
-        with mock.patch("eoh_go.experiments.eoh_arrival_grid.run_grid", side_effect=fake_run_grid) as run_grid:
-            with mock.patch("eoh_go.experiments.eoh_arrival_grid.summarize_rag_ablation", return_value={"stats": {}}) as summarize:
+        with mock.patch("eoh_go.experiments.grids.eoh_arrival_grid.run_grid", side_effect=fake_run_grid) as run_grid:
+            with mock.patch("eoh_go.experiments.grids.eoh_arrival_grid.summarize_rag_ablation", return_value={"stats": {}}) as summarize:
                 result = run_ablation_pair(args)
 
         baseline_args = run_grid.call_args_list[0].args[0]

@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from ..strategy_router import route_instance
+from eoh_go.strategy_router import route_instance
 
 
 DEFAULT_DENSITY_DIRS = {

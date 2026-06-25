@@ -7,8 +7,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from ..benchmark import parse_numeric_cost, run_test
-from .arrival_scale_table import prepare_instance, resolve_source_path
+from eoh_go.benchmark import parse_numeric_cost, run_test
+from eoh_go.experiments.reports.arrival_scale_table import prepare_instance, resolve_source_path
 
 
 DEFAULT_PROBLEMS = [f"rc10{i}.json" for i in range(1, 9)]

@@ -20,8 +20,8 @@ def run_tocc_v2_cycle(
     Does NOT execute runs — only produces validated proposal.
     Returns full audit dict for review.
     """
-    from eoh_go.experiments.tocc_agent import propose
-    from eoh_go.experiments.tocc_gatekeeper import validate_proposal
+    from eoh_go.tocc.agent import propose
+    from eoh_go.tocc.gatekeeper import validate_proposal
 
     result: dict[str, Any] = {
         "trace_path": trace_path,
