@@ -119,6 +119,24 @@ class ExperimentManifestRunnerTests(unittest.TestCase):
 
         self.assertNotIn("--prev-run-dir", cmd)
 
+    def test_build_cmd_reads_prev_run_dir_from_manifest_rag(self) -> None:
+        manifest = self._minimal_manifest()
+        manifest["rag"] = {"top_k": 2, "max_chars": 2500, "prev_run_dir": "/tmp/prev_iter"}
+        arm = manifest["arms"][0]
+        cmd = _build_cmd(manifest, "tsp_construct", arm, 0, 1, "/tmp/out_r1", prev_run_dir="")
+
+        self.assertIn("--prev-run-dir", cmd)
+        self.assertIn("/tmp/prev_iter", cmd)
+
+    def test_build_cmd_arg_prev_run_dir_overrides_manifest(self) -> None:
+        manifest = self._minimal_manifest()
+        manifest["rag"] = {"top_k": 2, "max_chars": 2500, "prev_run_dir": "/tmp/manifest_prev"}
+        arm = manifest["arms"][0]
+        cmd = _build_cmd(manifest, "tsp_construct", arm, 0, 1, "/tmp/out_r2", prev_run_dir="/tmp/arg_prev")
+
+        self.assertIn("/tmp/arg_prev", cmd)
+        self.assertNotIn("/tmp/manifest_prev", cmd)
+
 
 if __name__ == "__main__":
     unittest.main()

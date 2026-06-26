@@ -99,8 +99,9 @@ def _build_cmd(
         card_ids = arm.get("selected_card_ids", [])
         if card_ids:
             cmd.extend(["--selected-card-ids", ",".join(card_ids)])
-        if prev_run_dir:
-            cmd.extend(["--prev-run-dir", prev_run_dir])
+        effective_prev = prev_run_dir or rag.get("prev_run_dir", "")
+        if effective_prev:
+            cmd.extend(["--prev-run-dir", effective_prev])
     return cmd
 
 

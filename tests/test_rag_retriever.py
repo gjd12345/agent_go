@@ -230,13 +230,49 @@ class RagRetrieverTests(unittest.TestCase):
     return dispatch
 }"""
         features = extract_code_features(code)
-        self.assertIn("bestdelta", features)
-        self.assertIn("distpenalty", features)
-        self.assertIn("calcdistance", features)
+        self.assertIn("best", features)
+        self.assertIn("delta", features)
+        self.assertIn("dist", features)
+        self.assertIn("penalty", features)
+        self.assertIn("calc", features)
         self.assertIn("dispatch", features)
+        self.assertIn("candidate", features)
         self.assertNotIn("func", features)
         self.assertNotIn("return", features)
         self.assertNotIn("for", features)
+
+    def test_extract_code_features_splits_camelcase(self) -> None:
+        from eoh_go.rag.retriever import extract_code_features
+
+        code = "nearestCost = calcRegretValue(bestDelta)"
+        features = extract_code_features(code)
+        self.assertIn("nearest", features)
+        self.assertIn("cost", features)
+        self.assertIn("calc", features)
+        self.assertIn("regret", features)
+        self.assertIn("best", features)
+        self.assertIn("delta", features)
+        self.assertNotIn("nearestcost", features)
+        self.assertNotIn("bestdelta", features)
+
+    def test_extract_code_features_python_code(self) -> None:
+        from eoh_go.rag.retriever import extract_code_features
+
+        code = """def select_next_node(current_node, destination_node, unvisited_nodes, distance_matrix):
+    regret_values = []
+    for candidate in unvisited_nodes:
+        savings_ratio = distance_matrix[current_node][candidate]
+        regret_values.append(savings_ratio)
+    return min(unvisited_nodes, key=lambda n: regret_values[n])"""
+        features = extract_code_features(code)
+        self.assertIn("regret", features)
+        self.assertIn("savings", features)
+        self.assertIn("ratio", features)
+        self.assertNotIn("def", features)
+        self.assertNotIn("current", features)
+        self.assertNotIn("node", features)
+        self.assertNotIn("distance", features)
+        self.assertNotIn("matrix", features)
 
     def test_load_population_features_from_individuals(self) -> None:
         from eoh_go.rag.retriever import load_population_features
@@ -248,9 +284,34 @@ class RagRetrieverTests(unittest.TestCase):
             "invalid_entry",
         ]
         features = load_population_features(population)
-        self.assertIn("bestdelta", features)
-        self.assertIn("nearestcost", features)
+        self.assertIn("best", features)
+        self.assertIn("delta", features)
+        self.assertIn("nearest", features)
+        self.assertIn("cost", features)
         self.assertNotIn("func", features)
+
+    def test_load_population_features_skips_invalid_individuals(self) -> None:
+        from eoh_go.rag.retriever import load_population_features
+
+        population = [
+            {"code": "badStrategy()", "objective": None},
+            {"code": "goodStrategy(regretCalc)", "objective": 50.0},
+        ]
+        features = load_population_features(population)
+        self.assertIn("regret", features)
+        self.assertIn("calc", features)
+        self.assertNotIn("bad", features)
+
+    def test_load_population_features_top_fraction(self) -> None:
+        from eoh_go.rag.retriever import load_population_features
+
+        population = [
+            {"code": "topHalfStrategy(regretCalc)", "objective": 10.0},
+            {"code": "bottomHalfStrategy(greedyNearest)", "objective": 90.0},
+        ]
+        features_half = load_population_features(population, top_fraction=0.5)
+        self.assertIn("regret", features_half)
+        self.assertNotIn("greedy", features_half)
 
     def test_load_population_features_empty_population(self) -> None:
         from eoh_go.rag.retriever import load_population_features

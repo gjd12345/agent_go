@@ -33,6 +33,7 @@ def run_v3_loop(
 
     history: list[dict[str, Any]] = []
     current_trace = start_trace_path
+    prev_run_dir = ""
 
     for iteration in range(1, max_iterations + 1):
         print(f"\n=== V3 iteration {iteration}/{max_iterations} ===")
@@ -116,7 +117,7 @@ def run_v3_loop(
             "max_runs": 1, "max_llm_calls_estimate": 8,
             "require_confirm_for_real_run": True,
             "operators": "i1", "run_timeout_s": 1800,
-            "rag": {"top_k": 2, "max_chars": 2500},
+            "rag": {"top_k": 2, "max_chars": 2500, "prev_run_dir": prev_run_dir},
         }
         manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2))
         print(f"[MANIFEST] {manifest_path}")
@@ -161,6 +162,7 @@ def run_v3_loop(
                     current_trace = str(new_summary)
                     history[-1]["new_trace"] = str(new_summary)
                     history[-1]["best_objective"] = idx[0].get("best_objective")
+                    prev_run_dir = idx[0]["output_dir"]
                     print(f"[OBSERVE] best={idx[0].get('best_objective')}")
                 else:
                     history[-1]["error"] = "summary not found"; break

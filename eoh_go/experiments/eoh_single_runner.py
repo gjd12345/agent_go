@@ -13,7 +13,7 @@ from typing import Any
 from eoh_go.experiments.problem_registry import PROBLEMS
 from eoh_go.rag.build_corpus import _is_history_card, load_all_corpora
 from eoh_go.rag.prompt_context import format_prompt_context, format_prompt_context_with_audit
-from eoh_go.rag.retriever import RerankConfig, extract_code_features, load_population_features, retrieve, retrieve_with_rerank, score_corpus, score_corpus_with_rerank
+from eoh_go.rag.retriever import RerankConfig, load_population_features, retrieve, retrieve_with_rerank, score_corpus, score_corpus_with_rerank
 from eoh_go.rag.schemas import CorpusItem
 
 
@@ -530,6 +530,8 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
         context_path.write_text(context, encoding="utf-8")
         context_file = str(context_path)
         rag_trace["rag_context_path"] = str(context_path)
+        rag_trace["rag_prev_run_dir"] = args.prev_run_dir or ""
+        rag_trace["rag_population_feature_count"] = len(population_features) if population_features else 0
     endpoint_present = bool(normalize_api_endpoint(os.environ.get(args.api_endpoint_env, "")))
     model_present = bool(args.llm_model or os.environ.get(args.model_env, ""))
     api_key_present = bool(os.environ.get(args.api_key_env, ""))
