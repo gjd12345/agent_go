@@ -216,6 +216,47 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertEqual(suppressed["outcome_decision"], "suppress")
         self.assertLess(suppressed["multiplier"], 1.0)
 
+    def test_extract_code_features_from_go_code(self) -> None:
+        from eoh_go.rag.retriever import extract_code_features
+
+        code = """func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {
+    bestDelta := math.MaxFloat64
+    for candidate := range unassigned {
+        distPenalty := CalcDistance(oris[candidate], dess[candidate])
+        if distPenalty < bestDelta {
+            bestDelta = distPenalty
+        }
+    }
+    return dispatch
+}"""
+        features = extract_code_features(code)
+        self.assertIn("bestdelta", features)
+        self.assertIn("distpenalty", features)
+        self.assertIn("calcdistance", features)
+        self.assertIn("dispatch", features)
+        self.assertNotIn("func", features)
+        self.assertNotIn("return", features)
+        self.assertNotIn("for", features)
+
+    def test_load_population_features_from_individuals(self) -> None:
+        from eoh_go.rag.retriever import load_population_features
+
+        population = [
+            {"code": "func InsertShips() { bestDelta := 1.0 }", "objective": 100.5},
+            {"code": "func InsertShips() { nearestCost := 2.0 }", "objective": 98.2},
+            {"code": "", "objective": None},
+            "invalid_entry",
+        ]
+        features = load_population_features(population)
+        self.assertIn("bestdelta", features)
+        self.assertIn("nearestcost", features)
+        self.assertNotIn("func", features)
+
+    def test_load_population_features_empty_population(self) -> None:
+        from eoh_go.rag.retriever import load_population_features
+
+        self.assertEqual(load_population_features([]), set())
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -71,6 +71,7 @@ def _build_cmd(
     generation: int,
     repeat: int,
     output_dir: str,
+    prev_run_dir: str = "",
 ) -> list[str]:
     cmd = [
         manifest.get("python_exe") or _DEFAULT_PYTHON or sys.executable,
@@ -98,6 +99,8 @@ def _build_cmd(
         card_ids = arm.get("selected_card_ids", [])
         if card_ids:
             cmd.extend(["--selected-card-ids", ",".join(card_ids)])
+        if prev_run_dir:
+            cmd.extend(["--prev-run-dir", prev_run_dir])
     return cmd
 
 
@@ -166,15 +169,17 @@ def main() -> None:
             if problem not in arm_problems:
                 continue
             for gen in generations:
+                prev_run_dir = ""
                 for rep in range(1, repeats + 1):
                     run_tag = f"run_{problem}_{arm['name']}_g{gen}_r{rep}"
                     run_out = str(output_root / run_tag)
 
                     if args.dry_run:
-                        cmd = _build_cmd(manifest, problem, arm, gen, rep, run_out)
+                        cmd = _build_cmd(manifest, problem, arm, gen, rep, run_out, prev_run_dir=prev_run_dir)
                         print(f"[DRY] {run_tag}")
                         print(f"  {' '.join(cmd)}")
                         print()
+                        prev_run_dir = run_out
                         continue
 
                     if args.no_run:
@@ -185,12 +190,13 @@ def main() -> None:
                         prev = json.loads(summary_path.read_text(encoding="utf-8"))
                         if not prev.get("failure_reason") and prev.get("run_summary", {}).get("ok"):
                             print(f"[SKIP] {run_tag} (already complete)")
+                            prev_run_dir = run_out
                             continue
                         else:
                             print(f"[RETRY] {run_tag} (previous run failed: {prev.get('failure_reason','unknown')})")
 
                     print(f"[RUN] {run_tag}  start={time.strftime('%H:%M:%S')}")
-                    cmd = _build_cmd(manifest, problem, arm, gen, rep, run_out)
+                    cmd = _build_cmd(manifest, problem, arm, gen, rep, run_out, prev_run_dir=prev_run_dir)
                     started = time.time()
                     try:
                         proc = subprocess.run(cmd, text=True, capture_output=True, timeout=manifest.get("run_timeout_s", 1800) + 60)
@@ -222,6 +228,7 @@ def main() -> None:
                                 run_index[-1]["status"] = "ok_but_summary_failure"
 
                     print(f"[DONE] {run_tag}  status={status}  elapsed={elapsed}s")
+                    prev_run_dir = run_out
 
     if not args.dry_run and not args.no_run:
         index_path = output_root / "run_index.json"

@@ -104,6 +104,21 @@ class ExperimentManifestRunnerTests(unittest.TestCase):
 
         self.assertTrue(any("selected_card_ids" in error for error in errors))
 
+    def test_build_cmd_passes_prev_run_dir_when_provided(self) -> None:
+        manifest = self._minimal_manifest()
+        arm = manifest["arms"][0]
+        cmd = _build_cmd(manifest, "tsp_construct", arm, 0, 2, "/tmp/out_r2", prev_run_dir="/tmp/out_r1")
+
+        self.assertIn("--prev-run-dir", cmd)
+        self.assertIn("/tmp/out_r1", cmd)
+
+    def test_build_cmd_omits_prev_run_dir_when_empty(self) -> None:
+        manifest = self._minimal_manifest()
+        arm = manifest["arms"][0]
+        cmd = _build_cmd(manifest, "tsp_construct", arm, 0, 1, "/tmp/out_r1", prev_run_dir="")
+
+        self.assertNotIn("--prev-run-dir", cmd)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -13,7 +13,7 @@ from typing import Any
 from eoh_go.experiments.problem_registry import PROBLEMS
 from eoh_go.rag.build_corpus import _is_history_card, load_all_corpora
 from eoh_go.rag.prompt_context import format_prompt_context, format_prompt_context_with_audit
-from eoh_go.rag.retriever import RerankConfig, retrieve, retrieve_with_rerank, score_corpus, score_corpus_with_rerank
+from eoh_go.rag.retriever import RerankConfig, extract_code_features, load_population_features, retrieve, retrieve_with_rerank, score_corpus, score_corpus_with_rerank
 from eoh_go.rag.schemas import CorpusItem
 
 
@@ -508,6 +508,14 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
     rag_trace: dict[str, Any] | None = None
     if args.arm in {"literature_rag", "history_rag", "mixed_rag"}:
         selected_ids = [sid.strip() for sid in args.selected_card_ids.split(",") if sid.strip()] if args.selected_card_ids else None
+        population_features: set[str] | None = None
+        if args.prev_run_dir:
+            prev_pop_dir = Path(args.prev_run_dir) / "results" / "pops"
+            prev_pops = sorted(prev_pop_dir.glob("population_generation_*.json"), key=_natural_generation) if prev_pop_dir.exists() else []
+            if prev_pops:
+                prev_population = _load_json(prev_pops[-1])
+                if isinstance(prev_population, list):
+                    population_features = load_population_features(prev_population) or None
         context, rag_trace = build_official_rag_context(
             Path.cwd().resolve(),
             args.problem,
@@ -516,6 +524,7 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
             args.rag_max_chars,
             args.rag_query or None,
             selected_card_ids=selected_ids,
+            population_features=population_features,
         )
         context_path = run_dir / "rag_context.txt"
         context_path.write_text(context, encoding="utf-8")
@@ -694,6 +703,7 @@ def main() -> None:
     parser.add_argument("--rag-max-chars", type=int, default=1800)
     parser.add_argument("--rag-query", default="")
     parser.add_argument("--selected-card-ids", default="")
+    parser.add_argument("--prev-run-dir", default="", help="Previous run dir to extract population features for rerank")
     parser.add_argument("--pop-size", type=int, default=2)
     parser.add_argument("--generations", type=int, default=1)
     parser.add_argument("--operators", default="i1")

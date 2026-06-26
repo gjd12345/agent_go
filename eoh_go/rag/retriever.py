@@ -200,3 +200,45 @@ def score_corpus_with_rerank(
 
     results.sort(key=lambda r: (-r["final_score"], r["id"]))
     return results
+
+
+# ---------------------------------------------------------------------------
+# Phase 5: Population feature extraction
+# ---------------------------------------------------------------------------
+
+_CODE_FEATURE_RE = re.compile(r"[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)*")
+_CODE_STOPWORDS = frozenset({
+    "func", "return", "var", "int", "float64", "float32", "bool", "string",
+    "nil", "len", "append", "make", "range", "for", "if", "else",
+    "true", "false", "err", "error", "fmt", "math", "sort",
+    "package", "import", "main", "type", "struct", "interface",
+    "break", "continue", "switch", "case", "default", "defer", "go",
+    "chan", "map", "select", "fallthrough", "goto", "const",
+})
+
+
+def extract_code_features(code: str) -> set[str]:
+    """Extract meaningful identifier tokens from Go code."""
+    if not code:
+        return set()
+    tokens = _CODE_FEATURE_RE.findall(code)
+    features: set[str] = set()
+    for token in tokens:
+        parts = token.split("_")
+        for part in parts:
+            low = part.lower()
+            if len(low) >= 3 and low not in _CODE_STOPWORDS:
+                features.add(low)
+    return features
+
+
+def load_population_features(population: list[dict]) -> set[str]:
+    """Extract strategy features from all valid individuals in a population."""
+    features: set[str] = set()
+    for individual in population:
+        if not isinstance(individual, dict):
+            continue
+        code = individual.get("code", "")
+        if code:
+            features |= extract_code_features(code)
+    return features
