@@ -123,7 +123,13 @@ class TestSynthesizeCard:
         assert len(strategy_tags) <= 3
         assert "alpha" in card.content
         assert "α" not in card.content
-        assert card.content.count(";") <= 4
+        # Core section (before Feature tags) should stay bounded
+        core_section = card.content.split("\n\nFeature tags:")[0]
+        assert core_section.count(";") <= 4
+        # New sections exist
+        assert "Feature tags:" in card.content
+        assert "Formula summary:" in card.content
+        assert "Code pattern:" in card.content
 
     def test_cvrp_synthesis(self):
         code = "farthest = argmax(dist_depot); capacity_check = demand <= rest"
@@ -235,3 +241,87 @@ class TestHistoryCardPreservation:
         history_items = [i for i in items if _is_history_card(i)]
         assert len(history_items) == 1
         assert history_items[0].id == card.id
+
+
+class TestExtractScoringCore:
+    """Tests for _extract_scoring_core code snippet extraction."""
+
+    def test_extracts_scoring_lines_from_simple_function(self):
+        from eoh_go.rag.card_synthesis import _extract_scoring_core
+        code = """
+def select_next_node(current, unvisited, distance_matrix):
+    scores = []
+    for node in unvisited:
+        dist = distance_matrix[current][node]
+        score = 1.0 / (dist + 1e-8)
+        scores.append((score, node))
+    best = max(scores, key=lambda x: x[0])
+    return best[1]
+"""
+        snippet = _extract_scoring_core(code)
+        assert snippet is not None
+        assert "score" in snippet
+        assert len(snippet.splitlines()) <= 15
+
+    def test_returns_none_for_empty_code(self):
+        from eoh_go.rag.card_synthesis import _extract_scoring_core
+        assert _extract_scoring_core(None) is None
+        assert _extract_scoring_core("") is None
+
+    def test_filters_dangerous_lines(self):
+        from eoh_go.rag.card_synthesis import _extract_scoring_core
+        code = """
+def heuristic(nodes):
+    import os
+    print("debug")
+    score = len(nodes) * 2
+    return score
+"""
+        snippet = _extract_scoring_core(code)
+        if snippet:
+            assert "import os" not in snippet
+            assert "print(" not in snippet
+
+    def test_rejects_deeply_nested_code(self):
+        from eoh_go.rag.card_synthesis import _extract_scoring_core
+        code = """
+def deep():
+    for i in range(10):
+        for j in range(10):
+            for k in range(10):
+                for m in range(10):
+                    score = i + j + k + m
+    return score
+"""
+        snippet = _extract_scoring_core(code)
+        assert snippet is None
+
+    def test_rejects_infinite_loop(self):
+        from eoh_go.rag.card_synthesis import _extract_scoring_core
+        code = """
+def bad():
+    while True:
+        score = 1
+    return score
+"""
+        snippet = _extract_scoring_core(code)
+        assert snippet is None
+
+    def test_snippet_respects_max_chars(self):
+        from eoh_go.rag.card_synthesis import _extract_scoring_core
+        code = "def f():\n" + "\n".join(f"    score_{i} = {i} * distance" for i in range(50)) + "\n    return score_0"
+        snippet = _extract_scoring_core(code)
+        if snippet:
+            assert len(snippet) <= 700
+
+    def test_formula_summary_in_synthesized_card(self):
+        code = """
+def select(current, unvisited, dist):
+    regret = second_best - best
+    alpha = remaining_ratio
+    score = regret * alpha
+    return argmin(score)
+"""
+        card = synthesize_card("tsp_construct", code)
+        assert "Formula summary:" in card.content
+        assert "regret" in card.content

@@ -247,6 +247,43 @@ class OfficialEohRunTests(unittest.TestCase):
         self.assertTrue(payload["api_key_present"])
         self.assertNotIn("SECRET_SHOULD_NOT_APPEAR", encoded)
 
+    def test_build_rag_trace_includes_audit_fields(self) -> None:
+        """Trace from build_official_rag_context includes injection audit."""
+        _, trace = build_official_rag_context(
+            Path.cwd(), "tsp_construct", "literature_rag", top_k=3, max_chars=3000
+        )
+
+        self.assertIn("rag_injected_items", trace)
+        self.assertIn("rag_omitted_items", trace)
+        self.assertIn("rag_truncated_item_id", trace)
+        self.assertIn("rag_context_truncated", trace)
+        self.assertIn("rag_context_sections_chars", trace)
+
+        for entry in trace["rag_injected_items"]:
+            self.assertIn("id", entry)
+            self.assertIn("section", entry)
+            self.assertIn("status", entry)
+            self.assertIn("chars", entry)
+            self.assertIn(entry["section"], ("api_rules", "warnings", "strategy"))
+            self.assertIn(entry["status"], ("full", "truncated"))
+            self.assertGreater(entry["chars"], 0)
+
+        sections = trace["rag_context_sections_chars"]
+        self.assertIn("total", sections)
+        self.assertEqual(sections["total"], trace["rag_context_chars"])
+
+    def test_build_rag_trace_truncation_marks_correct_item(self) -> None:
+        """With very tight max_chars, some items should be omitted/truncated."""
+        _, trace = build_official_rag_context(
+            Path.cwd(), "tsp_construct", "literature_rag", top_k=5, max_chars=800
+        )
+
+        if trace["rag_context_truncated"]:
+            self.assertTrue(
+                trace["rag_truncated_item_id"] is not None
+                or len(trace["rag_omitted_items"]) > 0
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

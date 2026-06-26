@@ -283,6 +283,51 @@ def summarize(input_dir: str, no_card_memory: bool = False) -> dict[str, Any]:
                     except Exception as exc:
                         print(f"  [card-synthesis] Warning: {exc}")
 
+            # --- Card Outcome Memory: record per-card evidence ---
+            if rag and not no_card_memory:
+                try:
+                    from eoh_go.rag.card_outcomes import build_outcome_records, save_outcomes
+                    from eoh_go.rag.build_corpus import default_corpus_dir
+
+                    injected_items = rag.get("rag_injected_items", [])
+                    if not injected_items:
+                        injected_items = [
+                            {"id": item.get("id", ""), "kind": item.get("kind", ""),
+                             "section": "strategy", "status": "full", "chars": 0}
+                            for item in rag.get("rag_selected_items", [])
+                        ]
+                    audit_for_outcome = {
+                        "rag_injected_items": injected_items,
+                        "rag_omitted_items": rag.get("rag_omitted_items", []),
+                        "rag_truncated_item_id": rag.get("rag_truncated_item_id"),
+                        "rag_context_truncated": rag.get("rag_context_truncated", False),
+                    }
+                    gen_result = {
+                        "population_size": run_sum.get("population_size", 0),
+                        "valid_candidates": run_sum.get("valid_candidates", 0),
+                        "best_objective": best_val,
+                        "pure_baseline": baseline,
+                        "generation_success": funnel.get("generation_success", False),
+                        "objective_success": funnel.get("objective_success", False),
+                        "failure_reason": funnel.get("failure_reason"),
+                    }
+                    outcome_records = build_outcome_records(
+                        run_id=best_code_record_id,
+                        problem=problem,
+                        generation=run["generation"],
+                        injection_audit=audit_for_outcome,
+                        generation_result=gen_result,
+                        arm=run["arm"],
+                        repeat=run.get("repeat"),
+                        trace_path=str(Path(run.get("output_dir", "")) / "summary.json"),
+                    )
+                    if outcome_records:
+                        project_root = _find_project_root(run.get("output_dir", str(root)))
+                        outcomes_path = Path(default_corpus_dir(project_root)) / "card_outcomes.jsonl"
+                        save_outcomes(outcome_records, outcomes_path, append=True)
+                except Exception as exc:
+                    print(f"  [card-outcomes] Warning: {exc}")
+
         # Sort: pure -> api -> default -> targeted, then by gen
         arm_order = {"pure_eoh": 0, "api_only": 1, "default_rag": 2, "targeted_rag": 3,
                      "tocc_corrected": 4}

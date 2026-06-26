@@ -6,6 +6,7 @@ retrieve evolved strategies.
 """
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import re
@@ -191,8 +192,170 @@ def _build_summary(problem: str, features: set[str]) -> str:
     return f"{prefix} construction heuristic evolved from best code: {strategy_desc}."
 
 
-def _build_content(problem: str, features: set[str]) -> str:
-    """Generate Skill Card content (When/Do/Fallback/Safety)."""
+# ---------------------------------------------------------------------------
+# Code snippet extraction
+# ---------------------------------------------------------------------------
+
+_SCORING_KEYWORDS = frozenset([
+    "score", "scores", "weight", "weights", "cost", "costs",
+    "regret", "metric", "priority", "distance", "dist",
+    "penalty", "rank", "value", "argmin", "argmax",
+])
+
+_DANGEROUS_PATTERNS = re.compile(
+    r"(?:import\s|from\s.*import|open\(|os\.|subprocess\.|"
+    r"sys\.|print\(|logging\.|sleep\(|random\.|"
+    r"requests\.|urllib\.|http\.|socket\.)",
+    re.MULTILINE
+)
+
+_MAX_SNIPPET_LINES = 15
+_MAX_SNIPPET_CHARS = 700
+
+
+def _is_dangerous_line(line: str) -> bool:
+    return bool(_DANGEROUS_PATTERNS.search(line))
+
+
+def _nesting_depth(code: str) -> int:
+    """Estimate max indentation nesting depth."""
+    max_depth = 0
+    for line in code.splitlines():
+        stripped = line.lstrip()
+        if not stripped:
+            continue
+        indent = len(line) - len(stripped)
+        depth = indent // 4
+        max_depth = max(max_depth, depth)
+    return max_depth
+
+
+def _extract_scoring_core_ast(code: str) -> str | None:
+    """Try AST-based extraction: find return stmt, trace back assignments."""
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return None
+
+    func_bodies = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            func_bodies.append(node)
+
+    if not func_bodies:
+        return None
+
+    target_func = func_bodies[0]
+    lines = code.splitlines()
+
+    returns = [n for n in ast.walk(target_func) if isinstance(n, ast.Return)]
+    if not returns:
+        return None
+
+    last_return = None
+    for node in ast.walk(target_func):
+        if isinstance(node, ast.Return):
+            last_return = node
+
+    if last_return is None:
+        return None
+
+    end_line = last_return.lineno
+    start_line = max(1, end_line - _MAX_SNIPPET_LINES + 1)
+
+    func_start = target_func.lineno
+    start_line = max(start_line, func_start + 1)
+
+    snippet_lines = lines[start_line - 1:end_line]
+    snippet_lines = [l for l in snippet_lines if not _is_dangerous_line(l)]
+
+    if len(snippet_lines) > _MAX_SNIPPET_LINES:
+        snippet_lines = snippet_lines[-_MAX_SNIPPET_LINES:]
+
+    return "\n".join(snippet_lines).strip() if snippet_lines else None
+
+
+def _extract_scoring_core_keyword(code: str) -> str | None:
+    """Fallback: find lines with scoring keywords, expand window."""
+    lines = code.splitlines()
+    score_lines = []
+
+    for i, line in enumerate(lines):
+        line_lower = line.lower()
+        if any(kw in line_lower for kw in _SCORING_KEYWORDS):
+            if not _is_dangerous_line(line):
+                score_lines.append(i)
+
+    if not score_lines:
+        return None
+
+    center = score_lines[len(score_lines) // 2]
+    half_window = _MAX_SNIPPET_LINES // 2
+
+    start = max(0, center - half_window)
+    end = min(len(lines), center + half_window + 1)
+
+    snippet_lines = [l for l in lines[start:end] if not _is_dangerous_line(l)]
+    if len(snippet_lines) > _MAX_SNIPPET_LINES:
+        snippet_lines = snippet_lines[:_MAX_SNIPPET_LINES]
+
+    return "\n".join(snippet_lines).strip() if snippet_lines else None
+
+
+def _extract_scoring_core(code: str | None, max_lines: int = _MAX_SNIPPET_LINES) -> str | None:
+    """Extract scoring/selection core from heuristic code.
+
+    Returns None if no meaningful snippet can be extracted.
+    """
+    if not code or not code.strip():
+        return None
+
+    snippet = _extract_scoring_core_ast(code)
+    if not snippet:
+        snippet = _extract_scoring_core_keyword(code)
+
+    if not snippet:
+        return None
+
+    if _nesting_depth(snippet) > 3:
+        return None
+
+    if "while True" in snippet or "while 1" in snippet:
+        return None
+
+    lines = snippet.splitlines()[:max_lines]
+    result = "\n".join(lines)
+
+    if len(result) > _MAX_SNIPPET_CHARS:
+        result = result[:_MAX_SNIPPET_CHARS].rsplit("\n", 1)[0]
+
+    return result.strip() if result.strip() else None
+
+
+def _build_formula_summary(features: set[str]) -> str:
+    """One-line formula summary from detected features."""
+    parts = []
+    if "regret" in features:
+        parts.append("regret = second_best - best")
+    if "adaptive_weights" in features:
+        parts.append("alpha = remaining_ratio")
+    if "destination" in features:
+        parts.append("score includes d(node, dest)")
+    if "normalize" in features:
+        parts.append("distances normalized to [0,1]")
+    if "savings" in features:
+        parts.append("savings = d(ref,i)+d(ref,j)-d(i,j)")
+    if "farthest" in features:
+        parts.append("prefer distant nodes early")
+    if "clustering" in features:
+        parts.append("cluster-aware selection")
+    if not parts:
+        parts.append("composite scoring from detected features")
+    return "; ".join(parts[:3])
+
+
+def _build_content(problem: str, features: set[str], code: str | None = None) -> str:
+    """Generate Skill Card content (When/Do/Fallback/Safety + Formula + Code)."""
     prefix = problem.split("_")[0].upper()
 
     # When: combine relevant conditions
@@ -209,13 +372,28 @@ def _build_content(problem: str, features: set[str]) -> str:
             do_parts.append(_FEATURE_DO[f])
     do = ". ".join(do_parts[:4]) if do_parts else "apply the evolved scoring formula from best code."
 
-    return (
+    content = (
         f"Skill: {prefix.lower()}_evolved_{'_'.join(sorted(features)[:3])}\n"
         f"When: {when}\n"
         f"Do: {do}\n"
         f"Fallback: nearest neighbor if scores tie or few nodes remain.\n"
         f"Safety: return one valid node; do not mutate inputs; keep computation bounded."
     )
+
+    # Append structured sections for enhanced retrieval
+    feature_tags = ", ".join(sorted(features))
+    content += f"\n\nFeature tags: {feature_tags}"
+
+    formula = _build_formula_summary(features)
+    content += f"\nFormula summary: {formula}"
+
+    snippet = _extract_scoring_core(code) if code else None
+    if snippet:
+        content += f"\n\nCode pattern:\n```python\n{snippet}\n```"
+    else:
+        content += "\n\nCode pattern: -"
+
+    return content
 
 
 def synthesize_card(
@@ -256,7 +434,7 @@ def synthesize_card(
         source_path=source_path,
         summary=_build_summary(problem, card_features),
         constraints=_PROBLEM_CONSTRAINTS.get(problem, []),
-        content=_build_content(problem, card_features),
+        content=_build_content(problem, card_features, code=code),
     )
 
 

@@ -12,7 +12,7 @@ from typing import Any
 
 from eoh_go.experiments.official_eoh_smoke import PROBLEMS
 from eoh_go.rag.build_corpus import _is_history_card, load_all_corpora
-from eoh_go.rag.prompt_context import format_prompt_context
+from eoh_go.rag.prompt_context import format_prompt_context, format_prompt_context_with_audit
 from eoh_go.rag.retriever import retrieve, score_corpus
 from eoh_go.rag.schemas import CorpusItem
 
@@ -192,7 +192,10 @@ def build_official_rag_context(
             raise ValueError(f"No matching cards for IDs: {selected_card_ids}")
     scored = score_corpus(query_text, strategy_pool)
     retrieved = retrieve(query_text, strategy_pool, top_k=top_k)
-    context = format_prompt_context(retrieved, max_chars=max_chars, global_items=global_items).strip()
+    context, injection_audit = format_prompt_context_with_audit(
+        retrieved, max_chars=max_chars, global_items=global_items
+    )
+    context = context.strip()
     trace = {
         "rag_mode": mode,
         "rag_query": query_text,
@@ -212,6 +215,11 @@ def build_official_rag_context(
             {"id": item.id, "kind": item.kind, "score": score} for score, item in scored
         ],
         "rag_context_chars": len(context),
+        "rag_injected_items": injection_audit["rag_injected_items"],
+        "rag_omitted_items": injection_audit["rag_omitted_items"],
+        "rag_truncated_item_id": injection_audit["rag_truncated_item_id"],
+        "rag_context_truncated": injection_audit["rag_context_truncated"],
+        "rag_context_sections_chars": injection_audit["rag_context_sections_chars"],
     }
     return context, trace
 

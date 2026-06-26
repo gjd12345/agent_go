@@ -142,6 +142,86 @@ class RagPromptContextTests(unittest.TestCase):
         self.assertIn("Try several feasible assignments", context)
         self.assertNotIn("SECRET FAILURE BODY", context)
 
+    # ── audit interface tests ──────────────────────────────────────────────
+
+    def test_audit_returns_injected_items_with_correct_sections(self) -> None:
+        from eoh_go.rag.prompt_context import format_prompt_context_with_audit
+
+        context, audit = format_prompt_context_with_audit(
+            [self._item("strategy content")],
+            max_chars=2000,
+            global_items=[self._api_item()],
+        )
+
+        self.assertIn("API RULES", context)
+        self.assertIn("[Strategy 1:", context)
+
+        injected = audit["rag_injected_items"]
+        self.assertEqual(len(injected), 2)
+        api_entry = next(e for e in injected if e["section"] == "api_rules")
+        self.assertEqual(api_entry["id"], "insertships_api_skeleton")
+        self.assertEqual(api_entry["status"], "full")
+        self.assertGreater(api_entry["chars"], 0)
+
+        strategy_entry = next(e for e in injected if e["section"] == "strategy")
+        self.assertEqual(strategy_entry["id"], "topk_delta")
+        self.assertEqual(strategy_entry["status"], "full")
+
+        self.assertFalse(audit["rag_context_truncated"])
+        self.assertIsNone(audit["rag_truncated_item_id"])
+        self.assertEqual(audit["rag_omitted_items"], [])
+
+    def test_audit_marks_truncated_item(self) -> None:
+        from eoh_go.rag.prompt_context import format_prompt_context_with_audit
+
+        context, audit = format_prompt_context_with_audit(
+            [self._item("x" * 5000)],
+            max_chars=700,
+        )
+
+        self.assertTrue(audit["rag_context_truncated"])
+        self.assertEqual(audit["rag_truncated_item_id"], "topk_delta")
+        injected = audit["rag_injected_items"]
+        self.assertEqual(len(injected), 1)
+        self.assertEqual(injected[0]["status"], "truncated")
+
+    def test_audit_marks_omitted_items_when_budget_exceeded(self) -> None:
+        from eoh_go.rag.prompt_context import format_prompt_context_with_audit
+
+        items = [
+            self._item("short content", item_id="card_1"),
+            self._item("x" * 3000, item_id="card_2"),
+            self._item("should be omitted", item_id="card_3"),
+        ]
+        context, audit = format_prompt_context_with_audit(items, max_chars=600)
+
+        omitted_ids = [e["id"] for e in audit["rag_omitted_items"]]
+        self.assertIn("card_3", omitted_ids)
+        self.assertTrue(audit["rag_context_truncated"])
+
+    def test_audit_sections_chars_are_consistent(self) -> None:
+        from eoh_go.rag.prompt_context import format_prompt_context_with_audit
+
+        context, audit = format_prompt_context_with_audit(
+            [self._item("content")],
+            max_chars=2000,
+            global_items=[self._api_item()],
+        )
+
+        sections = audit["rag_context_sections_chars"]
+        self.assertEqual(sections["total"], len(context))
+        self.assertGreater(sections["api_rules"], 0)
+        self.assertGreater(sections["strategy"], 0)
+
+    def test_audit_empty_input_returns_empty_audit(self) -> None:
+        from eoh_go.rag.prompt_context import format_prompt_context_with_audit
+
+        context, audit = format_prompt_context_with_audit([], max_chars=1000)
+
+        self.assertEqual(context, "")
+        self.assertEqual(audit["rag_injected_items"], [])
+        self.assertFalse(audit["rag_context_truncated"])
+
 
 if __name__ == "__main__":
     unittest.main()
