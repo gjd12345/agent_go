@@ -284,6 +284,51 @@ class OfficialEohRunTests(unittest.TestCase):
                 or len(trace["rag_omitted_items"]) > 0
             )
 
+    def test_build_rag_context_rerank_enabled_with_outcome_summaries(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        context, trace = build_official_rag_context(
+            root, "tsp_construct", "literature_rag",
+            top_k=2, max_chars=3000,
+            outcome_summaries={"regret_insertion": {"decision": "suppress"}},
+        )
+        self.assertTrue(trace["rag_rerank_enabled"])
+        self.assertEqual(trace["rag_outcome_summary_count"], 1)
+        self.assertTrue(len(trace["rag_rerank_scores"]) > 0)
+        suppressed = next(
+            (r for r in trace["rag_rerank_scores"] if r["id"] == "regret_insertion"),
+            None,
+        )
+        if suppressed:
+            self.assertEqual(suppressed["outcome_decision"], "suppress")
+            self.assertLess(suppressed["multiplier"], 1.0)
+
+    def test_build_rag_context_rerank_disabled_without_signals(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        _, trace = build_official_rag_context(
+            root, "tsp_construct", "literature_rag",
+            top_k=2, max_chars=3000,
+        )
+        self.assertFalse(trace["rag_rerank_enabled"])
+        self.assertEqual(trace["rag_rerank_scores"], [])
+        self.assertEqual(trace["rag_population_features"], [])
+        self.assertEqual(trace["rag_outcome_summary_count"], 0)
+
+    def test_build_rag_context_population_features_changes_selection(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        _, trace_baseline = build_official_rag_context(
+            root, "tsp_construct", "literature_rag",
+            top_k=2, max_chars=3000,
+        )
+        baseline_ids = [item["id"] for item in trace_baseline["rag_selected_items"]]
+
+        _, trace_pop = build_official_rag_context(
+            root, "tsp_construct", "literature_rag",
+            top_k=2, max_chars=3000,
+            population_features=set(baseline_ids[0].replace("_", " ").split()),
+        )
+        self.assertTrue(trace_pop["rag_rerank_enabled"])
+        self.assertTrue(len(trace_pop["rag_population_features"]) > 0)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -164,6 +164,58 @@ class RagRetrieverTests(unittest.TestCase):
         )
         self.assertEqual(result, [])
 
+    def test_outcome_summaries_supports_dict(self) -> None:
+        from eoh_go.rag.retriever import retrieve_with_rerank
+
+        corpus = [
+            self._item("strong_card", "algorithm_card", "regret insertion heuristic"),
+            self._item("weak_card", "algorithm_card", "regret insertion"),
+        ]
+        query = "regret insertion heuristic"
+
+        outcome_summaries = {
+            "strong_card": {"decision": "suppress"},
+        }
+        result = retrieve_with_rerank(
+            query, corpus, top_k=2, outcome_summaries=outcome_summaries
+        )
+        self.assertEqual(result[0].id, "weak_card")
+
+    def test_extract_features_prefers_tags_over_text(self) -> None:
+        from eoh_go.rag.retriever import _extract_card_features
+
+        item = self._item(
+            "regret_insertion_card",
+            "algorithm_card",
+            "far first nearest neighbor greedy approach",
+            tags=["regret", "lookahead"],
+        )
+        features = _extract_card_features(item)
+        self.assertEqual(features, {"regret", "lookahead"})
+        self.assertNotIn("nearest", features)
+        self.assertNotIn("greedy", features)
+
+    def test_score_corpus_with_rerank_returns_debug_info(self) -> None:
+        from eoh_go.rag.retriever import score_corpus_with_rerank
+
+        corpus = [
+            self._item("card_a", "algorithm_card", "regret insertion"),
+            self._item("card_b", "algorithm_card", "regret heuristic"),
+        ]
+        result = score_corpus_with_rerank(
+            "regret insertion", corpus,
+            outcome_summaries={"card_a": {"decision": "suppress"}},
+        )
+        self.assertTrue(len(result) >= 1)
+        first = result[0]
+        self.assertIn("base_score", first)
+        self.assertIn("outcome_decision", first)
+        self.assertIn("multiplier", first)
+        self.assertIn("final_score", first)
+        suppressed = next(r for r in result if r["id"] == "card_a")
+        self.assertEqual(suppressed["outcome_decision"], "suppress")
+        self.assertLess(suppressed["multiplier"], 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()

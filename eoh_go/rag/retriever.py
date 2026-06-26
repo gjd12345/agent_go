@@ -80,14 +80,24 @@ _FEATURE_STOPWORDS = frozenset({
 
 
 def _extract_card_features(item: CorpusItem) -> set[str]:
+    tag_features = {
+        tag.lower()
+        for tag in item.tags
+        if len(tag) >= 3 and tag.lower() not in _FEATURE_STOPWORDS
+    }
+    if tag_features:
+        return tag_features
     raw: set[str] = set()
-    raw.update(tag.lower() for tag in item.tags)
     raw.update(_tokens(item.id))
     raw.update(_tokens(item.title))
     raw.update(_tokens(item.summary))
-    for constraint in item.constraints:
-        raw.update(_tokens(constraint))
     return {t for t in raw if len(t) >= 3 and t not in _FEATURE_STOPWORDS}
+
+
+def _outcome_decision(summary: object) -> str:
+    if isinstance(summary, dict):
+        return str(summary.get("decision", "neutral"))
+    return str(getattr(summary, "decision", "neutral"))
 
 
 def retrieve_with_rerank(
@@ -119,8 +129,7 @@ def retrieve_with_rerank(
         multiplier = 1.0
 
         if outcome_summaries and item.id in outcome_summaries:
-            summary = outcome_summaries[item.id]
-            decision = getattr(summary, "decision", "neutral")
+            decision = _outcome_decision(outcome_summaries[item.id])
             if decision == "boost":
                 multiplier *= config.boost_multiplier
             elif decision == "suppress":
@@ -143,3 +152,51 @@ def retrieve_with_rerank(
         )
     )
     return [item for _, item in scored[:top_k]]
+
+
+def score_corpus_with_rerank(
+    query: str,
+    corpus: list[CorpusItem],
+    *,
+    outcome_summaries: dict[str, object] | None = None,
+    population_features: set[str] | None = None,
+    config: RerankConfig | None = None,
+) -> list[dict]:
+    """Score all items with rerank debug info for trace recording."""
+    config = config or RerankConfig()
+    normalized_pop = {f.lower() for f in population_features} if population_features else set()
+
+    results = []
+    for item in corpus:
+        base_score = float(score_item(query, item))
+        if base_score <= 0:
+            continue
+        multiplier = 1.0
+        decision = "neutral"
+        overlap = 0.0
+
+        if outcome_summaries and item.id in outcome_summaries:
+            decision = _outcome_decision(outcome_summaries[item.id])
+            if decision == "boost":
+                multiplier *= config.boost_multiplier
+            elif decision == "suppress":
+                multiplier *= config.suppress_multiplier
+
+        if normalized_pop:
+            card_features = _extract_card_features(item)
+            if card_features:
+                overlap = len(card_features & normalized_pop) / len(card_features)
+                multiplier *= 1.0 - overlap * config.population_overlap_penalty
+
+        results.append({
+            "id": item.id,
+            "kind": item.kind,
+            "base_score": base_score,
+            "outcome_decision": decision,
+            "population_overlap": round(overlap, 3),
+            "multiplier": round(multiplier, 4),
+            "final_score": round(base_score * multiplier, 4),
+        })
+
+    results.sort(key=lambda r: (-r["final_score"], r["id"]))
+    return results

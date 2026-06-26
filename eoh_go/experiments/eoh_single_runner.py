@@ -13,7 +13,7 @@ from typing import Any
 from eoh_go.experiments.problem_registry import PROBLEMS
 from eoh_go.rag.build_corpus import _is_history_card, load_all_corpora
 from eoh_go.rag.prompt_context import format_prompt_context, format_prompt_context_with_audit
-from eoh_go.rag.retriever import RerankConfig, retrieve, retrieve_with_rerank, score_corpus
+from eoh_go.rag.retriever import RerankConfig, retrieve, retrieve_with_rerank, score_corpus, score_corpus_with_rerank
 from eoh_go.rag.schemas import CorpusItem
 
 
@@ -228,6 +228,14 @@ def build_official_rag_context(
         "rag_all_scores": [
             {"id": item.id, "kind": item.kind, "score": score} for score, item in scored
         ],
+        "rag_rerank_scores": (
+            score_corpus_with_rerank(
+                query_text, strategy_pool,
+                outcome_summaries=outcome_summaries,
+                population_features=population_features,
+                config=rerank_config,
+            ) if rerank_enabled else []
+        ),
         "rag_context_chars": len(context),
         "rag_injected_items": injection_audit["rag_injected_items"],
         "rag_omitted_items": injection_audit["rag_omitted_items"],
