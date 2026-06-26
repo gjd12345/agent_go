@@ -13,7 +13,7 @@ from typing import Any
 from eoh_go.experiments.problem_registry import PROBLEMS
 from eoh_go.rag.build_corpus import _is_history_card, load_all_corpora
 from eoh_go.rag.prompt_context import format_prompt_context, format_prompt_context_with_audit
-from eoh_go.rag.retriever import retrieve, score_corpus
+from eoh_go.rag.retriever import RerankConfig, retrieve, retrieve_with_rerank, score_corpus
 from eoh_go.rag.schemas import CorpusItem
 
 
@@ -144,6 +144,9 @@ def build_official_rag_context(
     max_chars: int,
     query: str | None = None,
     selected_card_ids: list[str] | None = None,
+    outcome_summaries: dict[str, object] | None = None,
+    population_features: set[str] | None = None,
+    rerank_config: RerankConfig | None = None,
 ) -> tuple[str, dict[str, Any]]:
     if problem not in OFFICIAL_RAG_PROBLEM_CONFIG:
         raise ValueError(f"Unsupported official RAG problem: {problem}")
@@ -191,7 +194,18 @@ def build_official_rag_context(
         if not strategy_pool:
             raise ValueError(f"No matching cards for IDs: {selected_card_ids}")
     scored = score_corpus(query_text, strategy_pool)
-    retrieved = retrieve(query_text, strategy_pool, top_k=top_k)
+    rerank_enabled = bool(outcome_summaries or population_features)
+    if rerank_enabled:
+        retrieved = retrieve_with_rerank(
+            query_text,
+            strategy_pool,
+            top_k=top_k,
+            outcome_summaries=outcome_summaries,
+            population_features=population_features,
+            config=rerank_config,
+        )
+    else:
+        retrieved = retrieve(query_text, strategy_pool, top_k=top_k)
     context, injection_audit = format_prompt_context_with_audit(
         retrieved, max_chars=max_chars, global_items=global_items
     )
@@ -220,6 +234,9 @@ def build_official_rag_context(
         "rag_truncated_item_id": injection_audit["rag_truncated_item_id"],
         "rag_context_truncated": injection_audit["rag_context_truncated"],
         "rag_context_sections_chars": injection_audit["rag_context_sections_chars"],
+        "rag_rerank_enabled": rerank_enabled,
+        "rag_population_features": sorted(population_features) if population_features else [],
+        "rag_outcome_summary_count": len(outcome_summaries) if outcome_summaries else 0,
     }
     return context, trace
 

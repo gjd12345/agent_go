@@ -125,7 +125,7 @@ def run_v3_loop(
         if not real_run:
             print(f"[DRY] cards={cards}, query={query[:80]}...")
             dm_cmd = [
-                sys.executable, "-m", "eoh_go.experiments.manifest_runner",
+                sys.executable, "-m", "eoh_go.experiments.batch_runner",
                 "--manifest", str(manifest_path),
                 "--output-dir", output_dir,
                 "--dry-run",
@@ -138,7 +138,7 @@ def run_v3_loop(
         # Real run
         print(f"[RUN] cards={cards}")
         run_cmd = [
-            sys.executable, "-m", "eoh_go.experiments.manifest_runner",
+            sys.executable, "-m", "eoh_go.experiments.batch_runner",
             "--manifest", str(manifest_path),
             "--output-dir", output_dir,
             "--force",
