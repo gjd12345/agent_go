@@ -25,9 +25,9 @@ Do not treat a single run as stable evidence. Mark it as smoke, pilot, or repeat
 - `AGENTS.md`
 - `eoh_go_workspace/reports/auto_experiment_reports/README.md`
 - `eoh_go_workspace/reports/auto_experiment_reports/tocc_best_code_records.md`
-- `eoh_go/experiments/run_experiment_manifest.py`
-- `eoh_go/experiments/summarize_manifest_runs.py`
-- `eoh_go/experiments/operator_card_controller.py`
+- `eoh_go/experiments/batch_runner.py`
+- `eoh_go/experiments/reports/run_summarizer.py`
+- `eoh_go/tocc/controller.py`
 
 ## Standard Commands
 
@@ -42,7 +42,7 @@ go build -o /tmp/eoh_go_mainbin .
 For manifest dry-runs:
 
 ```bash
-PYTHONPATH=. python3 -m eoh_go.experiments.manifest_runner \
+PYTHONPATH=. python3 -m eoh_go.experiments.batch_runner \
   --manifest <manifest.json> \
   --output-dir eoh_go_workspace/reports/auto_experiment_reports \
   --dry-run

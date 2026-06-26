@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from eoh_go.experiments.official_eoh_smoke import (
+from eoh_go.experiments.problem_registry import (
     parse_bp_online_output,
     parse_cvrp_construct_output,
     parse_tsp_construct_output,

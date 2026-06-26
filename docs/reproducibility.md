@@ -66,7 +66,7 @@ go build -o mainbin main.go routing.go
 ### Dry-run (no API calls)
 
 ```bash
-python -m eoh_go.experiments.manifest_runner \
+python -m eoh_go.experiments.batch_runner \
     --manifest path/to/manifest.json --dry-run
 ```
 
@@ -75,7 +75,7 @@ python -m eoh_go.experiments.manifest_runner \
 Requires `EOH_OFFICIAL_ROOT` and `EOH_OFFICIAL_PYTHON` set:
 
 ```bash
-python -m eoh_go.experiments.official_eoh_run \
+python -m eoh_go.experiments.eoh_single_runner \
     --problem bp_online --arm pure_eoh --generations 0 --pop-size 4
 ```
 

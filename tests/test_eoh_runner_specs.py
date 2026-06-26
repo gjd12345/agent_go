@@ -110,7 +110,7 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
                 pass
 
     def test_obp_smoke_loads_latest_offspring_audit(self) -> None:
-        from eoh_go.experiments.smokes.eoh_obp_smoke import _latest_offspring_audit
+        from eoh_go.experiments.legacy.smokes.eoh_obp_smoke import _latest_offspring_audit
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

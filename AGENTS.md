@@ -143,13 +143,13 @@ Gatekeeper enforces: cards exist, problem prefix matches, no forbidden fields.
 
 | Path | Purpose |
 |------|---------|
-| `eoh_go/experiments/official_eoh_run.py` | Official EOH benchmark runner |
-| `eoh_go/experiments/operator_card_controller.py` | V1 rule-based TOCC controller |
-| `eoh_go/experiments/tocc_agent.py` | V2 LLM proposer (trace → proposal) |
-| `eoh_go/experiments/tocc_gatekeeper.py` | V2 rule validator (R1-R11, alias support) |
-| `eoh_go/experiments/tocc_v2_pipeline.py` | V2 orchestrator (agent → gatekeeper) |
-| `eoh_go/experiments/run_experiment_manifest.py` | Manifest-driven experiment runner |
-| `eoh_go/experiments/summarize_manifest_runs.py` | Auto summarizer (tables + code + report) |
+| `eoh_go/experiments/eoh_single_runner.py` | Official EOH benchmark single-runner |
+| `eoh_go/tocc/controller.py` | V1 rule-based TOCC controller |
+| `eoh_go/tocc/agent.py` | V2 LLM proposer (trace -> proposal) |
+| `eoh_go/tocc/gatekeeper.py` | V2 rule validator (R1-R11, alias support) |
+| `eoh_go/tocc/pipeline.py` | V2 orchestrator (agent -> gatekeeper) |
+| `eoh_go/experiments/batch_runner.py` | Manifest-driven experiment runner |
+| `eoh_go/experiments/reports/run_summarizer.py` | Auto summarizer (tables + code + report) |
 | `eoh_go/rag/build_corpus.py` | Corpus building + mode filtering |
 | `eoh_go/rag/retriever.py` | Keyword-weighted retrieval |
 | `eoh_go/rag/prompt_context.py` | Prompt formatting (API RULES + STRATEGY CARDS) |
@@ -226,7 +226,7 @@ Wait for user nod before writing. Keep updates targeted — don't rewrite the wh
 export $(grep -v '^#' ~/.config/agent_go/chatrhino.env | xargs)
 
 # Run ablation pair
-python3 -m eoh_go.experiments.grids.eoh_arrival_grid \
+python3 -m eoh_go.experiments.grids.arrival_scale_grid \
   --root . --problem rc101.json rc102.json --density d50 d75 \
   --arrival-scale 1.0 --pop-size 8 --generations 1 \
   --rag-mode literature --rag-top-k 0 --rag-max-chars 2500 \

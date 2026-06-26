@@ -62,7 +62,7 @@ def main() -> None:
             cmd = [
                 sys.executable,
                 "-m",
-                "eoh_go.experiments.grids.eoh_arrival_grid",
+                "eoh_go.experiments.grids.arrival_scale_grid",
                 "--root",
                 str(root),
                 "--problem",

@@ -9,7 +9,7 @@ from argparse import Namespace
 from pathlib import Path
 from unittest.mock import patch
 
-from eoh_go.experiments.official_eoh_run import (
+from eoh_go.experiments.eoh_single_runner import (
     _runner_script,
     _tail_text,
     build_official_rag_context,
@@ -224,7 +224,7 @@ class OfficialEohRunTests(unittest.TestCase):
                     rag_query="",
                 )
                 with patch(
-                    "eoh_go.experiments.official_eoh_run.subprocess.run",
+                    "eoh_go.experiments.eoh_single_runner.subprocess.run",
                     side_effect=subprocess.TimeoutExpired(cmd=["python"], timeout=1, output=b"", stderr=b""),
                 ):
                     payload = run_official_eoh(args)
