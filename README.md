@@ -42,7 +42,7 @@ python -m unittest discover -s tests -q
 To run a small EOH grid, configure the DeepSeek/OpenAI-compatible API key in your environment first, then use:
 
 ```powershell
-python -m eoh_go.experiments.eoh_arrival_grid `
+python -m eoh_go.experiments.grids.eoh_arrival_grid `
   --root "." `
   --problem rc101.json `
   --density d25 --density d50 --density d75 `

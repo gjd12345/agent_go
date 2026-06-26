@@ -46,8 +46,8 @@
   - `literature_rag`: 只检索 problem-specific literature cards，不混入 history。
   - `history_rag`: 只检索 `history_{problem}_*` synthesized cards。
   - `mixed_rag`: literature + history 去重后共同检索。
-- `run_experiment_manifest.py` 支持 `mixed_rag`。
-- `operator_card_controller.py` 将 `history_rag` / `mixed_rag` 视为 RAG card arms，继续执行卡级诊断。
+- `manifest_runner.py` 支持 `mixed_rag`。
+- `operator_card_controller.py`（现 `eoh_go/tocc/controller.py`）将 `history_rag` / `mixed_rag` 视为 RAG card arms，继续执行卡级诊断。
 
 验证：
 
@@ -370,7 +370,7 @@ LLM actually called: no
 set -a
 source ~/.config/agent_go/chatrhino.env
 set +a
-caffeinate -i -m -s python3 -m eoh_go.experiments.run_experiment_manifest \
+caffeinate -i -m -s python3 -m eoh_go.experiments.manifest_runner \
   --manifest eoh_go_workspace/experiments/manifests/tocc_history_mixed_cvrp_smoke.json \
   --output-dir eoh_go_workspace/reports/auto_experiment_reports \
   --force
@@ -397,7 +397,7 @@ mixed_history_far_regret:
 已执行 summary：
 
 ```text
-PYTHONPATH=. python3 -m eoh_go.experiments.summarize_manifest_runs \
+PYTHONPATH=. python3 -m eoh_go.experiments.reports.summarize_manifest_runs \
   --input eoh_go_workspace/reports/auto_experiment_reports/tocc_history_mixed_cvrp_smoke \
   --no-card-memory-write
 ```

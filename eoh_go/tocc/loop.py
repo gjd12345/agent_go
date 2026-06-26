@@ -41,13 +41,13 @@ def run_v3_loop(
         if not real_run:
             # Dry-run: use V1 rule controller (fast, no API)
             cmd = [
-                sys.executable, "-m", "eoh_go.experiments.operator_card_controller",
+                sys.executable, "-m", "eoh_go.tocc.controller",
                 "--trace", current_trace,
             ]
         else:
             # Real-run: use V2 LLM agent
             cmd = [
-                sys.executable, "-m", "eoh_go.experiments.tocc_v2_pipeline",
+                sys.executable, "-m", "eoh_go.tocc.pipeline",
                 "--trace", current_trace,
                 "--problem", problem,
                 "--available-cards", ",".join(available_cards),

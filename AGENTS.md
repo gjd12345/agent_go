@@ -226,7 +226,7 @@ Wait for user nod before writing. Keep updates targeted — don't rewrite the wh
 export $(grep -v '^#' ~/.config/agent_go/chatrhino.env | xargs)
 
 # Run ablation pair
-python3 -m eoh_go.experiments.eoh_arrival_grid \
+python3 -m eoh_go.experiments.grids.eoh_arrival_grid \
   --root . --problem rc101.json rc102.json --density d50 d75 \
   --arrival-scale 1.0 --pop-size 8 --generations 1 \
   --rag-mode literature --rag-top-k 0 --rag-max-chars 2500 \

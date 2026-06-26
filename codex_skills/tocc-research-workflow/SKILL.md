@@ -42,7 +42,7 @@ go build -o /tmp/eoh_go_mainbin .
 For manifest dry-runs:
 
 ```bash
-PYTHONPATH=. python3 -m eoh_go.experiments.run_experiment_manifest \
+PYTHONPATH=. python3 -m eoh_go.experiments.manifest_runner \
   --manifest <manifest.json> \
   --output-dir eoh_go_workspace/reports/auto_experiment_reports \
   --dry-run

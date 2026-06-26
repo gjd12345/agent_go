@@ -100,7 +100,7 @@ $env:DEEPSEEK_MODEL="deepseek-v4-flash"
 然后运行一个 RC101 的小网格：
 
 ```powershell
-python -m eoh_go.experiments.eoh_arrival_grid `
+python -m eoh_go.experiments.grids.eoh_arrival_grid `
   --root "." `
   --problem rc101.json `
   --density d25 --density d50 --density d75 `

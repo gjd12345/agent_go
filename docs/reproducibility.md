@@ -66,7 +66,7 @@ go build -o mainbin main.go routing.go
 ### Dry-run (no API calls)
 
 ```bash
-python -m eoh_go.experiments.run_experiment_manifest \
+python -m eoh_go.experiments.manifest_runner \
     --manifest path/to/manifest.json --dry-run
 ```
 
