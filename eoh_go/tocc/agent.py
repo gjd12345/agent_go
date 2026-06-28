@@ -72,6 +72,7 @@ def _flatten_trace(summary_path: str) -> dict[str, Any]:
 
     best_code = run_sum.get("best_code", "")
     code_family = list(_get_code_family(best_code))
+    population_features = list(rag.get("rag_population_features") or [])
 
     return {
         "problem": payload.get("problem", ""),
@@ -83,6 +84,16 @@ def _flatten_trace(summary_path: str) -> dict[str, Any]:
         "rag_context_chars": rag.get("rag_context_chars"),
         "rag_max_chars": rag.get("rag_max_chars"),
         "rag_strategy_pool_size": rag.get("rag_strategy_pool_size"),
+        "rag_candidate_card_ids": rag.get("rag_candidate_card_ids", []),
+        "rag_candidate_card_source": rag.get("rag_candidate_card_source"),
+        "rag_candidate_pool_size_before_filter": rag.get("rag_candidate_pool_size_before_filter"),
+        "rag_candidate_pool_size_after_filter": rag.get("rag_candidate_pool_size_after_filter"),
+        "rag_selection_space_warning": rag.get("rag_selection_space_warning", []),
+        "rag_rerank_enabled": rag.get("rag_rerank_enabled"),
+        "rag_rerank_scores": list(rag.get("rag_rerank_scores") or [])[:8],
+        "rag_outcome_summary_count": rag.get("rag_outcome_summary_count"),
+        "rag_population_feature_count": len(population_features),
+        "rag_population_features": population_features[:20],
         "valid_candidates": run_sum.get("valid_candidates"),
         "population_size": run_sum.get("population_size"),
         "best_objective": run_sum.get("best_objective"),
@@ -110,13 +121,26 @@ def _build_user_prompt(trace: dict[str, Any]) -> str:
     items = trace.get("rag_selected_items", [])
     titles = trace.get("rag_selected_titles", [])
     scores = trace.get("rag_all_scores", [])
+    candidate_ids = trace.get("rag_candidate_card_ids", [])
+    rerank_scores = trace.get("rag_rerank_scores", [])
 
     parts = [
         f"Problem: {trace.get('problem')}",
         f"Arm: {trace.get('arm')}",
         f"RAG Query: {trace.get('rag_query')}",
+        (
+            f"Candidate Pool: {trace.get('rag_candidate_card_source') or 'none'} "
+            f"({trace.get('rag_candidate_pool_size_after_filter')}/"
+            f"{trace.get('rag_candidate_pool_size_before_filter')}): {candidate_ids}"
+        ),
         f"Selected Cards ({len(items)}): {', '.join(f'{i}({t})' for i, t in zip(items, titles))}",
         f"Card Scores: {', '.join(s['id'] + '=' + str(s['score']) for s in scores[:5])}",
+        f"Rerank Enabled: {trace.get('rag_rerank_enabled')}",
+        f"Outcome Summary Count: {trace.get('rag_outcome_summary_count')}",
+        f"Population Feature Count: {trace.get('rag_population_feature_count')}",
+        f"Population Features: {trace.get('rag_population_features', [])}",
+        f"Selection Warnings: {trace.get('rag_selection_space_warning', [])}",
+        f"Top Rerank Scores: {json.dumps(rerank_scores, ensure_ascii=False)}",
         f"Context: {trace.get('rag_context_chars')}/{trace.get('rag_max_chars')} chars, pool_size={trace.get('rag_strategy_pool_size')}",
         f"Valid Candidates: {trace.get('valid_candidates')}/{trace.get('population_size')}",
         f"Best Objective: {trace.get('best_objective')}",

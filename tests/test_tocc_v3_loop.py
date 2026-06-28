@@ -109,6 +109,53 @@ class ToccV3LoopTests(unittest.TestCase):
         self.assertIn("12.821", prompt)
         self.assertIn("cvrp_far_first", prompt)
 
+    def test_prompt_contains_candidate_pool_and_rerank_trace(self):
+        from eoh_go.tocc.agent import _build_user_prompt, _flatten_trace
+
+        rerank_scores = [
+            {"id": f"card_{index}", "final_score": 20 - index, "population_overlap": 0.1}
+            for index in range(10)
+        ]
+        population_features = [f"feature_{index}" for index in range(25)]
+        trace = {
+            "problem": "tsp_construct",
+            "arm": "literature_rag",
+            "rag_trace": {
+                "rag_candidate_card_ids": ["tsp_regret_insertion", "tsp_farthest_insertion"],
+                "rag_candidate_card_source": "candidate_card_ids",
+                "rag_candidate_pool_size_before_filter": 8,
+                "rag_candidate_pool_size_after_filter": 2,
+                "rag_selection_space_warning": ["candidate_pool_size_lte_top_k"],
+                "rag_rerank_enabled": True,
+                "rag_rerank_scores": rerank_scores,
+                "rag_outcome_summary_count": 3,
+                "rag_population_features": population_features,
+            },
+            "run_summary": {"best_code": "regret = second_best - best"},
+        }
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as handle:
+            json.dump(trace, handle)
+            handle.flush()
+            temp_name = handle.name
+        try:
+            flat = _flatten_trace(temp_name)
+            prompt = _build_user_prompt(flat)
+        finally:
+            os.unlink(temp_name)
+
+        self.assertEqual(8, len(flat["rag_rerank_scores"]))
+        self.assertEqual(20, len(flat["rag_population_features"]))
+        self.assertEqual(25, flat["rag_population_feature_count"])
+        self.assertIn("Candidate Pool: candidate_card_ids", prompt)
+        self.assertIn("2/8", prompt)
+        self.assertIn("Rerank Enabled: True", prompt)
+        self.assertIn("Outcome Summary Count: 3", prompt)
+        self.assertIn("Population Feature Count: 25", prompt)
+        self.assertIn("Selection Warnings: ['candidate_pool_size_lte_top_k']", prompt)
+        self.assertIn("Top Rerank Scores:", prompt)
+        self.assertIn("card_7", prompt)
+        self.assertNotIn("card_8", prompt)
+
 
 if __name__ == "__main__":
     unittest.main()
