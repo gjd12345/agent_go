@@ -1,0 +1,50 @@
+[
+  {
+    "tag": "run_cvrp_construct_A_pure_g1_r1",
+    "problem": "cvrp_construct",
+    "arm": "A_pure",
+    "generation": 1,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 197.3,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/rag_ablation_smoke_cvrp/run_cvrp_construct_A_pure_g1_r1",
+    "best_objective": 12.6504,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_B_keyword_g1_r1",
+    "problem": "cvrp_construct",
+    "arm": "B_keyword",
+    "generation": 1,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 330.9,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/rag_ablation_smoke_cvrp/run_cvrp_construct_B_keyword_g1_r1",
+    "best_objective": 13.56371,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_C_keyword_outcome_g1_r1",
+    "problem": "cvrp_construct",
+    "arm": "C_keyword_outcome",
+    "generation": 1,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 466.7,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/rag_ablation_smoke_cvrp/run_cvrp_construct_C_keyword_outcome_g1_r1",
+    "best_objective": 12.71323,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_cvrp_construct_D_keyword_outcome_pop_g1_r1",
+    "problem": "cvrp_construct",
+    "arm": "D_keyword_outcome_pop",
+    "generation": 1,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 389.4,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/rag_ablation_smoke_cvrp/run_cvrp_construct_D_keyword_outcome_pop_g1_r1",
+    "best_objective": 12.85971,
+    "valid_candidates": 4
+  }
+]

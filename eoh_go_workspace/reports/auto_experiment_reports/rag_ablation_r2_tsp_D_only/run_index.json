@@ -1,0 +1,38 @@
+[
+  {
+    "tag": "run_tsp_construct_D_keyword_outcome_pop_g4_r1",
+    "problem": "tsp_construct",
+    "arm": "D_keyword_outcome_pop",
+    "generation": 4,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 563.1,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/rag_ablation_r2_tsp_D_only/run_tsp_construct_D_keyword_outcome_pop_g4_r1",
+    "best_objective": 6.68218,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_tsp_construct_D_keyword_outcome_pop_g4_r2",
+    "problem": "tsp_construct",
+    "arm": "D_keyword_outcome_pop",
+    "generation": 4,
+    "repeat": 2,
+    "status": "ok",
+    "runtime_s": 509.2,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/rag_ablation_r2_tsp_D_only/run_tsp_construct_D_keyword_outcome_pop_g4_r2",
+    "best_objective": 6.57418,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_tsp_construct_D_keyword_outcome_pop_g4_r3",
+    "problem": "tsp_construct",
+    "arm": "D_keyword_outcome_pop",
+    "generation": 4,
+    "repeat": 3,
+    "status": "ok",
+    "runtime_s": 636.4,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/rag_ablation_r2_tsp_D_only/run_tsp_construct_D_keyword_outcome_pop_g4_r3",
+    "best_objective": 6.10999,
+    "valid_candidates": 4
+  }
+]
