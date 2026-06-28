@@ -41,8 +41,7 @@ class RagContextRequest:
     top_k: int
     max_chars: int
     candidate_card_ids: list[str] | None = None
-    selected_card_ids: list[str] | None = None
-    cards: list[str] | None = None
+    candidate_card_source: str = "none"
     outcome_summaries: dict[str, object] | None = None
     population_features: set[str] | None = None
     rerank_config: RerankConfig | None = None
@@ -116,17 +115,37 @@ def _dedupe_preserve_order(values: list[str] | None) -> list[str]:
     return result
 
 
+_CANDIDATE_CARD_SOURCES = {"candidate_card_ids", "selected_card_ids", "cards", "none"}
+
+
+def resolve_candidate_card_fields(
+    *,
+    candidate_card_ids: list[str] | None = None,
+    selected_card_ids: list[str] | None = None,
+    cards: list[str] | None = None,
+) -> tuple[str, list[str]]:
+    """Resolve legacy public inputs to one canonical candidate allowlist."""
+    for source, values in (
+        ("candidate_card_ids", candidate_card_ids),
+        ("selected_card_ids", selected_card_ids),
+        ("cards", cards),
+    ):
+        resolved = _dedupe_preserve_order(values)
+        if resolved:
+            return source, resolved
+    return "none", []
+
+
 def _candidate_source(request: RagContextRequest) -> tuple[str, list[str]]:
     candidates = _dedupe_preserve_order(request.candidate_card_ids)
-    if candidates:
-        return "candidate_card_ids", candidates
-    selected = _dedupe_preserve_order(request.selected_card_ids)
-    if selected:
-        return "selected_card_ids", selected
-    cards = _dedupe_preserve_order(request.cards)
-    if cards:
-        return "cards", cards
-    return "none", []
+    if not candidates:
+        return "none", []
+    source = request.candidate_card_source or "candidate_card_ids"
+    if source == "none":
+        source = "candidate_card_ids"
+    if source not in _CANDIDATE_CARD_SOURCES:
+        raise ValueError(f"Unsupported candidate card source: {source}")
+    return source, candidates
 
 
 def _filter_strategy_pool(
@@ -311,6 +330,11 @@ def build_official_rag_context(
     candidate_card_ids: list[str] | None = None,
     cards: list[str] | None = None,
 ) -> tuple[str, dict[str, Any]]:
+    candidate_source, effective_candidate_ids = resolve_candidate_card_fields(
+        candidate_card_ids=candidate_card_ids,
+        selected_card_ids=selected_card_ids,
+        cards=cards,
+    )
     return build_rag_context(
         project_root,
         RagContextRequest(
@@ -319,9 +343,8 @@ def build_official_rag_context(
             query=query,
             top_k=top_k,
             max_chars=max_chars,
-            candidate_card_ids=candidate_card_ids,
-            selected_card_ids=selected_card_ids,
-            cards=cards,
+            candidate_card_ids=effective_candidate_ids or None,
+            candidate_card_source=candidate_source,
             outcome_summaries=outcome_summaries,
             population_features=population_features,
             rerank_config=rerank_config,

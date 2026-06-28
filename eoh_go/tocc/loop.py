@@ -16,6 +16,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+from eoh_go.tocc.contracts import TOCC_CANDIDATE_POOL_STRATEGY
+
 MAX_ITERATIONS = 2
 
 
@@ -75,7 +77,7 @@ def run_v3_loop(
             safe_arm = {
                 "name": f"v1_{diagnosis}",
                 "runner_arm": "literature_rag",
-                "context_strategy": "tocc_selected_cards",
+                "context_strategy": TOCC_CANDIDATE_POOL_STRATEGY,
                 "rag_query": query,
                 "candidate_card_ids": cards,
             }

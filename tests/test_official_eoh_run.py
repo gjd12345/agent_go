@@ -209,6 +209,20 @@ class OfficialEohRunTests(unittest.TestCase):
         self.assertEqual(["tsp_construct_api_skeleton"], [item["id"] for item in trace["rag_global_items"]])
         self.assertIn("API RULES", context)
 
+    def test_cards_legacy_fallback_is_normalized_at_outer_builder(self) -> None:
+        _, trace = build_official_rag_context(
+            Path.cwd(),
+            "tsp_construct",
+            "literature_rag",
+            top_k=1,
+            max_chars=3000,
+            query="regret",
+            cards=["tsp_regret_insertion"],
+        )
+
+        self.assertEqual(["tsp_regret_insertion"], trace["rag_candidate_card_ids"])
+        self.assertEqual("cards", trace["rag_candidate_card_source"])
+
     def test_candidate_pool_lte_top_k_emits_selection_space_warning(self) -> None:
         _, trace = build_official_rag_context(
             Path.cwd(),
