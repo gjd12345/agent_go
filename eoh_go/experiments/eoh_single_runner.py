@@ -383,6 +383,7 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
             args.rag_query or None,
             outcome_summaries=outcome_summaries,
             population_features=population_features,
+            rerank_mode=args.rag_rerank,
             **candidate_kwargs,
         )
         context_path = run_dir / "rag_context.txt"
@@ -552,6 +553,7 @@ def main() -> None:
     )
     parser.add_argument("--prev-run-dir", default="", help="Previous run dir to extract population features for rerank")
     parser.add_argument("--outcome-file", default="", help="Card outcome JSONL file used for outcome-aware rerank")
+    parser.add_argument("--rag-rerank", default="feature_outcome", choices=["keyword", "feature_outcome", "llm"], help="Rerank mode")
     parser.add_argument("--pop-size", type=int, default=2)
     parser.add_argument("--generations", type=int, default=1)
     parser.add_argument("--operators", default="i1")

@@ -45,6 +45,7 @@ class RagContextRequest:
     outcome_summaries: dict[str, object] | None = None
     population_features: set[str] | None = None
     rerank_config: RerankConfig | None = None
+    rerank_mode: str = "feature_outcome"
 
 
 def _matches_problem_strategy(item: CorpusItem, problem: str) -> bool:
@@ -230,18 +231,42 @@ def build_rag_context(
     pool_size_after_filter = len(strategy_pool)
 
     scored = score_corpus(query_text, strategy_pool)
+
+    llm_rerank_trace = None
     rerank_enabled = bool(request.outcome_summaries or request.population_features)
-    if rerank_enabled:
-        retrieved = retrieve_with_rerank(
+
+    if request.rerank_mode == "llm":
+        from eoh_go.rag.llm_reranker import llm_rerank, LlmRerankTrace
+        llm_selected, llm_rerank_trace = llm_rerank(
             query_text,
             strategy_pool,
             top_k=top_k,
+            problem=request.problem,
+            population_features=request.population_features,
+            outcome_summaries=request.outcome_summaries,
+        )
+        if llm_selected:
+            retrieved = llm_selected
+        else:
+            if rerank_enabled:
+                retrieved = retrieve_with_rerank(
+                    query_text, strategy_pool, top_k=top_k,
+                    outcome_summaries=request.outcome_summaries,
+                    population_features=request.population_features,
+                    config=request.rerank_config,
+                )
+            else:
+                retrieved = retrieve(query_text, strategy_pool, top_k=top_k)
+    elif rerank_enabled:
+        retrieved = retrieve_with_rerank(
+            query_text, strategy_pool, top_k=top_k,
             outcome_summaries=request.outcome_summaries,
             population_features=request.population_features,
             config=request.rerank_config,
         )
     else:
         retrieved = retrieve(query_text, strategy_pool, top_k=top_k)
+
     score_by_id = {item.id: score for score, item in scored}
     zero_score_candidate_ids = [
         card_id
@@ -309,10 +334,17 @@ def build_rag_context(
         "rag_truncated_item_id": injection_audit["rag_truncated_item_id"],
         "rag_context_truncated": injection_audit["rag_context_truncated"],
         "rag_context_sections_chars": injection_audit["rag_context_sections_chars"],
-        "rag_rerank_enabled": rerank_enabled,
+        "rag_rerank_enabled": rerank_enabled if request.rerank_mode != "llm" else False,
+        "rag_rerank_mode": request.rerank_mode,
         "rag_population_features": sorted(request.population_features) if request.population_features else [],
+        "rag_population_feature_count": len(request.population_features) if request.population_features else 0,
         "rag_outcome_summary_count": len(request.outcome_summaries) if request.outcome_summaries else 0,
     }
+    if llm_rerank_trace is not None:
+        trace["rag_llm_rerank_latency_ms"] = llm_rerank_trace.latency_ms
+        trace["rag_llm_rerank_selected"] = llm_rerank_trace.selected_ids
+        trace["rag_llm_rerank_reasoning"] = llm_rerank_trace.reasoning
+        trace["rag_llm_rerank_fallback_reason"] = llm_rerank_trace.fallback_reason
     return context, trace
 
 
@@ -329,6 +361,7 @@ def build_official_rag_context(
     rerank_config: RerankConfig | None = None,
     candidate_card_ids: list[str] | None = None,
     cards: list[str] | None = None,
+    rerank_mode: str = "feature_outcome",
 ) -> tuple[str, dict[str, Any]]:
     candidate_source, effective_candidate_ids = resolve_candidate_card_fields(
         candidate_card_ids=candidate_card_ids,
@@ -348,5 +381,6 @@ def build_official_rag_context(
             outcome_summaries=outcome_summaries,
             population_features=population_features,
             rerank_config=rerank_config,
+            rerank_mode=rerank_mode,
         ),
     )
