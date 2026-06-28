@@ -103,7 +103,7 @@ def _build_cmd(
         "--official-root", manifest.get("official_root") or _DEFAULT_ROOT,
         "--python", manifest.get("python_exe") or _DEFAULT_PYTHON or sys.executable,
     ]
-    rag = manifest.get("rag", {})
+    rag = {**manifest.get("rag", {}), **arm.get("rag", {})}
     if arm["runner_arm"] in ("literature_rag", "history_rag", "mixed_rag"):
         cmd.extend(["--rag-top-k", str(rag.get("top_k", 2))])
         cmd.extend(["--rag-max-chars", str(rag.get("max_chars", 2500))])
@@ -113,7 +113,10 @@ def _build_cmd(
         if card_ids:
             cmd.extend(["--selected-card-ids", ",".join(card_ids)])
             cmd.extend(["--candidate-card-source", card_source])
-        effective_prev = prev_run_dir or rag.get("prev_run_dir", "")
+        if rag.get("use_prev_run_dir_chain"):
+            effective_prev = prev_run_dir or rag.get("prev_run_dir", "")
+        else:
+            effective_prev = rag.get("prev_run_dir", "")
         if effective_prev:
             cmd.extend(["--prev-run-dir", effective_prev])
         if rag.get("outcome_file"):
@@ -245,7 +248,10 @@ def main() -> None:
                                 run_index[-1]["status"] = "ok_but_summary_failure"
 
                     print(f"[DONE] {run_tag}  status={status}  elapsed={elapsed}s")
-                    prev_run_dir = run_out
+                    if status == "ok" or (summary_path.exists() and json.loads(summary_path.read_text(encoding="utf-8")).get("run_summary", {}).get("ok")):
+                        prev_run_dir = run_out
+                    else:
+                        prev_run_dir = ""
 
     if not args.dry_run and not args.no_run:
         index_path = output_root / "run_index.json"

@@ -140,6 +140,7 @@ class ExperimentManifestRunnerTests(unittest.TestCase):
     def test_build_cmd_passes_prev_run_dir_when_provided(self) -> None:
         manifest = self._minimal_manifest()
         arm = manifest["arms"][0]
+        arm["rag"] = {"use_prev_run_dir_chain": True}
         cmd = _build_cmd(manifest, "tsp_construct", arm, 0, 2, "/tmp/out_r2", prev_run_dir="/tmp/out_r1")
 
         self.assertIn("--prev-run-dir", cmd)
@@ -165,6 +166,7 @@ class ExperimentManifestRunnerTests(unittest.TestCase):
         manifest = self._minimal_manifest()
         manifest["rag"] = {"top_k": 2, "max_chars": 2500, "prev_run_dir": "/tmp/manifest_prev"}
         arm = manifest["arms"][0]
+        arm["rag"] = {"use_prev_run_dir_chain": True}
         cmd = _build_cmd(manifest, "tsp_construct", arm, 0, 1, "/tmp/out_r2", prev_run_dir="/tmp/arg_prev")
 
         self.assertIn("/tmp/arg_prev", cmd)
