@@ -3,6 +3,7 @@
 from .prompt_context import format_prompt_context, format_prompt_context_with_audit
 from .features import (
     STRATEGY_FEATURES,
+    extract_card_features,
     extract_code_features,
     extract_identifier_tokens,
     extract_strategy_features,
@@ -19,6 +20,7 @@ __all__ = [
     "CorpusItem",
     "RerankConfig",
     "STRATEGY_FEATURES",
+    "extract_card_features",
     "extract_code_features",
     "extract_identifier_tokens",
     "extract_strategy_features",

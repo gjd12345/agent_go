@@ -130,22 +130,6 @@
       "aliases": [],
       "canonical_target": null,
       "classification": "metadata_tag",
-      "corpus_tag_count": 0,
-      "history_tag_count": 0,
-      "in_code_stopwords": false,
-      "in_reranker_stopwords": true,
-      "name": "algorithm",
-      "observed_in": [
-        "reranker._FEATURE_STOPWORDS"
-      ],
-      "overlap_enabled": false,
-      "patterns": [],
-      "risk_notes": []
-    },
-    {
-      "aliases": [],
-      "canonical_target": null,
-      "classification": "metadata_tag",
       "corpus_tag_count": 4,
       "history_tag_count": 0,
       "in_code_stopwords": false,
@@ -196,11 +180,10 @@
       "corpus_tag_count": 7,
       "history_tag_count": 0,
       "in_code_stopwords": false,
-      "in_reranker_stopwords": true,
+      "in_reranker_stopwords": false,
       "name": "api",
       "observed_in": [
-        "corpus:api_constraints.jsonl",
-        "reranker._FEATURE_STOPWORDS"
+        "corpus:api_constraints.jsonl"
       ],
       "overlap_enabled": false,
       "patterns": [],
@@ -408,22 +391,6 @@
       "classification": "metadata_tag",
       "corpus_tag_count": 0,
       "history_tag_count": 0,
-      "in_code_stopwords": false,
-      "in_reranker_stopwords": true,
-      "name": "bp",
-      "observed_in": [
-        "reranker._FEATURE_STOPWORDS"
-      ],
-      "overlap_enabled": false,
-      "patterns": [],
-      "risk_notes": []
-    },
-    {
-      "aliases": [],
-      "canonical_target": null,
-      "classification": "metadata_tag",
-      "corpus_tag_count": 0,
-      "history_tag_count": 0,
       "in_code_stopwords": true,
       "in_reranker_stopwords": false,
       "name": "break",
@@ -481,22 +448,6 @@
       "risk_notes": [
         "feasible/demand are weak tokens; capacity is also an API variable"
       ]
-    },
-    {
-      "aliases": [],
-      "canonical_target": null,
-      "classification": "metadata_tag",
-      "corpus_tag_count": 0,
-      "history_tag_count": 0,
-      "in_code_stopwords": false,
-      "in_reranker_stopwords": true,
-      "name": "card",
-      "observed_in": [
-        "reranker._FEATURE_STOPWORDS"
-      ],
-      "overlap_enabled": false,
-      "patterns": [],
-      "risk_notes": []
     },
     {
       "aliases": [],
@@ -652,13 +603,12 @@
       "corpus_tag_count": 26,
       "history_tag_count": 14,
       "in_code_stopwords": false,
-      "in_reranker_stopwords": true,
+      "in_reranker_stopwords": false,
       "name": "construct",
       "observed_in": [
         "corpus:algorithm_cards.jsonl",
         "corpus:api_constraints.jsonl",
-        "history_card_tags",
-        "reranker._FEATURE_STOPWORDS"
+        "history_card_tags"
       ],
       "overlap_enabled": false,
       "patterns": [],
@@ -719,13 +669,12 @@
       "corpus_tag_count": 17,
       "history_tag_count": 11,
       "in_code_stopwords": false,
-      "in_reranker_stopwords": true,
+      "in_reranker_stopwords": false,
       "name": "cvrp",
       "observed_in": [
         "corpus:algorithm_cards.jsonl",
         "corpus:api_constraints.jsonl",
-        "history_card_tags",
-        "reranker._FEATURE_STOPWORDS"
+        "history_card_tags"
       ],
       "overlap_enabled": false,
       "patterns": [],
@@ -1145,13 +1094,12 @@
       "corpus_tag_count": 17,
       "history_tag_count": 14,
       "in_code_stopwords": false,
-      "in_reranker_stopwords": true,
+      "in_reranker_stopwords": false,
       "name": "evolved",
       "observed_in": [
         "corpus:algorithm_cards.jsonl",
         "corpus:code_examples.jsonl",
-        "history_card_tags",
-        "reranker._FEATURE_STOPWORDS"
+        "history_card_tags"
       ],
       "overlap_enabled": false,
       "patterns": [],
@@ -1707,22 +1655,6 @@
       "aliases": [],
       "canonical_target": null,
       "classification": "metadata_tag",
-      "corpus_tag_count": 0,
-      "history_tag_count": 0,
-      "in_code_stopwords": false,
-      "in_reranker_stopwords": true,
-      "name": "history",
-      "observed_in": [
-        "reranker._FEATURE_STOPWORDS"
-      ],
-      "overlap_enabled": false,
-      "patterns": [],
-      "risk_notes": []
-    },
-    {
-      "aliases": [],
-      "canonical_target": null,
-      "classification": "metadata_tag",
       "corpus_tag_count": 1,
       "history_tag_count": 0,
       "in_code_stopwords": false,
@@ -1822,13 +1754,12 @@
       "corpus_tag_count": 19,
       "history_tag_count": 0,
       "in_code_stopwords": false,
-      "in_reranker_stopwords": true,
+      "in_reranker_stopwords": false,
       "name": "insertships",
       "observed_in": [
         "corpus:algorithm_cards.jsonl",
         "corpus:api_constraints.jsonl",
-        "corpus:code_examples.jsonl",
-        "reranker._FEATURE_STOPWORDS"
+        "corpus:code_examples.jsonl"
       ],
       "overlap_enabled": false,
       "patterns": [],
@@ -2409,28 +2340,11 @@
       "corpus_tag_count": 7,
       "history_tag_count": 0,
       "in_code_stopwords": false,
-      "in_reranker_stopwords": true,
+      "in_reranker_stopwords": false,
       "name": "obp",
       "observed_in": [
         "corpus:algorithm_cards.jsonl",
-        "corpus:api_constraints.jsonl",
-        "reranker._FEATURE_STOPWORDS"
-      ],
-      "overlap_enabled": false,
-      "patterns": [],
-      "risk_notes": []
-    },
-    {
-      "aliases": [],
-      "canonical_target": null,
-      "classification": "metadata_tag",
-      "corpus_tag_count": 0,
-      "history_tag_count": 0,
-      "in_code_stopwords": false,
-      "in_reranker_stopwords": true,
-      "name": "online",
-      "observed_in": [
-        "reranker._FEATURE_STOPWORDS"
+        "corpus:api_constraints.jsonl"
       ],
       "overlap_enabled": false,
       "patterns": [],
@@ -2904,11 +2818,10 @@
       "corpus_tag_count": 7,
       "history_tag_count": 0,
       "in_code_stopwords": false,
-      "in_reranker_stopwords": true,
+      "in_reranker_stopwords": false,
       "name": "safety",
       "observed_in": [
-        "corpus:api_constraints.jsonl",
-        "reranker._FEATURE_STOPWORDS"
+        "corpus:api_constraints.jsonl"
       ],
       "overlap_enabled": false,
       "patterns": [],
@@ -3392,13 +3305,12 @@
       "corpus_tag_count": 9,
       "history_tag_count": 3,
       "in_code_stopwords": false,
-      "in_reranker_stopwords": true,
+      "in_reranker_stopwords": false,
       "name": "tsp",
       "observed_in": [
         "corpus:algorithm_cards.jsonl",
         "corpus:api_constraints.jsonl",
-        "history_card_tags",
-        "reranker._FEATURE_STOPWORDS"
+        "history_card_tags"
       ],
       "overlap_enabled": false,
       "patterns": [],
@@ -3576,22 +3488,6 @@
     {
       "aliases": [],
       "canonical_target": null,
-      "classification": "metadata_tag",
-      "corpus_tag_count": 0,
-      "history_tag_count": 0,
-      "in_code_stopwords": false,
-      "in_reranker_stopwords": true,
-      "name": "vrp",
-      "observed_in": [
-        "reranker._FEATURE_STOPWORDS"
-      ],
-      "overlap_enabled": false,
-      "patterns": [],
-      "risk_notes": []
-    },
-    {
-      "aliases": [],
-      "canonical_target": null,
       "classification": "legacy_observed_feature",
       "corpus_tag_count": 1,
       "history_tag_count": 0,
@@ -3717,7 +3613,7 @@
       "module": "eoh_go/rag/card_synthesis.py"
     },
     {
-      "behavior": "non-stopword tags win; id/title/summary tokens are used only when no tag features remain",
+      "behavior": "delegates card tags and id/title/summary fallback to rag.features.extract_card_features",
       "module": "eoh_go/rag/reranker.py"
     },
     {
@@ -3972,21 +3868,6 @@
       "with",
       "yield"
     ],
-    "reranker": [
-      "algorithm",
-      "api",
-      "bp",
-      "card",
-      "construct",
-      "cvrp",
-      "evolved",
-      "history",
-      "insertships",
-      "obp",
-      "online",
-      "safety",
-      "tsp",
-      "vrp"
-    ]
+    "reranker": []
   }
 }

@@ -157,7 +157,9 @@ def build_inventory(repo_root: Path) -> dict[str, Any]:
         if legacy_code_family is not None
         else "features.STRATEGY_FEATURES"
     )
-    reranker_stopwords = set(_literal_assignment(reranker_path, "_FEATURE_STOPWORDS"))
+    reranker_stopwords = set(
+        _optional_literal_assignment(reranker_path, "_FEATURE_STOPWORDS") or set()
+    )
     all_tags, history_tags, observed_in = _load_corpus_tags(corpus_dir)
 
     for name in synthesis_patterns:
@@ -226,7 +228,7 @@ def build_inventory(repo_root: Path) -> dict[str, Any]:
             },
             {
                 "module": "eoh_go/rag/reranker.py",
-                "behavior": "non-stopword tags win; id/title/summary tokens are used only when no tag features remain",
+                "behavior": "delegates card tags and id/title/summary fallback to rag.features.extract_card_features",
             },
             {
                 "module": "eoh_go/tocc/controller.py",

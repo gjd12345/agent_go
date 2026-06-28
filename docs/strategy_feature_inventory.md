@@ -7,7 +7,7 @@ It records current behavior and proposed classifications; it does not change run
 
 - `eoh_go/rag/features.py`: identifier extraction remains compatible; canonical taxonomy uses aliases and bounded strong patterns; population unions canonical features from valid individuals
 - `eoh_go/rag/card_synthesis.py`: delegates strategy extraction and code-family compatibility wrappers to rag.features
-- `eoh_go/rag/reranker.py`: non-stopword tags win; id/title/summary tokens are used only when no tag features remain
+- `eoh_go/rag/reranker.py`: delegates card tags and id/title/summary fallback to rag.features.extract_card_features
 - `eoh_go/tocc/controller.py`: delegates code-family extraction directly to rag.features.extract_strategy_features
 
 ## Classification
@@ -15,7 +15,7 @@ It records current behavior and proposed classifications; it does not change run
 - **canonical_strategy_feature**: `adaptive_weights`, `best_fit`, `capacity`, `centrality`, `cluster`, `depot`, `destination`, `detour`, `distance`, `farthest`, `first_fit`, `harmonic`, `lookahead`, `nearest`, `normalize`, `penalty`, `regret`, `remaining_aware`, `residual`, `savings`, `sweep`, `tightness`, `two_opt`, `utilization`, `worst_fit`
 - **legacy_observed_feature**: `2opt`, `angle`, `balance`, `best-fit`, `bestfit`, `clarke-wright`, `clustering`, `cost-delta`, `diffusion`, `exp`, `far_first`, `feasibility`, `first-fit`, `firstfit`, `forward_score`, `greedy`, `insertion`, `isolation`, `local-search`, `look_ahead`, `merge`, `pair-savings`, `polynomial`, `progress`, `regret2`, `remaining_capacity`, `residual-capacity`, `rest_capacity`, `return-distance`, `route-consolidation`, `second_best`, `select-next`, `size-class`, `smooth-route`, `sqrt`, `threshold`, `two_hop`, `weighted-score`, `worst-fit`, `worstfit`
 - **weak_context_token**: `alpha`, `beta`, `demand`, `feasible`, `future`, `gamma`, `return`
-- **metadata_tag**: `001`, `002`, `003`, `004`, `algorithm`, `all`, `api`, `append`, `args`, `array`, `balanced`, `binpacking`, `bins`, `bool`, `bp`, `break`, `bsl`, `card`, `case`, `chan`, `class`, `const`, `construct`, `continue`, `current`, `cvrp`, `d25`, `d50`, `d75`, `data`, `def`, `default`, `defer`, `delta`, `demands`, `density`, `dict`, `dispersed`, `else`, `eoh`, `eoh1`, `err`, `error`, `evolved`, `exact`, `except`, `fallback`, `fallthrough`, `false`, `fast`, `finally`, `first`, `float`, `float32`, `float64`, `fmt`, `for`, `func`, `funsearch`, `gen16`, `gen8`, `go`, `goto`, `guard`, `history`, `hst`, `if`, `import`, `index`, `input`, `insertships`, `int`, `interface`, `item`, `items`, `knapsack`, `kwargs`, `lambda`, `len`, `limited-capacity`, `list`, `low-density`, `main`, `make`, `map`, `math`, `matrix`, `medium-density`, `missing-result`, `mixer`, `negative`, `nil`, `node`, `nodes`, `none`, `numpy`, `obj`, `objective`, `obp`, `online`, `optimization`, `output`, `package`, `pass`, `print`, `raise`, `range`, `remaining`, `rest`, `result`, `robust`, `router`, `sa`, `safety`, `score`, `scorebin`, `scores`, `select`, `self`, `set`, `solomon`, `sort`, `splitorders`, `string`, `struct`, `suspicious-low`, `switch`, `timeout`, `topk`, `topk3`, `total`, `true`, `try`, `tsp`, `tuple`, `type`, `unvisited`, `value`, `values`, `var`, `visited`, `vrp`, `window`, `with`, `yield`
+- **metadata_tag**: `001`, `002`, `003`, `004`, `all`, `api`, `append`, `args`, `array`, `balanced`, `binpacking`, `bins`, `bool`, `break`, `bsl`, `case`, `chan`, `class`, `const`, `construct`, `continue`, `current`, `cvrp`, `d25`, `d50`, `d75`, `data`, `def`, `default`, `defer`, `delta`, `demands`, `density`, `dict`, `dispersed`, `else`, `eoh`, `eoh1`, `err`, `error`, `evolved`, `exact`, `except`, `fallback`, `fallthrough`, `false`, `fast`, `finally`, `first`, `float`, `float32`, `float64`, `fmt`, `for`, `func`, `funsearch`, `gen16`, `gen8`, `go`, `goto`, `guard`, `hst`, `if`, `import`, `index`, `input`, `insertships`, `int`, `interface`, `item`, `items`, `knapsack`, `kwargs`, `lambda`, `len`, `limited-capacity`, `list`, `low-density`, `main`, `make`, `map`, `math`, `matrix`, `medium-density`, `missing-result`, `mixer`, `negative`, `nil`, `node`, `nodes`, `none`, `numpy`, `obj`, `objective`, `obp`, `optimization`, `output`, `package`, `pass`, `print`, `raise`, `range`, `remaining`, `rest`, `result`, `robust`, `router`, `sa`, `safety`, `score`, `scorebin`, `scores`, `select`, `self`, `set`, `solomon`, `sort`, `splitorders`, `string`, `struct`, `suspicious-low`, `switch`, `timeout`, `topk`, `topk3`, `total`, `true`, `try`, `tsp`, `tuple`, `type`, `unvisited`, `value`, `values`, `var`, `visited`, `window`, `with`, `yield`
 
 Canonical features are overlap candidates. Legacy observed features remain traceable but default to overlap disabled.
 Weak context tokens must only participate in compound patterns.
@@ -30,11 +30,10 @@ Weak context tokens must only participate in compound patterns.
 | `004` | metadata_tag | `-` | no | corpus:code_examples.jsonl | 2/0 | - |
 | `2opt` | legacy_observed_feature | `two_opt` | no | corpus:algorithm_cards.jsonl | 1/0 | - |
 | `adaptive_weights` | canonical_strategy_feature | `-` | yes | corpus:algorithm_cards.jsonl<br>features.FEATURE_PATTERNS<br>features.STRATEGY_FEATURES<br>history_card_tags | 5/5 | alpha/beta/gamma are weak tokens and must not trigger alone |
-| `algorithm` | metadata_tag | `-` | no | reranker._FEATURE_STOPWORDS | 0/0 | - |
 | `all` | metadata_tag | `-` | no | corpus:code_examples.jsonl<br>corpus:failure_cases.jsonl | 4/0 | - |
 | `alpha` | weak_context_token | `-` | no | - | 0/0 | - |
 | `angle` | legacy_observed_feature | `-` | no | corpus:algorithm_cards.jsonl | 1/0 | - |
-| `api` | metadata_tag | `-` | no | corpus:api_constraints.jsonl<br>reranker._FEATURE_STOPWORDS | 7/0 | - |
+| `api` | metadata_tag | `-` | no | corpus:api_constraints.jsonl | 7/0 | - |
 | `append` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `args` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `array` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
@@ -47,11 +46,9 @@ Weak context tokens must only participate in compound patterns.
 | `binpacking` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:api_constraints.jsonl | 7/0 | - |
 | `bins` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `bool` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
-| `bp` | metadata_tag | `-` | no | reranker._FEATURE_STOPWORDS | 0/0 | - |
 | `break` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `bsl` | metadata_tag | `-` | no | corpus:code_examples.jsonl | 2/0 | - |
 | `capacity` | canonical_strategy_feature | `-` | yes | corpus:algorithm_cards.jsonl<br>features.FEATURE_PATTERNS<br>features.STRATEGY_FEATURES<br>features._CODE_STOPWORDS<br>history_card_tags | 10/9 | feasible/demand are weak tokens; capacity is also an API variable |
-| `card` | metadata_tag | `-` | no | reranker._FEATURE_STOPWORDS | 0/0 | - |
 | `case` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `centrality` | canonical_strategy_feature | `-` | yes | corpus:algorithm_cards.jsonl<br>features.FEATURE_PATTERNS<br>features.STRATEGY_FEATURES<br>history_card_tags | 2/2 | - |
 | `chan` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
@@ -60,11 +57,11 @@ Weak context tokens must only participate in compound patterns.
 | `cluster` | canonical_strategy_feature | `-` | yes | corpus:algorithm_cards.jsonl<br>features.FEATURE_PATTERNS<br>features.STRATEGY_FEATURES | 3/0 | - |
 | `clustering` | legacy_observed_feature | `cluster` | no | corpus:algorithm_cards.jsonl<br>history_card_tags | 2/2 | - |
 | `const` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
-| `construct` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:api_constraints.jsonl<br>history_card_tags<br>reranker._FEATURE_STOPWORDS | 26/14 | - |
+| `construct` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:api_constraints.jsonl<br>history_card_tags | 26/14 | - |
 | `continue` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `cost-delta` | legacy_observed_feature | `-` | no | corpus:algorithm_cards.jsonl | 1/0 | - |
 | `current` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
-| `cvrp` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:api_constraints.jsonl<br>history_card_tags<br>reranker._FEATURE_STOPWORDS | 17/11 | - |
+| `cvrp` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:api_constraints.jsonl<br>history_card_tags | 17/11 | - |
 | `d25` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl | 1/0 | - |
 | `d50` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:code_examples.jsonl | 3/0 | - |
 | `d75` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:code_examples.jsonl | 4/0 | - |
@@ -88,7 +85,7 @@ Weak context tokens must only participate in compound patterns.
 | `eoh1` | metadata_tag | `-` | no | corpus:code_examples.jsonl | 1/0 | - |
 | `err` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `error` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
-| `evolved` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:code_examples.jsonl<br>history_card_tags<br>reranker._FEATURE_STOPWORDS | 17/14 | - |
+| `evolved` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:code_examples.jsonl<br>history_card_tags | 17/14 | - |
 | `exact` | metadata_tag | `-` | no | corpus:code_examples.jsonl | 1/0 | - |
 | `except` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `exp` | legacy_observed_feature | `-` | no | corpus:algorithm_cards.jsonl | 1/0 | - |
@@ -122,14 +119,13 @@ Weak context tokens must only participate in compound patterns.
 | `greedy` | legacy_observed_feature | `-` | no | corpus:algorithm_cards.jsonl | 1/0 | - |
 | `guard` | metadata_tag | `-` | no | corpus:failure_cases.jsonl | 3/0 | - |
 | `harmonic` | canonical_strategy_feature | `-` | yes | corpus:algorithm_cards.jsonl<br>features.FEATURE_PATTERNS<br>features.STRATEGY_FEATURES | 1/0 | - |
-| `history` | metadata_tag | `-` | no | reranker._FEATURE_STOPWORDS | 0/0 | - |
 | `hst` | metadata_tag | `-` | no | corpus:code_examples.jsonl | 1/0 | - |
 | `if` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `import` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `index` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `input` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `insertion` | legacy_observed_feature | `-` | no | corpus:algorithm_cards.jsonl | 4/0 | - |
-| `insertships` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:api_constraints.jsonl<br>corpus:code_examples.jsonl<br>reranker._FEATURE_STOPWORDS | 19/0 | - |
+| `insertships` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:api_constraints.jsonl<br>corpus:code_examples.jsonl | 19/0 | - |
 | `int` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `interface` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `isolation` | legacy_observed_feature | `-` | no | - | 0/0 | - |
@@ -164,8 +160,7 @@ Weak context tokens must only participate in compound patterns.
 | `numpy` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `obj` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `objective` | metadata_tag | `-` | no | corpus:failure_cases.jsonl | 1/0 | - |
-| `obp` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:api_constraints.jsonl<br>reranker._FEATURE_STOPWORDS | 7/0 | - |
-| `online` | metadata_tag | `-` | no | reranker._FEATURE_STOPWORDS | 0/0 | - |
+| `obp` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:api_constraints.jsonl | 7/0 | - |
 | `optimization` | metadata_tag | `-` | no | corpus:api_constraints.jsonl | 1/0 | - |
 | `output` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `package` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
@@ -193,7 +188,7 @@ Weak context tokens must only participate in compound patterns.
 | `route-consolidation` | legacy_observed_feature | `-` | no | corpus:algorithm_cards.jsonl | 1/0 | - |
 | `router` | metadata_tag | `-` | no | corpus:code_examples.jsonl | 4/0 | - |
 | `sa` | metadata_tag | `-` | no | corpus:code_examples.jsonl | 1/0 | - |
-| `safety` | metadata_tag | `-` | no | corpus:api_constraints.jsonl<br>reranker._FEATURE_STOPWORDS | 7/0 | - |
+| `safety` | metadata_tag | `-` | no | corpus:api_constraints.jsonl | 7/0 | - |
 | `savings` | canonical_strategy_feature | `-` | yes | corpus:algorithm_cards.jsonl<br>features.FEATURE_PATTERNS<br>features.STRATEGY_FEATURES<br>history_card_tags | 4/2 | - |
 | `score` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `scorebin` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:api_constraints.jsonl | 7/0 | - |
@@ -222,7 +217,7 @@ Weak context tokens must only participate in compound patterns.
 | `total` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `true` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `try` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
-| `tsp` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:api_constraints.jsonl<br>history_card_tags<br>reranker._FEATURE_STOPWORDS | 9/3 | - |
+| `tsp` | metadata_tag | `-` | no | corpus:algorithm_cards.jsonl<br>corpus:api_constraints.jsonl<br>history_card_tags | 9/3 | - |
 | `tuple` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `two_hop` | legacy_observed_feature | `-` | no | - | 0/0 | - |
 | `two_opt` | canonical_strategy_feature | `-` | yes | features.FEATURE_PATTERNS<br>features.STRATEGY_FEATURES | 0/0 | - |
@@ -233,7 +228,6 @@ Weak context tokens must only participate in compound patterns.
 | `values` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `var` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
 | `visited` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |
-| `vrp` | metadata_tag | `-` | no | reranker._FEATURE_STOPWORDS | 0/0 | - |
 | `weighted-score` | legacy_observed_feature | `-` | no | corpus:algorithm_cards.jsonl | 1/0 | - |
 | `window` | metadata_tag | `-` | no | corpus:code_examples.jsonl | 1/0 | - |
 | `with` | metadata_tag | `-` | no | features._CODE_STOPWORDS | 0/0 | - |

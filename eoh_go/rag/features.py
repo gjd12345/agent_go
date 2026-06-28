@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import re
 
+from .schemas import CorpusItem
+
 
 _CAMEL_SPLIT_RE = re.compile(r"([a-z0-9])([A-Z])")
 _CODE_FEATURE_RE = re.compile(r"[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)*")
@@ -147,6 +149,18 @@ def extract_strategy_features(code: str | None) -> set[str]:
         for feature, patterns in FEATURE_PATTERNS.items()
         if any(_contains_pattern(normalized_code, pattern) for pattern in patterns)
     }
+
+
+def extract_card_features(item: CorpusItem) -> set[str]:
+    """Extract canonical features from card tags, then descriptive text."""
+    tag_features = {
+        canonical
+        for tag in item.tags
+        if (canonical := normalize_strategy_feature(tag)) is not None
+    }
+    if tag_features:
+        return tag_features
+    return extract_strategy_features("\n".join((item.id, item.title, item.summary)))
 
 
 def load_population_features(
