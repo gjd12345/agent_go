@@ -347,6 +347,68 @@ class OfficialEohRunTests(unittest.TestCase):
         self.assertTrue(payload["api_key_present"])
         self.assertNotIn("SECRET_SHOULD_NOT_APPEAR", encoded)
 
+    def test_missing_outcome_file_writes_structured_failure_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = Path(tmp) / "out"
+            missing_outcome = Path(tmp) / "missing_outcomes.jsonl"
+            args = Namespace(
+                official_root=tmp,
+                python="python",
+                output_dir=str(output_dir),
+                problem="tsp_construct",
+                arm="literature_rag",
+                context_file="",
+                pop_size=2,
+                generations=1,
+                operators="i1",
+                n_processes=1,
+                eval_timeout_s=1,
+                llm_timeout_s=1,
+                run_timeout_s=1,
+                use_official_seed=False,
+                api_key_env="MISSING_TEST_KEY",
+                api_endpoint_env="MISSING_TEST_ENDPOINT",
+                model_env="MISSING_TEST_MODEL",
+                llm_model="",
+                rag_top_k=2,
+                rag_max_chars=1800,
+                rag_query="regret",
+                selected_card_ids="tsp_regret_insertion",
+                candidate_card_source="candidate_card_ids",
+                prev_run_dir="",
+                outcome_file=str(missing_outcome),
+            )
+
+            payload = run_official_eoh(args)
+            summary_path = output_dir / "official_eoh_run_summary.json"
+
+            self.assertTrue(summary_path.exists())
+            persisted = json.loads(summary_path.read_text(encoding="utf-8"))
+            self.assertEqual("outcome_file_not_found", payload["failure_reason"])
+            self.assertEqual("outcome_file_not_found", persisted["failure_reason"])
+            self.assertEqual(str(missing_outcome), persisted["rag_trace"]["rag_outcome_file"])
+            self.assertFalse(persisted["rag_trace"]["rag_outcome_file_exists"])
+            self.assertIsNone(persisted["return_code"])
+
+    def test_missing_outcome_file_causes_nonzero_cli_exit(self) -> None:
+        from eoh_go.experiments.eoh_single_runner import main
+
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = Path(tmp) / "out"
+            argv = [
+                "eoh_single_runner",
+                "--official-root", tmp,
+                "--output-dir", str(output_dir),
+                "--problem", "tsp_construct",
+                "--arm", "literature_rag",
+                "--selected-card-ids", "tsp_regret_insertion",
+                "--candidate-card-source", "candidate_card_ids",
+                "--outcome-file", str(Path(tmp) / "missing.jsonl"),
+            ]
+            with patch("sys.argv", argv):
+                with self.assertRaisesRegex(SystemExit, "1"):
+                    main()
+
     def test_build_rag_trace_includes_audit_fields(self) -> None:
         """Trace from build_official_rag_context includes injection audit."""
         _, trace = build_official_rag_context(

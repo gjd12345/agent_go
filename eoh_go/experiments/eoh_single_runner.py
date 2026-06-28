@@ -315,6 +315,29 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
     runner_path.write_text(_runner_script(), encoding="utf-8")
     context_file = args.context_file
     rag_trace: dict[str, Any] | None = None
+    endpoint_present = bool(normalize_api_endpoint(os.environ.get(args.api_endpoint_env, "")))
+    model_present = bool(args.llm_model or os.environ.get(args.model_env, ""))
+    api_key_present = bool(os.environ.get(args.api_key_env, ""))
+    payload: dict[str, Any] = {
+        "problem": args.problem,
+        "arm": args.arm,
+        "official_root": str(official_root),
+        "python_exe": str(python_exe),
+        "run_dir": str(run_dir),
+        "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "pop_size": args.pop_size,
+        "generations": args.generations,
+        "operators": args.operators,
+        "use_official_seed": args.use_official_seed,
+        "api_key_present": api_key_present,
+        "api_endpoint_present": endpoint_present,
+        "model_present": model_present,
+        "return_code": None,
+        "runtime_seconds": None,
+        "stdout_tail": "",
+        "stderr_tail": "",
+        "rag_trace": None,
+    }
     if args.arm in {"literature_rag", "history_rag", "mixed_rag"}:
         selected_ids = [sid.strip() for sid in args.selected_card_ids.split(",") if sid.strip()] if args.selected_card_ids else None
         candidate_source = getattr(args, "candidate_card_source", "selected_card_ids" if selected_ids else "none")
@@ -330,7 +353,16 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
         if getattr(args, "outcome_file", ""):
             outcome_path = Path(args.outcome_file)
             if not outcome_path.exists():
-                raise ValueError(f"Outcome file not found: {args.outcome_file}")
+                rag_trace = {
+                    "rag_candidate_card_ids": selected_ids or [],
+                    "rag_candidate_card_source": candidate_source,
+                    "rag_outcome_file": str(outcome_path),
+                    "rag_outcome_file_exists": False,
+                }
+                payload["rag_trace"] = rag_trace
+                payload["failure_reason"] = "outcome_file_not_found"
+                _write_outputs(output_root, payload)
+                return payload
             outcome_summaries = summarize_all_cards(load_outcomes(outcome_path)) or None
         candidate_kwargs: dict[str, list[str] | None] = {
             "candidate_card_ids": selected_ids if candidate_source == "candidate_card_ids" else None,
@@ -354,30 +386,9 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
         rag_trace["rag_context_path"] = str(context_path)
         rag_trace["rag_prev_run_dir"] = args.prev_run_dir or ""
         rag_trace["rag_outcome_file"] = args.outcome_file or ""
+        rag_trace["rag_outcome_file_exists"] = True if args.outcome_file else None
         rag_trace["rag_population_feature_count"] = len(population_features) if population_features else 0
-    endpoint_present = bool(normalize_api_endpoint(os.environ.get(args.api_endpoint_env, "")))
-    model_present = bool(args.llm_model or os.environ.get(args.model_env, ""))
-    api_key_present = bool(os.environ.get(args.api_key_env, ""))
-    payload: dict[str, Any] = {
-        "problem": args.problem,
-        "arm": args.arm,
-        "official_root": str(official_root),
-        "python_exe": str(python_exe),
-        "run_dir": str(run_dir),
-        "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "pop_size": args.pop_size,
-        "generations": args.generations,
-        "operators": args.operators,
-        "use_official_seed": args.use_official_seed,
-        "api_key_present": api_key_present,
-        "api_endpoint_present": endpoint_present,
-        "model_present": model_present,
-        "return_code": None,
-        "runtime_seconds": None,
-        "stdout_tail": "",
-        "stderr_tail": "",
-        "rag_trace": rag_trace,
-    }
+    payload["rag_trace"] = rag_trace
     if not api_key_present:
         payload["failure_reason"] = f"missing_env_{args.api_key_env}"
         _write_outputs(output_root, payload)
@@ -550,6 +561,8 @@ def main() -> None:
     parser.add_argument("--llm-model", default="")
     payload = run_official_eoh(parser.parse_args())
     print(json.dumps(payload, ensure_ascii=True, indent=2))
+    if payload.get("failure_reason") == "outcome_file_not_found":
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
