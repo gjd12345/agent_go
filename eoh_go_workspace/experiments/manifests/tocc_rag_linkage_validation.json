@@ -1,0 +1,45 @@
+{
+  "suite": "tocc_rag_linkage_validation",
+  "model": "JoyAI-LLM-Pro",
+  "problems": ["tsp_construct"],
+  "arms": [
+    {
+      "name": "keyword_rag",
+      "runner_arm": "literature_rag",
+      "context_strategy": "tocc_candidate_pool",
+      "rag_query": "tsp regret farthest insertion avoid nearest repetition",
+      "candidate_card_ids": [
+        "tsp_regret_insertion",
+        "tsp_farthest_insertion",
+        "tsp_two_opt_awareness",
+        "tsp_nearest_insertion"
+      ],
+      "problems": ["tsp_construct"]
+    },
+    {
+      "name": "outcome_population_rag",
+      "runner_arm": "literature_rag",
+      "context_strategy": "tocc_candidate_pool",
+      "rag_query": "tsp regret farthest insertion avoid repeated nearest family with outcome and population signals",
+      "candidate_card_ids": [
+        "tsp_regret_insertion",
+        "tsp_farthest_insertion",
+        "tsp_two_opt_awareness",
+        "tsp_nearest_insertion"
+      ],
+      "problems": ["tsp_construct"]
+    }
+  ],
+  "generations": [0],
+  "pop_size": 4,
+  "repeats": 1,
+  "max_runs": 2,
+  "max_llm_calls_estimate": 8,
+  "require_confirm_for_real_run": true,
+  "operators": "i1",
+  "run_timeout_s": 900,
+  "rag": {
+    "top_k": 2,
+    "max_chars": 2500
+  }
+}
