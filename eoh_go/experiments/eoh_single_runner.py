@@ -10,37 +10,19 @@ import time
 from pathlib import Path
 from typing import Any
 
+from eoh_go.experiments.rag_context_builder import (
+    OFFICIAL_RAG_PROBLEM_CONFIG,
+    build_official_rag_context,
+    history_card_gate_reasons,
+    history_card_gate_warnings,
+)
 from eoh_go.experiments.problem_registry import PROBLEMS
-from eoh_go.rag.build_corpus import _is_history_card, load_all_corpora
-from eoh_go.rag.prompt_context import format_prompt_context, format_prompt_context_with_audit
-from eoh_go.rag.retriever import RerankConfig, load_population_features, retrieve, retrieve_with_rerank, score_corpus, score_corpus_with_rerank
-from eoh_go.rag.schemas import CorpusItem
+from eoh_go.rag.card_outcomes import load_outcomes, summarize_all_cards
+from eoh_go.rag.features import load_population_features
 
 
 DEFAULT_OFFICIAL_ROOT = os.environ.get("EOH_OFFICIAL_ROOT", "")
 DEFAULT_OFFICIAL_PYTHON = os.environ.get("EOH_OFFICIAL_PYTHON", "")
-
-
-OFFICIAL_RAG_PROBLEM_CONFIG = {
-    "bp_online": {
-        "api_ids": {"obp_api_skeleton"},
-        "strategy_prefixes": ("obp_",),
-        "query": (
-            "online bin packing score feasible bins residual capacity best fit "
-            "harmonic utilization polynomial minimize used bins"
-        ),
-    },
-    "tsp_construct": {
-        "api_ids": {"tsp_construct_api_skeleton"},
-        "strategy_prefixes": ("tsp_",),
-        "query": "tsp construct select next node distance nearest insertion regret route length",
-    },
-    "cvrp_construct": {
-        "api_ids": {"cvrp_construct_api_skeleton"},
-        "strategy_prefixes": ("cvrp_",),
-        "query": "cvrp construct select next customer distance farthest cluster regret route depot",
-    },
-}
 
 
 def normalize_api_endpoint(endpoint: str) -> str:
@@ -74,179 +56,6 @@ def _tail_text(value: str | bytes | None, max_lines: int = 80) -> str:
     else:
         text = value
     return "\n".join(text.splitlines()[-max_lines:])
-
-
-def _matches_problem_strategy(item: CorpusItem, problem: str) -> bool:
-    prefixes = OFFICIAL_RAG_PROBLEM_CONFIG[problem]["strategy_prefixes"]
-    return item.kind == "algorithm_card" and item.id.startswith(prefixes) and not _is_history_card(item)
-
-
-def _matches_problem_history(item: CorpusItem, problem: str) -> bool:
-    if not _is_history_card(item):
-        return False
-    if item.id.startswith(f"history_{problem}_"):
-        return True
-    family = problem.split("_", 1)[0]
-    return item.id.startswith(f"history_{family}_") and family in item.tags and "construct" in item.tags
-
-
-_NON_STRATEGY_HISTORY_TAGS = {
-    "bp",
-    "obp",
-    "tsp",
-    "cvrp",
-    "construct",
-    "online",
-    "evolved",
-    "history",
-}
-
-
-def history_card_gate_reasons(item: CorpusItem) -> list[str]:
-    """Return hard-block reasons for a synthesized history card.
-
-    History cards are derived from concrete best code, so they can easily
-    collapse several unrelated signals into one prompt card. For mixed RAG we
-    only allow cards that still look like a small operator, not a compressed
-    full program.
-    """
-    if not _is_history_card(item):
-        return []
-    strategy_tags = [
-        tag for tag in item.tags
-        if tag.lower() not in _NON_STRATEGY_HISTORY_TAGS
-    ]
-    reasons: list[str] = []
-    if len(strategy_tags) > 4:
-        reasons.append(f"too_many_strategy_signals:{len(strategy_tags)}")
-    do_section = (item.content or "").split("Fallback:", 1)[0]
-    do_steps = do_section.count(";") + 1 if "Do:" in do_section else 0
-    if do_steps > 5:
-        reasons.append(f"too_many_do_steps:{do_steps}")
-    return reasons
-
-
-def history_card_gate_warnings(item: CorpusItem) -> list[str]:
-    if not _is_history_card(item):
-        return []
-    text = f"{item.summary}\n{item.content}".lower()
-    warnings: list[str] = []
-    if "score" in text and not any(token in text for token in ("maximize", "minimize", "higher is better", "lower is better")):
-        warnings.append("score_direction_not_explicit")
-    return warnings
-
-
-def build_official_rag_context(
-    project_root: Path,
-    problem: str,
-    mode: str,
-    top_k: int,
-    max_chars: int,
-    query: str | None = None,
-    selected_card_ids: list[str] | None = None,
-    outcome_summaries: dict[str, object] | None = None,
-    population_features: set[str] | None = None,
-    rerank_config: RerankConfig | None = None,
-) -> tuple[str, dict[str, Any]]:
-    if problem not in OFFICIAL_RAG_PROBLEM_CONFIG:
-        raise ValueError(f"Unsupported official RAG problem: {problem}")
-    if mode not in {"literature_rag", "history_rag", "mixed_rag"}:
-        raise ValueError(f"Unsupported official RAG mode: {mode}")
-
-    config = OFFICIAL_RAG_PROBLEM_CONFIG[problem]
-    corpus = load_all_corpora(project_root)
-    api_ids = set(config["api_ids"])
-    global_items = [item for item in corpus if item.kind == "api_constraint" and item.id in api_ids]
-    query_text = query or str(config["query"])
-    literature_pool = [item for item in corpus if _matches_problem_strategy(item, problem)]
-    raw_history_pool = [item for item in corpus if _matches_problem_history(item, problem)]
-    blocked_history_items = [
-        {"id": item.id, "kind": item.kind, "title": item.title, "reasons": history_card_gate_reasons(item)}
-        for item in raw_history_pool
-        if history_card_gate_reasons(item)
-    ]
-    history_gate_warnings = [
-        {"id": item.id, "kind": item.kind, "title": item.title, "warnings": history_card_gate_warnings(item)}
-        for item in raw_history_pool
-        if history_card_gate_warnings(item)
-    ]
-    blocked_history_ids = {item["id"] for item in blocked_history_items}
-    history_pool = [item for item in raw_history_pool if item.id not in blocked_history_ids]
-    if mode == "literature_rag":
-        strategy_pool = literature_pool
-    elif mode == "history_rag":
-        strategy_pool = history_pool
-    else:
-        strategy_pool = []
-        seen_ids: set[str] = set()
-        for item in literature_pool + history_pool:
-            if item.id in seen_ids:
-                continue
-            strategy_pool.append(item)
-            seen_ids.add(item.id)
-    if selected_card_ids:
-        id_set = set(selected_card_ids)
-        blocked_selected = sorted(id_set & blocked_history_ids)
-        if blocked_selected:
-            reason_map = {item["id"]: item["reasons"] for item in blocked_history_items}
-            raise ValueError(f"Selected history cards failed gate: {[(item_id, reason_map[item_id]) for item_id in blocked_selected]}")
-        strategy_pool = [item for item in strategy_pool if item.id in id_set]
-        if not strategy_pool:
-            raise ValueError(f"No matching cards for IDs: {selected_card_ids}")
-    scored = score_corpus(query_text, strategy_pool)
-    rerank_enabled = bool(outcome_summaries or population_features)
-    if rerank_enabled:
-        retrieved = retrieve_with_rerank(
-            query_text,
-            strategy_pool,
-            top_k=top_k,
-            outcome_summaries=outcome_summaries,
-            population_features=population_features,
-            config=rerank_config,
-        )
-    else:
-        retrieved = retrieve(query_text, strategy_pool, top_k=top_k)
-    context, injection_audit = format_prompt_context_with_audit(
-        retrieved, max_chars=max_chars, global_items=global_items
-    )
-    context = context.strip()
-    trace = {
-        "rag_mode": mode,
-        "rag_query": query_text,
-        "rag_top_k": top_k,
-        "rag_max_chars": max_chars,
-        "rag_corpus_size": len(corpus),
-        "rag_strategy_pool_size": len(strategy_pool),
-        "rag_history_pool_size_before_gate": len(raw_history_pool),
-        "rag_history_pool_size_after_gate": len(history_pool),
-        "rag_blocked_history_items": blocked_history_items,
-        "rag_history_gate_warnings": history_gate_warnings,
-        "rag_global_items": [{"id": item.id, "kind": item.kind, "title": item.title} for item in global_items],
-        "rag_selected_items": [
-            {"id": item.id, "kind": item.kind, "title": item.title} for item in retrieved
-        ],
-        "rag_all_scores": [
-            {"id": item.id, "kind": item.kind, "score": score} for score, item in scored
-        ],
-        "rag_rerank_scores": (
-            score_corpus_with_rerank(
-                query_text, strategy_pool,
-                outcome_summaries=outcome_summaries,
-                population_features=population_features,
-                config=rerank_config,
-            ) if rerank_enabled else []
-        ),
-        "rag_context_chars": len(context),
-        "rag_injected_items": injection_audit["rag_injected_items"],
-        "rag_omitted_items": injection_audit["rag_omitted_items"],
-        "rag_truncated_item_id": injection_audit["rag_truncated_item_id"],
-        "rag_context_truncated": injection_audit["rag_context_truncated"],
-        "rag_context_sections_chars": injection_audit["rag_context_sections_chars"],
-        "rag_rerank_enabled": rerank_enabled,
-        "rag_population_features": sorted(population_features) if population_features else [],
-        "rag_outcome_summary_count": len(outcome_summaries) if outcome_summaries else 0,
-    }
-    return context, trace
 
 
 def summarize_run(run_dir: Path) -> dict[str, Any]:
@@ -508,6 +317,7 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
     rag_trace: dict[str, Any] | None = None
     if args.arm in {"literature_rag", "history_rag", "mixed_rag"}:
         selected_ids = [sid.strip() for sid in args.selected_card_ids.split(",") if sid.strip()] if args.selected_card_ids else None
+        candidate_source = getattr(args, "candidate_card_source", "selected_card_ids" if selected_ids else "none")
         population_features: set[str] | None = None
         if args.prev_run_dir:
             prev_pop_dir = Path(args.prev_run_dir) / "results" / "pops"
@@ -516,6 +326,17 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
                 prev_population = _load_json(prev_pops[-1])
                 if isinstance(prev_population, list):
                     population_features = load_population_features(prev_population) or None
+        outcome_summaries: dict[str, object] | None = None
+        if getattr(args, "outcome_file", ""):
+            outcome_path = Path(args.outcome_file)
+            if not outcome_path.exists():
+                raise ValueError(f"Outcome file not found: {args.outcome_file}")
+            outcome_summaries = summarize_all_cards(load_outcomes(outcome_path)) or None
+        candidate_kwargs: dict[str, list[str] | None] = {
+            "candidate_card_ids": selected_ids if candidate_source == "candidate_card_ids" else None,
+            "selected_card_ids": selected_ids if candidate_source == "selected_card_ids" else None,
+            "cards": selected_ids if candidate_source == "cards" else None,
+        }
         context, rag_trace = build_official_rag_context(
             Path.cwd().resolve(),
             args.problem,
@@ -523,14 +344,16 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
             args.rag_top_k,
             args.rag_max_chars,
             args.rag_query or None,
-            selected_card_ids=selected_ids,
+            outcome_summaries=outcome_summaries,
             population_features=population_features,
+            **candidate_kwargs,
         )
         context_path = run_dir / "rag_context.txt"
         context_path.write_text(context, encoding="utf-8")
         context_file = str(context_path)
         rag_trace["rag_context_path"] = str(context_path)
         rag_trace["rag_prev_run_dir"] = args.prev_run_dir or ""
+        rag_trace["rag_outcome_file"] = args.outcome_file or ""
         rag_trace["rag_population_feature_count"] = len(population_features) if population_features else 0
     endpoint_present = bool(normalize_api_endpoint(os.environ.get(args.api_endpoint_env, "")))
     model_present = bool(args.llm_model or os.environ.get(args.model_env, ""))
@@ -705,7 +528,14 @@ def main() -> None:
     parser.add_argument("--rag-max-chars", type=int, default=1800)
     parser.add_argument("--rag-query", default="")
     parser.add_argument("--selected-card-ids", default="")
+    parser.add_argument(
+        "--candidate-card-source",
+        choices=["candidate_card_ids", "selected_card_ids", "cards", "none"],
+        default="selected_card_ids",
+        help="Source field for the legacy --selected-card-ids allowlist",
+    )
     parser.add_argument("--prev-run-dir", default="", help="Previous run dir to extract population features for rerank")
+    parser.add_argument("--outcome-file", default="", help="Card outcome JSONL file used for outcome-aware rerank")
     parser.add_argument("--pop-size", type=int, default=2)
     parser.add_argument("--generations", type=int, default=1)
     parser.add_argument("--operators", default="i1")

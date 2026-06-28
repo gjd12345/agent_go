@@ -44,7 +44,20 @@ class ExperimentManifestRunnerTests(unittest.TestCase):
 
         self.assertIn("--selected-card-ids", cmd)
         self.assertIn("tsp_regret_insertion,tsp_farthest_insertion", cmd)
+        self.assertIn("--candidate-card-source", cmd)
+        self.assertIn("selected_card_ids", cmd)
         self.assertIn("--rag-query", cmd)
+
+    def test_build_cmd_prefers_candidate_card_ids(self) -> None:
+        manifest = self._minimal_manifest()
+        arm = manifest["arms"][0]
+        arm["candidate_card_ids"] = ["tsp_nearest_insertion", "tsp_two_opt_awareness"]
+        cmd = _build_cmd(manifest, "tsp_construct", arm, 0, 1, "/tmp/out")
+
+        self.assertIn("--selected-card-ids", cmd)
+        self.assertIn("tsp_nearest_insertion,tsp_two_opt_awareness", cmd)
+        self.assertIn("--candidate-card-source", cmd)
+        self.assertIn("candidate_card_ids", cmd)
 
     def test_no_run_is_read_only(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -96,13 +109,27 @@ class ExperimentManifestRunnerTests(unittest.TestCase):
             self.assertIn("--force", proc.stdout + proc.stderr)
             self.assertFalse(output_dir.exists())
 
-    def test_validate_manifest_rejects_missing_selected_cards_for_tocc_strategy(self) -> None:
+    def test_validate_manifest_lists_all_supported_card_fields_for_tocc_strategy(self) -> None:
         manifest = self._minimal_manifest()
         manifest["arms"][0]["selected_card_ids"] = []
 
         errors = _validate_manifest(manifest)
 
-        self.assertTrue(any("selected_card_ids" in error for error in errors))
+        self.assertTrue(
+            any(
+                "tocc_* strategy requires candidate_card_ids, selected_card_ids, or cards" in error
+                for error in errors
+            )
+        )
+
+    def test_validate_manifest_accepts_candidate_card_ids_for_tocc_strategy(self) -> None:
+        manifest = self._minimal_manifest()
+        manifest["arms"][0]["selected_card_ids"] = []
+        manifest["arms"][0]["candidate_card_ids"] = ["tsp_regret_insertion", "tsp_farthest_insertion"]
+
+        errors = _validate_manifest(manifest)
+
+        self.assertEqual([], errors)
 
     def test_build_cmd_passes_prev_run_dir_when_provided(self) -> None:
         manifest = self._minimal_manifest()
@@ -136,6 +163,15 @@ class ExperimentManifestRunnerTests(unittest.TestCase):
 
         self.assertIn("/tmp/arg_prev", cmd)
         self.assertNotIn("/tmp/manifest_prev", cmd)
+
+    def test_build_cmd_passes_outcome_file_from_manifest_rag(self) -> None:
+        manifest = self._minimal_manifest()
+        manifest["rag"] = {"top_k": 2, "max_chars": 2500, "outcome_file": "/tmp/card_outcomes.jsonl"}
+        arm = manifest["arms"][0]
+        cmd = _build_cmd(manifest, "tsp_construct", arm, 0, 1, "/tmp/out")
+
+        self.assertIn("--outcome-file", cmd)
+        self.assertIn("/tmp/card_outcomes.jsonl", cmd)
 
 
 if __name__ == "__main__":

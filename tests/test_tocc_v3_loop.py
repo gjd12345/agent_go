@@ -97,9 +97,12 @@ class ToccV3LoopTests(unittest.TestCase):
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(trace, f)
             f.flush()
-            flat = _flatten_trace(f.name)
+            temp_name = f.name
+        try:
+            flat = _flatten_trace(temp_name)
             prompt = _build_user_prompt(flat)
-            os.unlink(f.name)
+        finally:
+            os.unlink(temp_name)
 
         self.assertIn("13.207", prompt)
         self.assertIn("Historical Best Targeted", prompt)

@@ -77,7 +77,7 @@ def run_v3_loop(
                 "runner_arm": "literature_rag",
                 "context_strategy": "tocc_selected_cards",
                 "rag_query": query,
-                "selected_card_ids": cards,
+                "candidate_card_ids": cards,
             }
             gatekeeper = {}
         else:
@@ -85,7 +85,7 @@ def run_v3_loop(
             accepted = proposal_raw.get("accepted", False)
             safe_arm = proposal_raw.get("safe_arm")
             gatekeeper = proposal_raw.get("gatekeeper", {})
-            cards = safe_arm["selected_card_ids"] if safe_arm else []
+            cards = (safe_arm.get("candidate_card_ids") or safe_arm.get("selected_card_ids") or []) if safe_arm else []
             query = safe_arm["rag_query"] if safe_arm else ""
             diagnosis = proposal_raw.get("proposal", {}).get("diagnosis", "")
             print(f"[V2] accepted={accepted}, cards={cards}")
@@ -102,7 +102,7 @@ def run_v3_loop(
             print(f"[REJECTED] violations={gatekeeper.get('violations', [])}")
             break
 
-        cards = safe_arm["selected_card_ids"]
+        cards = safe_arm.get("candidate_card_ids") or safe_arm.get("selected_card_ids") or []
         query = safe_arm["rag_query"]
         print(f"[ACCEPTED] cards={cards}")
 

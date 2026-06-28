@@ -49,13 +49,42 @@ FORBIDDEN_FIELDS = {
 
 # Canonical field names for proposal normalization
 FIELD_ALIASES = {
+    "candidate_card_ids": "cards",
     "selected_card_ids": "cards",
     "rag_query": "query",
 }
 
-MAX_CARDS = 4
-MIN_CARDS = 1
+MAX_CARDS = 10
+MIN_CARDS = 2
+MAX_CANDIDATE_CARDS = MAX_CARDS
+MIN_CANDIDATE_CARDS = MIN_CARDS
 MAX_QUERY_CHARS = 500
+
+
+def _dedupe_preserve_order(values: Any) -> tuple[list[str], list[str]]:
+    seen: set[str] = set()
+    deduped: list[str] = []
+    duplicates: list[str] = []
+    if not values:
+        return deduped, duplicates
+    for raw in values:
+        value = str(raw).strip()
+        if not value:
+            continue
+        if value in seen:
+            duplicates.append(value)
+            continue
+        seen.add(value)
+        deduped.append(value)
+    return deduped, duplicates
+
+
+def _proposal_cards(proposal: dict[str, Any]) -> tuple[list[str], str, list[str]]:
+    for source in ("candidate_card_ids", "selected_card_ids", "cards"):
+        if proposal.get(source):
+            cards, duplicates = _dedupe_preserve_order(proposal.get(source))
+            return cards, source, duplicates
+    return [], "none", []
 
 
 def validate_proposal(
@@ -70,17 +99,19 @@ def validate_proposal(
     warnings: list[str] = []
     fixed: dict[str, Any] | None = None
 
-    # Normalize field aliases: accept goal-schema or agent-schema names
-    cards_raw = proposal.get("cards") or proposal.get("selected_card_ids", [])
+    # Normalize field aliases: candidate_card_ids is the canonical candidate pool.
+    cards, card_source, duplicate_cards = _proposal_cards(proposal)
     query_raw = proposal.get("query") or proposal.get("rag_query", "")
     proposal = dict(proposal)
-    proposal["cards"] = list(cards_raw)
+    proposal["candidate_card_ids"] = list(cards)
+    proposal["cards"] = list(cards)
     proposal["query"] = str(query_raw)
 
-    cards = list(proposal.get("cards", []))
     diagnosis = str(proposal.get("diagnosis", ""))
     query = str(proposal.get("query", ""))
     next_action = str(proposal.get("next_action", ""))
+    if duplicate_cards:
+        warnings.append(f"R0: deduped duplicate candidate cards: {duplicate_cards}")
 
     # R1: Card existence
     if available_card_ids:
@@ -104,15 +135,18 @@ def validate_proposal(
 
     # R3: Non-empty cards
     if len(cards) < MIN_CARDS:
-        violations.append(f"R3: cards list is empty (min {MIN_CARDS})")
+        violations.append(f"R3: candidate_card_ids has {len(cards)} cards (min {MIN_CARDS})")
         return {"accepted": False, "violations": violations, "warnings": warnings, "fixed": None, "safe_arm": None}
+    if len(cards) < 4:
+        warnings.append(f"R3: candidate_card_ids has {len(cards)} cards; recommended range is 4-8 when available")
 
     # R4: Sanity card count
     if len(cards) > MAX_CARDS:
         cards = cards[:MAX_CARDS]
         fixed = dict(proposal)
         fixed["cards"] = cards
-        warnings.append(f"R4: truncated cards from {len(proposal['cards'])} to {MAX_CARDS}")
+        fixed["candidate_card_ids"] = cards
+        warnings.append(f"R4: truncated candidate_card_ids from {len(proposal['cards'])} to {MAX_CARDS}")
 
     # R5: Valid diagnosis
     if diagnosis not in VALID_DIAGNOSES:
@@ -190,7 +224,7 @@ def validate_proposal(
         return {"accepted": False, "violations": violations, "warnings": warnings, "fixed": None, "safe_arm": None}
 
     # Build safe_arm
-    effective_cards = fixed["cards"] if fixed else cards
+    effective_cards = fixed["candidate_card_ids"] if fixed else cards
     effective_query = fixed.get("query", query) if fixed else query
 
     safe_arm = {
@@ -198,7 +232,8 @@ def validate_proposal(
         "runner_arm": arm,
         "context_strategy": "tocc_selected_cards",
         "rag_query": effective_query,
-        "selected_card_ids": effective_cards,
+        "candidate_card_ids": effective_cards,
+        "candidate_card_source": card_source,
     }
     accepted = len(violations) == 0
 

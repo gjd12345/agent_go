@@ -191,6 +191,72 @@ class OfficialEohRunTests(unittest.TestCase):
         self.assertEqual(3, trace["rag_history_pool_size_after_gate"])
         self.assertIn("history_cvrp_far_destination_seed", context)
 
+    def test_candidate_card_ids_filter_strategy_only_and_keep_api_constraints(self) -> None:
+        context, trace = build_official_rag_context(
+            Path.cwd(),
+            "tsp_construct",
+            "literature_rag",
+            top_k=2,
+            max_chars=3000,
+            query="tsp regret farthest",
+            candidate_card_ids=["tsp_regret_insertion", "tsp_farthest_insertion"],
+        )
+
+        self.assertEqual("candidate_card_ids", trace["rag_candidate_card_source"])
+        self.assertEqual(["tsp_regret_insertion", "tsp_farthest_insertion"], trace["rag_candidate_card_ids"])
+        self.assertGreater(trace["rag_candidate_pool_size_before_filter"], trace["rag_candidate_pool_size_after_filter"])
+        self.assertEqual(2, trace["rag_candidate_pool_size_after_filter"])
+        self.assertEqual(["tsp_construct_api_skeleton"], [item["id"] for item in trace["rag_global_items"]])
+        self.assertIn("API RULES", context)
+
+    def test_candidate_pool_lte_top_k_emits_selection_space_warning(self) -> None:
+        _, trace = build_official_rag_context(
+            Path.cwd(),
+            "tsp_construct",
+            "literature_rag",
+            top_k=2,
+            max_chars=3000,
+            query="tsp regret farthest",
+            candidate_card_ids=["tsp_regret_insertion", "tsp_farthest_insertion"],
+        )
+
+        self.assertEqual(2, trace["rag_candidate_pool_size_after_filter"])
+        self.assertTrue(
+            any(
+                "candidate_pool_size_lte_top_k" in warning
+                for warning in trace["rag_selection_space_warning"]
+            )
+        )
+
+    def test_candidate_allowlist_does_not_fallback_when_empty(self) -> None:
+        with self.assertRaisesRegex(ValueError, "No matching strategy cards"):
+            build_official_rag_context(
+                Path.cwd(),
+                "tsp_construct",
+                "literature_rag",
+                top_k=2,
+                max_chars=3000,
+                candidate_card_ids=["tsp_not_real"],
+            )
+
+    def test_candidate_allowlist_blocked_history_fails_fast(self) -> None:
+        from eoh_go.rag.build_corpus import _is_history_card, load_all_corpora
+
+        history_id = next(
+            item.id
+            for item in load_all_corpora(Path.cwd())
+            if _is_history_card(item) and item.id.startswith("history_tsp_construct_")
+        )
+        with self.assertRaisesRegex(ValueError, "Candidate history cards failed gate"):
+            build_official_rag_context(
+                Path.cwd(),
+                "tsp_construct",
+                "mixed_rag",
+                top_k=2,
+                max_chars=3000,
+                candidate_card_ids=["tsp_regret_insertion", history_id],
+            )
+
     def test_run_official_eoh_timeout_reports_without_key_value(self) -> None:
         old_key = os.environ.get("TEST_OFFICIAL_KEY")
         old_endpoint = os.environ.get("TEST_OFFICIAL_ENDPOINT")
