@@ -126,6 +126,9 @@ class ToccV3LoopTests(unittest.TestCase):
                 "rag_candidate_pool_size_before_filter": 8,
                 "rag_candidate_pool_size_after_filter": 2,
                 "rag_selection_space_warning": ["candidate_pool_size_lte_top_k"],
+                "candidate_cards_with_zero_keyword_score": ["tsp_two_opt_awareness"],
+                "candidate_cards_dropped_by_zero_keyword_score": ["tsp_two_opt_awareness"],
+                "rag_candidate_zero_score_warning": ["candidate_cards_dropped_by_zero_keyword_score"],
                 "rag_rerank_enabled": True,
                 "rag_rerank_scores": rerank_scores,
                 "rag_outcome_summary_count": 3,
@@ -146,12 +149,18 @@ class ToccV3LoopTests(unittest.TestCase):
         self.assertEqual(8, len(flat["rag_rerank_scores"]))
         self.assertEqual(20, len(flat["rag_population_features"]))
         self.assertEqual(25, flat["rag_population_feature_count"])
+        self.assertEqual(
+            ["tsp_two_opt_awareness"],
+            flat["candidate_cards_dropped_by_zero_keyword_score"],
+        )
         self.assertIn("Candidate Pool: candidate_card_ids", prompt)
         self.assertIn("2/8", prompt)
         self.assertIn("Rerank Enabled: True", prompt)
         self.assertIn("Outcome Summary Count: 3", prompt)
         self.assertIn("Population Feature Count: 25", prompt)
         self.assertIn("Selection Warnings: ['candidate_pool_size_lte_top_k']", prompt)
+        self.assertIn("Zero-score Candidate Warning: ['candidate_cards_dropped_by_zero_keyword_score']", prompt)
+        self.assertIn("Dropped Zero-score Candidates: ['tsp_two_opt_awareness']", prompt)
         self.assertIn("Top Rerank Scores:", prompt)
         self.assertIn("card_7", prompt)
         self.assertNotIn("card_8", prompt)

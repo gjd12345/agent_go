@@ -223,6 +223,31 @@ def build_rag_context(
         )
     else:
         retrieved = retrieve(query_text, strategy_pool, top_k=top_k)
+    score_by_id = {item.id: score for score, item in scored}
+    zero_score_candidate_ids = [
+        card_id
+        for card_id in dict.fromkeys(candidate_ids)
+        if score_by_id.get(card_id) == 0
+    ]
+    retrieved_ids = {item.id for item in retrieved}
+    dropped_zero_score_candidate_ids = [
+        card_id for card_id in zero_score_candidate_ids if card_id not in retrieved_ids
+    ]
+    zero_score_warnings = (
+        ["candidate_cards_dropped_by_zero_keyword_score"]
+        if dropped_zero_score_candidate_ids
+        else []
+    )
+    rerank_scores = (
+        score_corpus_with_rerank(
+            query_text, strategy_pool,
+            outcome_summaries=request.outcome_summaries,
+            population_features=request.population_features,
+            config=request.rerank_config,
+        ) if rerank_enabled else []
+    )
+    for item in rerank_scores:
+        item["selected"] = item["id"] in retrieved_ids
     context, injection_audit = format_prompt_context_with_audit(
         retrieved, max_chars=max_chars, global_items=global_items
     )
@@ -244,6 +269,9 @@ def build_rag_context(
         "rag_candidate_pool_size_before_filter": pool_size_before_filter,
         "rag_candidate_pool_size_after_filter": pool_size_after_filter,
         "rag_selection_space_warning": selection_warnings,
+        "candidate_cards_with_zero_keyword_score": zero_score_candidate_ids,
+        "candidate_cards_dropped_by_zero_keyword_score": dropped_zero_score_candidate_ids,
+        "rag_candidate_zero_score_warning": zero_score_warnings,
         "rag_history_pool_size_before_gate": len(raw_history_pool),
         "rag_history_pool_size_after_gate": len(history_pool),
         "rag_blocked_history_items": blocked_history_items,
@@ -255,14 +283,7 @@ def build_rag_context(
         "rag_all_scores": [
             {"id": item.id, "kind": item.kind, "score": score} for score, item in scored
         ],
-        "rag_rerank_scores": (
-            score_corpus_with_rerank(
-                query_text, strategy_pool,
-                outcome_summaries=request.outcome_summaries,
-                population_features=request.population_features,
-                config=request.rerank_config,
-            ) if rerank_enabled else []
-        ),
+        "rag_rerank_scores": rerank_scores,
         "rag_context_chars": len(context),
         "rag_injected_items": injection_audit["rag_injected_items"],
         "rag_omitted_items": injection_audit["rag_omitted_items"],

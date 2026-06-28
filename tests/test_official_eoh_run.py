@@ -228,6 +228,40 @@ class OfficialEohRunTests(unittest.TestCase):
             )
         )
 
+    def test_candidate_zero_keyword_scores_and_selected_rerank_items_are_traced(self) -> None:
+        _, trace = build_official_rag_context(
+            Path.cwd(),
+            "tsp_construct",
+            "literature_rag",
+            top_k=1,
+            max_chars=3000,
+            query="regret farthest",
+            candidate_card_ids=[
+                "tsp_regret_insertion",
+                "tsp_farthest_insertion",
+                "tsp_two_opt_awareness",
+            ],
+            outcome_summaries={"tsp_regret_insertion": {"decision": "neutral"}},
+        )
+
+        self.assertEqual(
+            ["tsp_two_opt_awareness"],
+            trace["candidate_cards_with_zero_keyword_score"],
+        )
+        self.assertEqual(
+            ["tsp_two_opt_awareness"],
+            trace["candidate_cards_dropped_by_zero_keyword_score"],
+        )
+        self.assertEqual(
+            ["candidate_cards_dropped_by_zero_keyword_score"],
+            trace["rag_candidate_zero_score_warning"],
+        )
+        rerank_scores = trace["rag_rerank_scores"]
+        self.assertTrue(rerank_scores)
+        self.assertTrue(all("selected" in item for item in rerank_scores))
+        self.assertEqual(1, sum(bool(item["selected"]) for item in rerank_scores))
+        self.assertNotIn("tsp_two_opt_awareness", {item["id"] for item in rerank_scores})
+
     def test_candidate_allowlist_does_not_fallback_when_empty(self) -> None:
         with self.assertRaisesRegex(ValueError, "No matching strategy cards"):
             build_official_rag_context(

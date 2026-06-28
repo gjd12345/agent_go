@@ -89,6 +89,11 @@ def _flatten_trace(summary_path: str) -> dict[str, Any]:
         "rag_candidate_pool_size_before_filter": rag.get("rag_candidate_pool_size_before_filter"),
         "rag_candidate_pool_size_after_filter": rag.get("rag_candidate_pool_size_after_filter"),
         "rag_selection_space_warning": rag.get("rag_selection_space_warning", []),
+        "candidate_cards_with_zero_keyword_score": rag.get("candidate_cards_with_zero_keyword_score", []),
+        "candidate_cards_dropped_by_zero_keyword_score": rag.get(
+            "candidate_cards_dropped_by_zero_keyword_score", []
+        ),
+        "rag_candidate_zero_score_warning": rag.get("rag_candidate_zero_score_warning", []),
         "rag_rerank_enabled": rag.get("rag_rerank_enabled"),
         "rag_rerank_scores": list(rag.get("rag_rerank_scores") or [])[:8],
         "rag_outcome_summary_count": rag.get("rag_outcome_summary_count"),
@@ -140,6 +145,11 @@ def _build_user_prompt(trace: dict[str, Any]) -> str:
         f"Population Feature Count: {trace.get('rag_population_feature_count')}",
         f"Population Features: {trace.get('rag_population_features', [])}",
         f"Selection Warnings: {trace.get('rag_selection_space_warning', [])}",
+        f"Zero-score Candidate Warning: {trace.get('rag_candidate_zero_score_warning', [])}",
+        (
+            "Dropped Zero-score Candidates: "
+            f"{trace.get('candidate_cards_dropped_by_zero_keyword_score', [])}"
+        ),
         f"Top Rerank Scores: {json.dumps(rerank_scores, ensure_ascii=False)}",
         f"Context: {trace.get('rag_context_chars')}/{trace.get('rag_max_chars')} chars, pool_size={trace.get('rag_strategy_pool_size')}",
         f"Valid Candidates: {trace.get('valid_candidates')}/{trace.get('population_size')}",
