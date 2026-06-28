@@ -70,6 +70,8 @@ def chat_completion(
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": "opencode/1.0",
     }
 
     last_error: Exception | None = None

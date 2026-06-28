@@ -35,6 +35,10 @@ def _arm_card_ids(arm: dict[str, Any]) -> tuple[list[str], str]:
     return [], "none"
 
 
+def _effective_rag(manifest: dict[str, Any], arm: dict[str, Any]) -> dict[str, Any]:
+    return {**manifest.get("rag", {}), **arm.get("rag", {})}
+
+
 def _validate_manifest(manifest: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     required = ["suite", "problems", "arms"]
@@ -77,6 +81,12 @@ def _matrix_count(manifest: dict[str, Any]) -> int:
     )
 
 
+def _write_run_index(path: Path, records: list[dict[str, Any]]) -> None:
+    temp_path = path.with_suffix(path.suffix + ".tmp")
+    temp_path.write_text(json.dumps(records, ensure_ascii=False, indent=2), encoding="utf-8")
+    temp_path.replace(path)
+
+
 def _build_cmd(
     manifest: dict[str, Any],
     problem: str,
@@ -103,7 +113,7 @@ def _build_cmd(
         "--official-root", manifest.get("official_root") or _DEFAULT_ROOT,
         "--python", manifest.get("python_exe") or _DEFAULT_PYTHON or sys.executable,
     ]
-    rag = manifest.get("rag", {})
+    rag = _effective_rag(manifest, arm)
     if arm["runner_arm"] in ("literature_rag", "history_rag", "mixed_rag"):
         cmd.extend(["--rag-top-k", str(rag.get("top_k", 2))])
         cmd.extend(["--rag-max-chars", str(rag.get("max_chars", 2500))])
@@ -175,6 +185,7 @@ def main() -> None:
     print()
 
     run_index: list[dict[str, Any]] = []
+    index_path = output_root / "run_index.json"
     problems = manifest["problems"]
     arms = manifest["arms"]
     generations = manifest.get("generations", [0])
@@ -185,8 +196,10 @@ def main() -> None:
             arm_problems = arm.get("problems", problems)
             if problem not in arm_problems:
                 continue
+            use_prev_run_dir_chain = bool(_effective_rag(manifest, arm).get("use_prev_run_dir_chain"))
             for gen in generations:
                 prev_run_dir = ""
+                previous_repeat_failed = False
                 for rep in range(1, repeats + 1):
                     run_tag = f"run_{problem}_{arm['name']}_g{gen}_r{rep}"
                     run_out = str(output_root / run_tag)
@@ -196,7 +209,8 @@ def main() -> None:
                         print(f"[DRY] {run_tag}")
                         print(f"  {' '.join(cmd)}")
                         print()
-                        prev_run_dir = run_out
+                        if use_prev_run_dir_chain:
+                            prev_run_dir = run_out
                         continue
 
                     if args.no_run:
@@ -207,7 +221,26 @@ def main() -> None:
                         prev = json.loads(summary_path.read_text(encoding="utf-8"))
                         if not prev.get("failure_reason") and prev.get("run_summary", {}).get("ok"):
                             print(f"[SKIP] {run_tag} (already complete)")
-                            prev_run_dir = run_out
+                            prev_summary = prev.get("run_summary", {})
+                            run_index.append(
+                                {
+                                    "tag": run_tag,
+                                    "problem": problem,
+                                    "arm": arm["name"],
+                                    "generation": gen,
+                                    "repeat": rep,
+                                    "status": "ok",
+                                    "runtime_s": prev.get("runtime_seconds"),
+                                    "output_dir": run_out,
+                                    "best_objective": prev_summary.get("best_objective"),
+                                    "valid_candidates": prev_summary.get("valid_candidates"),
+                                    "resumed_existing": True,
+                                }
+                            )
+                            _write_run_index(index_path, run_index)
+                            if use_prev_run_dir_chain:
+                                prev_run_dir = run_out
+                                previous_repeat_failed = False
                             continue
                         else:
                             print(f"[RETRY] {run_tag} (previous run failed: {prev.get('failure_reason','unknown')})")
@@ -222,7 +255,7 @@ def main() -> None:
                         status = "timeout"
                     elapsed = round(time.time() - started, 1)
 
-                    run_index.append({
+                    run_record = {
                         "tag": run_tag,
                         "problem": problem,
                         "arm": arm["name"],
@@ -231,8 +264,14 @@ def main() -> None:
                         "status": status,
                         "runtime_s": elapsed,
                         "output_dir": run_out,
-                    })
+                    }
+                    if use_prev_run_dir_chain and prev_run_dir:
+                        run_record["prev_run_dir"] = prev_run_dir
+                    if use_prev_run_dir_chain and previous_repeat_failed:
+                        run_record["population_chain_skipped_previous_failed"] = True
+                    run_index.append(run_record)
 
+                    run_succeeded = False
                     if summary_path.exists():
                         summary = json.loads(summary_path.read_text(encoding="utf-8"))
                         run_sum = summary.get("run_summary", {})
@@ -243,13 +282,16 @@ def main() -> None:
                             run_index[-1]["failure_reason"] = fail_reason
                             if status == "ok":
                                 run_index[-1]["status"] = "ok_but_summary_failure"
+                        run_succeeded = status == "ok" and not fail_reason and bool(run_sum.get("ok"))
 
                     print(f"[DONE] {run_tag}  status={status}  elapsed={elapsed}s")
-                    prev_run_dir = run_out
+                    if use_prev_run_dir_chain:
+                        prev_run_dir = run_out if run_succeeded else ""
+                        previous_repeat_failed = not run_succeeded
+                    _write_run_index(index_path, run_index)
 
     if not args.dry_run and not args.no_run:
-        index_path = output_root / "run_index.json"
-        index_path.write_text(json.dumps(run_index, ensure_ascii=False, indent=2), encoding="utf-8")
+        _write_run_index(index_path, run_index)
         print(f"\nRun index written to {index_path}")
 
 

@@ -66,6 +66,9 @@ class TestChatCompletion:
             model="test-model",
         )
         assert result == "hello world"
+        request = mock_urlopen.call_args.args[0]
+        assert request.get_header("Accept") == "application/json"
+        assert request.get_header("User-agent") == "opencode/1.0"
 
     @patch("eoh_go.llm.client.urllib.request.urlopen")
     def test_retries_on_failure(self, mock_urlopen, monkeypatch):

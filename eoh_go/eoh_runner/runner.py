@@ -256,6 +256,8 @@ def run_v0_eoh(config: EOHConfig) -> dict[str, Any]:
         # 2. Imports from Agent_EOH
         from eoh import EVOL
         from eoh.utils.getParas import Paras
+        from eoh_go.llm.api_patch import install_api_url_patch
+        install_api_url_patch()
         import importlib
         problem_module = importlib.import_module(problem_module_name)
         
