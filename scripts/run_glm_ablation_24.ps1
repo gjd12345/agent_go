@@ -49,7 +49,7 @@ function Invoke-Suite([string]$Name, [string]$Manifest) {
     "[$(Get-Date -Format o)] completed $Name" | Tee-Object -FilePath $LogPath -Append
 }
 
-[ExecutionState]::SetThreadExecutionState(0x80000001) | Out-Null
+[ExecutionState]::SetThreadExecutionState([uint32]0x80000001L) | Out-Null
 try {
     Invoke-Suite `
         "tsp" `
@@ -62,5 +62,5 @@ try {
     $_ | Out-String | Tee-Object -FilePath $LogPath -Append
     throw
 } finally {
-    [ExecutionState]::SetThreadExecutionState(0x80000000) | Out-Null
+    [ExecutionState]::SetThreadExecutionState([uint32]0x80000000L) | Out-Null
 }
