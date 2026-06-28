@@ -1,0 +1,3881 @@
+{
+  "aliases": {
+    "2opt": "two_opt",
+    "best-fit": "best_fit",
+    "bestfit": "best_fit",
+    "clarke-wright": "savings",
+    "clustering": "cluster",
+    "far_first": "farthest",
+    "first-fit": "first_fit",
+    "firstfit": "first_fit",
+    "look_ahead": "lookahead",
+    "pair-savings": "savings",
+    "regret2": "regret",
+    "remaining_capacity": "residual",
+    "residual-capacity": "residual",
+    "rest_capacity": "capacity",
+    "return-distance": "destination",
+    "second_best": "regret",
+    "size-class": "harmonic",
+    "worst-fit": "worst_fit",
+    "worstfit": "worst_fit"
+  },
+  "features": [
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 3,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "001",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 3,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "002",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 2,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "003",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 2,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "004",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "two_opt",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "2opt",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 5,
+      "history_tag_count": 5,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "adaptive_weights",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "corpus:algorithm_cards.jsonl",
+        "history_card_tags"
+      ],
+      "overlap_enabled": true,
+      "patterns": [
+        "alpha",
+        "beta",
+        "gamma",
+        "remaining_ratio"
+      ],
+      "risk_notes": [
+        "alpha/beta/gamma are weak tokens and must not trigger alone"
+      ]
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": true,
+      "name": "algorithm",
+      "observed_in": [
+        "reranker._FEATURE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 4,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "all",
+      "observed_in": [
+        "corpus:code_examples.jsonl",
+        "corpus:failure_cases.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "weak_context_token",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "alpha",
+      "observed_in": [],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "angle",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 7,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": true,
+      "name": "api",
+      "observed_in": [
+        "corpus:api_constraints.jsonl",
+        "reranker._FEATURE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "append",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "args",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "array",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "balance",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 3,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "balanced",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "best_fit",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "best-fit",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [
+        "best-fit",
+        "bestfit"
+      ],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "best_fit",
+      "observed_in": [
+        "card_synthesis._CODE_FAMILY_FEATURES"
+      ],
+      "overlap_enabled": true,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "best_fit",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "bestfit",
+      "observed_in": [],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "weak_context_token",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "beta",
+      "observed_in": [],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 7,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "binpacking",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl",
+        "corpus:api_constraints.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "bins",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "bool",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": true,
+      "name": "bp",
+      "observed_in": [
+        "reranker._FEATURE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "break",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 2,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "bsl",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [
+        "rest_capacity"
+      ],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 10,
+      "history_tag_count": 9,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "capacity",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "card_synthesis._CODE_FAMILY_FEATURES",
+        "corpus:algorithm_cards.jsonl",
+        "features._CODE_STOPWORDS",
+        "history_card_tags"
+      ],
+      "overlap_enabled": true,
+      "patterns": [
+        "capacity",
+        "demand",
+        "feasible"
+      ],
+      "risk_notes": [
+        "feasible/demand are weak tokens; capacity is also an API variable"
+      ]
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": true,
+      "name": "card",
+      "observed_in": [
+        "reranker._FEATURE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "case",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 2,
+      "history_tag_count": 2,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "centrality",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "corpus:algorithm_cards.jsonl",
+        "history_card_tags"
+      ],
+      "overlap_enabled": true,
+      "patterns": [
+        "centrality",
+        "closeness",
+        "mst",
+        "spanning"
+      ],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "chan",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "savings",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "clarke-wright",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "class",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [
+        "clustering"
+      ],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 3,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "cluster",
+      "observed_in": [
+        "card_synthesis._CODE_FAMILY_FEATURES",
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": true,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "cluster",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 2,
+      "history_tag_count": 2,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "clustering",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "corpus:algorithm_cards.jsonl",
+        "history_card_tags"
+      ],
+      "overlap_enabled": false,
+      "patterns": [
+        "cluster",
+        "centroid",
+        "k-means",
+        "kmeans"
+      ],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "const",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 26,
+      "history_tag_count": 14,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": true,
+      "name": "construct",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl",
+        "corpus:api_constraints.jsonl",
+        "history_card_tags",
+        "reranker._FEATURE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "continue",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "cost-delta",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "current",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 17,
+      "history_tag_count": 11,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": true,
+      "name": "cvrp",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl",
+        "corpus:api_constraints.jsonl",
+        "history_card_tags",
+        "reranker._FEATURE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "d25",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 3,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "d50",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl",
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 4,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "d75",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl",
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "data",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "def",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "default",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "defer",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 2,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "delta",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "weak_context_token",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "demand",
+      "observed_in": [],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "demands",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 7,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "density",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "depot",
+      "observed_in": [
+        "card_synthesis._CODE_FAMILY_FEATURES",
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": true,
+      "patterns": [],
+      "risk_notes": [
+        "depot is commonly an API/interface token"
+      ]
+    },
+    {
+      "aliases": [
+        "return-distance"
+      ],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 12,
+      "history_tag_count": 12,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "destination",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "card_synthesis._CODE_FAMILY_FEATURES",
+        "corpus:algorithm_cards.jsonl",
+        "features._CODE_STOPWORDS",
+        "history_card_tags"
+      ],
+      "overlap_enabled": true,
+      "patterns": [
+        "dest",
+        "destination",
+        "return",
+        "bwd",
+        "backward"
+      ],
+      "risk_notes": [
+        "return is a weak token and causes broad false positives"
+      ]
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "detour",
+      "observed_in": [
+        "card_synthesis._CODE_FAMILY_FEATURES"
+      ],
+      "overlap_enabled": true,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "dict",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "diffusion",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [
+        "diffusion",
+        "discount"
+      ],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "dispersed",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 6,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "distance",
+      "observed_in": [
+        "card_synthesis._CODE_FAMILY_FEATURES",
+        "corpus:algorithm_cards.jsonl",
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": true,
+      "patterns": [],
+      "risk_notes": [
+        "distance and distance_matrix are commonly API/interface tokens"
+      ]
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "else",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 14,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "eoh",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl",
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "eoh1",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "err",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "error",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 17,
+      "history_tag_count": 14,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": true,
+      "name": "evolved",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl",
+        "corpus:code_examples.jsonl",
+        "history_card_tags",
+        "reranker._FEATURE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "exact",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "except",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "exp",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "fallback",
+      "observed_in": [
+        "corpus:failure_cases.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "fallthrough",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "false",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "farthest",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "far_first",
+      "observed_in": [],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [
+        "far_first"
+      ],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 8,
+      "history_tag_count": 5,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "farthest",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "card_synthesis._CODE_FAMILY_FEATURES",
+        "corpus:algorithm_cards.jsonl",
+        "history_card_tags"
+      ],
+      "overlap_enabled": true,
+      "patterns": [
+        "farthest",
+        "far_first",
+        "distant"
+      ],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "fast",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 1,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "feasibility",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl",
+        "history_card_tags"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "weak_context_token",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "feasible",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "finally",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 2,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "first",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "first_fit",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "first-fit",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [
+        "first-fit",
+        "firstfit"
+      ],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "first_fit",
+      "observed_in": [
+        "card_synthesis._CODE_FAMILY_FEATURES"
+      ],
+      "overlap_enabled": true,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "first_fit",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "firstfit",
+      "observed_in": [],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "float",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "float32",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "float64",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "fmt",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "for",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 4,
+      "history_tag_count": 4,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "forward_score",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "corpus:algorithm_cards.jsonl",
+        "history_card_tags"
+      ],
+      "overlap_enabled": false,
+      "patterns": [
+        "fwd_score",
+        "forward",
+        "dist_from_current"
+      ],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "func",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "funsearch",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "weak_context_token",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "future",
+      "observed_in": [],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "weak_context_token",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "gamma",
+      "observed_in": [],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "gen16",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 2,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "gen8",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "go",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "goto",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "greedy",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 3,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "guard",
+      "observed_in": [
+        "corpus:failure_cases.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [
+        "size-class"
+      ],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "harmonic",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": true,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": true,
+      "name": "history",
+      "observed_in": [
+        "reranker._FEATURE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "hst",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "if",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "import",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "index",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "input",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 4,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "insertion",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 19,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": true,
+      "name": "insertships",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl",
+        "corpus:api_constraints.jsonl",
+        "corpus:code_examples.jsonl",
+        "reranker._FEATURE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "int",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "interface",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "isolation",
+      "observed_in": [
+        "card_synthesis._CODE_FAMILY_FEATURES"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "item",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "items",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "knapsack",
+      "observed_in": [
+        "corpus:api_constraints.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "kwargs",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "lambda",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "len",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "limited-capacity",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "list",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "local-search",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "lookahead",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "look_ahead",
+      "observed_in": [],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [
+        "look_ahead"
+      ],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 9,
+      "history_tag_count": 6,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "lookahead",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "card_synthesis._CODE_FAMILY_FEATURES",
+        "corpus:algorithm_cards.jsonl",
+        "history_card_tags"
+      ],
+      "overlap_enabled": true,
+      "patterns": [
+        "lookahead",
+        "look_ahead",
+        "future"
+      ],
+      "risk_notes": [
+        "future is a weak token and must not trigger alone"
+      ]
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 2,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "low-density",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "main",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "make",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "map",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "math",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "matrix",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 2,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "medium-density",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "merge",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "missing-result",
+      "observed_in": [
+        "corpus:failure_cases.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "mixer",
+      "observed_in": [
+        "corpus:api_constraints.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 10,
+      "history_tag_count": 5,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "nearest",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "card_synthesis._CODE_FAMILY_FEATURES",
+        "corpus:algorithm_cards.jsonl",
+        "corpus:code_examples.jsonl",
+        "history_card_tags"
+      ],
+      "overlap_enabled": true,
+      "patterns": [
+        "nearest",
+        "argmin",
+        "closest"
+      ],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "negative",
+      "observed_in": [
+        "corpus:failure_cases.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "nil",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "node",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "nodes",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "none",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 8,
+      "history_tag_count": 8,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "normalize",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "corpus:algorithm_cards.jsonl",
+        "history_card_tags"
+      ],
+      "overlap_enabled": true,
+      "patterns": [
+        "normalize",
+        "range_fwd",
+        "/ range",
+        "[0, 1]",
+        "[0,1]"
+      ],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "numpy",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "obj",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "objective",
+      "observed_in": [
+        "corpus:failure_cases.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 7,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": true,
+      "name": "obp",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl",
+        "corpus:api_constraints.jsonl",
+        "reranker._FEATURE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": true,
+      "name": "online",
+      "observed_in": [
+        "reranker._FEATURE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "optimization",
+      "observed_in": [
+        "corpus:api_constraints.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "output",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "package",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "savings",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "pair-savings",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "pass",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 5,
+      "history_tag_count": 5,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "penalty",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "corpus:algorithm_cards.jsonl",
+        "history_card_tags"
+      ],
+      "overlap_enabled": true,
+      "patterns": [
+        "penalty",
+        "penalize"
+      ],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "polynomial",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "print",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "progress",
+      "observed_in": [
+        "card_synthesis._CODE_FAMILY_FEATURES"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "raise",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "range",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [
+        "regret2",
+        "second_best"
+      ],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 8,
+      "history_tag_count": 6,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "regret",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "card_synthesis._CODE_FAMILY_FEATURES",
+        "corpus:algorithm_cards.jsonl",
+        "history_card_tags"
+      ],
+      "overlap_enabled": true,
+      "patterns": [
+        "regret",
+        "second_best",
+        "second-best"
+      ],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "regret",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "regret2",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "remaining",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 7,
+      "history_tag_count": 7,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "remaining_aware",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "corpus:algorithm_cards.jsonl",
+        "history_card_tags"
+      ],
+      "overlap_enabled": true,
+      "patterns": [
+        "remaining",
+        "n_rem",
+        "n_unvisited"
+      ],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "residual",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "remaining_capacity",
+      "observed_in": [],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [
+        "remaining_capacity",
+        "residual-capacity"
+      ],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "residual",
+      "observed_in": [
+        "card_synthesis._CODE_FAMILY_FEATURES",
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": true,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "residual",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "residual-capacity",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "rest",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "capacity",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "rest_capacity",
+      "observed_in": [],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "result",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "weak_context_token",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "return",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "destination",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "return-distance",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 2,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "robust",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "route-consolidation",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 4,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "router",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "sa",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 7,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": true,
+      "name": "safety",
+      "observed_in": [
+        "corpus:api_constraints.jsonl",
+        "reranker._FEATURE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [
+        "clarke-wright",
+        "pair-savings"
+      ],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 4,
+      "history_tag_count": 2,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "savings",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "card_synthesis._CODE_FAMILY_FEATURES",
+        "corpus:algorithm_cards.jsonl",
+        "history_card_tags"
+      ],
+      "overlap_enabled": true,
+      "patterns": [
+        "saving",
+        "clarke",
+        "wright"
+      ],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "score",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 7,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "scorebin",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl",
+        "corpus:api_constraints.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "scores",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "regret",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "second_best",
+      "observed_in": [],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "select",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "select-next",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "self",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "set",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "harmonic",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "size-class",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "smooth-route",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "solomon",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "sort",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "splitorders",
+      "observed_in": [
+        "corpus:api_constraints.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "sqrt",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "string",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "struct",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "suspicious-low",
+      "observed_in": [
+        "corpus:failure_cases.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "sweep",
+      "observed_in": [
+        "card_synthesis._CODE_FAMILY_FEATURES",
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": true,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 4,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "switch",
+      "observed_in": [
+        "corpus:code_examples.jsonl",
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 3,
+      "history_tag_count": 3,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "threshold",
+      "observed_in": [
+        "card_synthesis.FEATURE_PATTERNS",
+        "corpus:algorithm_cards.jsonl",
+        "history_card_tags"
+      ],
+      "overlap_enabled": false,
+      "patterns": [
+        "threshold"
+      ],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 2,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "tightness",
+      "observed_in": [
+        "card_synthesis._CODE_FAMILY_FEATURES",
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": true,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "timeout",
+      "observed_in": [
+        "corpus:failure_cases.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "topk",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "topk3",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "total",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "true",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "try",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 9,
+      "history_tag_count": 3,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": true,
+      "name": "tsp",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl",
+        "corpus:api_constraints.jsonl",
+        "history_card_tags",
+        "reranker._FEATURE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "tuple",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "two_hop",
+      "observed_in": [
+        "card_synthesis._CODE_FAMILY_FEATURES"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [
+        "2opt"
+      ],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "two_opt",
+      "observed_in": [],
+      "overlap_enabled": true,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "type",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "unvisited",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "utilization",
+      "observed_in": [
+        "card_synthesis._CODE_FAMILY_FEATURES",
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": true,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "value",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "values",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "var",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "visited",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": true,
+      "name": "vrp",
+      "observed_in": [
+        "reranker._FEATURE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "weighted-score",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "window",
+      "observed_in": [
+        "corpus:code_examples.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "with",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "worst_fit",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 1,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "worst-fit",
+      "observed_in": [
+        "corpus:algorithm_cards.jsonl"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [
+        "worst-fit",
+        "worstfit"
+      ],
+      "canonical_target": null,
+      "classification": "canonical_strategy_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "worst_fit",
+      "observed_in": [],
+      "overlap_enabled": true,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": "worst_fit",
+      "classification": "legacy_observed_feature",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": false,
+      "in_reranker_stopwords": false,
+      "name": "worstfit",
+      "observed_in": [],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    },
+    {
+      "aliases": [],
+      "canonical_target": null,
+      "classification": "metadata_tag",
+      "corpus_tag_count": 0,
+      "history_tag_count": 0,
+      "in_code_stopwords": true,
+      "in_reranker_stopwords": false,
+      "name": "yield",
+      "observed_in": [
+        "features._CODE_STOPWORDS"
+      ],
+      "overlap_enabled": false,
+      "patterns": [],
+      "risk_notes": []
+    }
+  ],
+  "module_extractors": [
+    {
+      "behavior": "identifier regex -> camel/snake/kebab split -> stopword filter; population unions valid individual tokens",
+      "module": "eoh_go/rag/features.py"
+    },
+    {
+      "behavior": "lowercase substring matching through FEATURE_PATTERNS; code family uses an independent substring set",
+      "module": "eoh_go/rag/card_synthesis.py"
+    },
+    {
+      "behavior": "non-stopword tags win; id/title/summary tokens are used only when no tag features remain",
+      "module": "eoh_go/rag/reranker.py"
+    },
+    {
+      "behavior": "delegates code-family extraction to card_synthesis.get_code_family",
+      "module": "eoh_go/tocc/controller.py"
+    }
+  ],
+  "patterns": {
+    "adaptive_weights": [
+      "alpha",
+      "beta",
+      "gamma",
+      "remaining_ratio"
+    ],
+    "capacity": [
+      "capacity",
+      "demand",
+      "feasible"
+    ],
+    "centrality": [
+      "centrality",
+      "closeness",
+      "mst",
+      "spanning"
+    ],
+    "clustering": [
+      "cluster",
+      "centroid",
+      "k-means",
+      "kmeans"
+    ],
+    "destination": [
+      "dest",
+      "destination",
+      "return",
+      "bwd",
+      "backward"
+    ],
+    "diffusion": [
+      "diffusion",
+      "discount"
+    ],
+    "farthest": [
+      "farthest",
+      "far_first",
+      "distant"
+    ],
+    "forward_score": [
+      "fwd_score",
+      "forward",
+      "dist_from_current"
+    ],
+    "lookahead": [
+      "lookahead",
+      "look_ahead",
+      "future"
+    ],
+    "nearest": [
+      "nearest",
+      "argmin",
+      "closest"
+    ],
+    "normalize": [
+      "normalize",
+      "range_fwd",
+      "/ range",
+      "[0, 1]",
+      "[0,1]"
+    ],
+    "penalty": [
+      "penalty",
+      "penalize"
+    ],
+    "regret": [
+      "regret",
+      "second_best",
+      "second-best"
+    ],
+    "remaining_aware": [
+      "remaining",
+      "n_rem",
+      "n_unvisited"
+    ],
+    "savings": [
+      "saving",
+      "clarke",
+      "wright"
+    ],
+    "threshold": [
+      "threshold"
+    ]
+  },
+  "risks": [
+    "substring matching has no token boundaries",
+    "return -> destination and feasible -> capacity are broad false-positive paths",
+    "distance/capacity/destination/depot are code stopwords but also strategy candidates",
+    "reranker currently treats arbitrary non-stopword tags as overlap features"
+  ],
+  "schema_version": 1,
+  "sources": [
+    "eoh_go/rag/features.py",
+    "eoh_go/rag/card_synthesis.py",
+    "eoh_go/rag/reranker.py",
+    "eoh_go/tocc/controller.py",
+    "eoh_go_workspace/rag/corpus/*.jsonl"
+  ],
+  "stopwords": {
+    "code": [
+      "append",
+      "args",
+      "array",
+      "bins",
+      "bool",
+      "break",
+      "capacity",
+      "case",
+      "chan",
+      "class",
+      "const",
+      "continue",
+      "current",
+      "data",
+      "def",
+      "default",
+      "defer",
+      "demands",
+      "depot",
+      "destination",
+      "dict",
+      "distance",
+      "else",
+      "err",
+      "error",
+      "except",
+      "fallthrough",
+      "false",
+      "finally",
+      "float",
+      "float32",
+      "float64",
+      "fmt",
+      "for",
+      "func",
+      "go",
+      "goto",
+      "if",
+      "import",
+      "index",
+      "input",
+      "int",
+      "interface",
+      "item",
+      "items",
+      "kwargs",
+      "lambda",
+      "len",
+      "list",
+      "main",
+      "make",
+      "map",
+      "math",
+      "matrix",
+      "nil",
+      "node",
+      "nodes",
+      "none",
+      "numpy",
+      "obj",
+      "output",
+      "package",
+      "pass",
+      "print",
+      "raise",
+      "range",
+      "remaining",
+      "rest",
+      "result",
+      "return",
+      "score",
+      "scores",
+      "select",
+      "self",
+      "set",
+      "sort",
+      "string",
+      "struct",
+      "switch",
+      "total",
+      "true",
+      "try",
+      "tuple",
+      "type",
+      "unvisited",
+      "value",
+      "values",
+      "var",
+      "visited",
+      "with",
+      "yield"
+    ],
+    "reranker": [
+      "algorithm",
+      "api",
+      "bp",
+      "card",
+      "construct",
+      "cvrp",
+      "evolved",
+      "history",
+      "insertships",
+      "obp",
+      "online",
+      "safety",
+      "tsp",
+      "vrp"
+    ]
+  }
+}
