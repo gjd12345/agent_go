@@ -167,6 +167,8 @@ def _runner_script() -> str:
                 headers = {
                     "Authorization": f"Bearer {self.api_key}",
                     "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "User-Agent": "opencode/1.0",
                 }
                 url = api_url(self.api_endpoint)
                 for attempt in range(max_retries):
