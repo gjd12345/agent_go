@@ -65,6 +65,7 @@
   "operators": "e1,e2,m1,m2",
   "run_timeout_s": 7200,
   "max_runs": 12,
+  "max_consecutive_failures": 5,
   "require_confirm_for_real_run": false,
   "rag": {
     "top_k": 2,

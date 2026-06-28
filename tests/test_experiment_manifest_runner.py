@@ -453,6 +453,62 @@ class ExperimentManifestRunnerTests(unittest.TestCase):
             self.assertTrue(run_index[0]["resumed_existing"])
             self.assertEqual(1.25, run_index[0]["best_objective"])
 
+    def test_consecutive_failure_limit_stops_remaining_paid_runs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manifest = self._minimal_manifest()
+            manifest.update(
+                {
+                    "suite": "failure_circuit_breaker",
+                    "repeats": 6,
+                    "max_runs": 6,
+                    "max_consecutive_failures": 5,
+                    "require_confirm_for_real_run": False,
+                }
+            )
+            manifest_path = self._write_manifest(root, manifest)
+            commands: list[list[str]] = []
+
+            def fake_run(cmd, **_kwargs):
+                commands.append(cmd)
+                output_dir = Path(cmd[cmd.index("--output-dir") + 1])
+                output_dir.mkdir(parents=True, exist_ok=True)
+                (output_dir / "official_eoh_run_summary.json").write_text(
+                    json.dumps(
+                        {
+                            "failure_reason": "return_code_1",
+                            "run_summary": {
+                                "ok": False,
+                                "best_objective": None,
+                                "valid_candidates": 0,
+                            },
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                return SimpleNamespace(returncode=1, stdout="", stderr="generated code failed")
+
+            with mock.patch.object(
+                sys,
+                "argv",
+                [
+                    "batch_runner",
+                    "--manifest",
+                    str(manifest_path),
+                    "--output-dir",
+                    str(root / "out"),
+                    "--force",
+                ],
+            ), mock.patch("eoh_go.experiments.batch_runner.subprocess.run", side_effect=fake_run):
+                with self.assertRaisesRegex(SystemExit, "consecutive run failures"):
+                    main()
+
+            self.assertEqual(5, len(commands))
+            run_index = json.loads(
+                (root / "out" / "failure_circuit_breaker" / "run_index.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(5, len(run_index))
+
 
 if __name__ == "__main__":
     unittest.main()

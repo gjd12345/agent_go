@@ -190,6 +190,8 @@ def main() -> None:
     arms = manifest["arms"]
     generations = manifest.get("generations", [0])
     repeats = manifest.get("repeats", 1)
+    max_consecutive_failures = int(manifest.get("max_consecutive_failures", 0))
+    consecutive_system_failures = 0
 
     for p_idx, problem in enumerate(problems):
         for a_idx, arm in enumerate(arms):
@@ -238,6 +240,7 @@ def main() -> None:
                                 }
                             )
                             _write_run_index(index_path, run_index)
+                            consecutive_system_failures = 0
                             if use_prev_run_dir_chain:
                                 prev_run_dir = run_out
                                 previous_repeat_failed = False
@@ -272,6 +275,7 @@ def main() -> None:
                     run_index.append(run_record)
 
                     run_succeeded = False
+                    fail_reason = None
                     if summary_path.exists():
                         summary = json.loads(summary_path.read_text(encoding="utf-8"))
                         run_sum = summary.get("run_summary", {})
@@ -288,7 +292,27 @@ def main() -> None:
                     if use_prev_run_dir_chain:
                         prev_run_dir = run_out if run_succeeded else ""
                         previous_repeat_failed = not run_succeeded
+                    systemic_failure = (
+                        status == "timeout"
+                        or status.startswith("exit_")
+                        or not summary_path.exists()
+                        or bool(
+                            fail_reason
+                            and fail_reason not in {"no_valid_candidates", "valid_collapse"}
+                        )
+                    )
+                    run_index[-1]["systemic_failure"] = systemic_failure
+                    consecutive_system_failures = (
+                        consecutive_system_failures + 1 if systemic_failure else 0
+                    )
                     _write_run_index(index_path, run_index)
+                    if (
+                        max_consecutive_failures > 0
+                        and consecutive_system_failures >= max_consecutive_failures
+                    ):
+                        raise SystemExit(
+                            f"stopped after {consecutive_system_failures} consecutive run failures"
+                        )
 
     if not args.dry_run and not args.no_run:
         _write_run_index(index_path, run_index)
