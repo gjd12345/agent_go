@@ -346,6 +346,10 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
         population_features: set[str] | None = None
         if args.prev_run_dir:
             prev_pop_dir = Path(args.prev_run_dir) / "results" / "pops"
+            if not prev_pop_dir.exists():
+                nested_pop_dirs = sorted(Path(args.prev_run_dir).rglob("results/pops"))
+                if nested_pop_dirs:
+                    prev_pop_dir = nested_pop_dirs[-1]
             prev_pops = sorted(prev_pop_dir.glob("population_generation_*.json"), key=_natural_generation) if prev_pop_dir.exists() else []
             if prev_pops:
                 prev_population = _load_json(prev_pops[-1])

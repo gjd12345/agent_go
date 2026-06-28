@@ -423,6 +423,74 @@ class OfficialEohRunTests(unittest.TestCase):
                 with self.assertRaisesRegex(SystemExit, "1"):
                     main()
 
+    def test_run_official_eoh_loads_population_from_nested_official_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            prev_run_dir = root / "previous"
+            pop_dir = (
+                prev_run_dir
+                / "tsp_construct"
+                / "context_file"
+                / "run_20260628_120000"
+                / "results"
+                / "pops"
+            )
+            pop_dir.mkdir(parents=True)
+            (pop_dir / "population_generation_4.json").write_text(
+                json.dumps(
+                    [
+                        {
+                            "objective": 1.0,
+                            "code": "regret = second_best - best; return regret",
+                        }
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            args = Namespace(
+                official_root=str(root / "official"),
+                python="python",
+                output_dir=str(root / "out"),
+                problem="tsp_construct",
+                arm="literature_rag",
+                context_file="",
+                pop_size=2,
+                generations=0,
+                operators="i1",
+                n_processes=1,
+                eval_timeout_s=1,
+                llm_timeout_s=1,
+                run_timeout_s=1,
+                use_official_seed=False,
+                api_key_env="MISSING_NESTED_POP_KEY",
+                api_endpoint_env="MISSING_NESTED_POP_ENDPOINT",
+                model_env="MISSING_NESTED_POP_MODEL",
+                llm_model="",
+                rag_top_k=1,
+                rag_max_chars=1800,
+                rag_query="tsp regret farthest",
+                selected_card_ids="tsp_regret_insertion,tsp_farthest_insertion",
+                candidate_card_source="candidate_card_ids",
+                prev_run_dir=str(prev_run_dir),
+                outcome_file="",
+            )
+
+            with patch.dict(
+                os.environ,
+                {
+                    "MISSING_NESTED_POP_KEY": "",
+                    "MISSING_NESTED_POP_ENDPOINT": "",
+                    "MISSING_NESTED_POP_MODEL": "",
+                },
+            ):
+                payload = run_official_eoh(args)
+
+            trace = payload["rag_trace"]
+            self.assertEqual("missing_env_MISSING_NESTED_POP_KEY", payload["failure_reason"])
+            self.assertGreater(trace["rag_population_feature_count"], 0)
+            self.assertIn("regret", trace["rag_population_features"])
+            self.assertEqual(str(prev_run_dir), trace["rag_prev_run_dir"])
+
     def test_build_rag_trace_includes_audit_fields(self) -> None:
         """Trace from build_official_rag_context includes injection audit."""
         _, trace = build_official_rag_context(
