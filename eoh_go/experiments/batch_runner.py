@@ -25,6 +25,16 @@ _DEFAULT_ROOT = os.environ.get("EOH_OFFICIAL_ROOT", "")
 VALID_ARMS = {"pure_eoh", "api_only", "literature_rag", "history_rag", "mixed_rag", "context_file"}
 
 
+def _arm_card_ids(arm: dict[str, Any]) -> tuple[list[str], str]:
+    if arm.get("candidate_card_ids"):
+        return list(arm.get("candidate_card_ids", [])), "candidate_card_ids"
+    if arm.get("selected_card_ids"):
+        return list(arm.get("selected_card_ids", [])), "selected_card_ids"
+    if arm.get("cards"):
+        return list(arm.get("cards", [])), "cards"
+    return [], "none"
+
+
 def _validate_manifest(manifest: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     required = ["suite", "problems", "arms"]
@@ -40,8 +50,9 @@ def _validate_manifest(manifest: dict[str, Any]) -> list[str]:
         if runner not in VALID_ARMS:
             errors.append(f"arm[{i}] invalid runner_arm: {runner!r}, must be one of {sorted(VALID_ARMS)}")
         strategy = arm.get("context_strategy", "")
-        if strategy.startswith("tocc_") and not arm.get("selected_card_ids"):
-            errors.append(f"arm[{i}] tocc_* strategy requires selected_card_ids")
+        card_ids, _ = _arm_card_ids(arm)
+        if strategy.startswith("tocc_") and not card_ids:
+            errors.append(f"arm[{i}] tocc_* strategy requires candidate_card_ids or selected_card_ids")
 
     problems = manifest.get("problems", [])
     for p in problems:
@@ -96,12 +107,15 @@ def _build_cmd(
         cmd.extend(["--rag-max-chars", str(rag.get("max_chars", 2500))])
         if arm.get("rag_query"):
             cmd.extend(["--rag-query", arm["rag_query"]])
-        card_ids = arm.get("selected_card_ids", [])
+        card_ids, card_source = _arm_card_ids(arm)
         if card_ids:
             cmd.extend(["--selected-card-ids", ",".join(card_ids)])
+            cmd.extend(["--candidate-card-source", card_source])
         effective_prev = prev_run_dir or rag.get("prev_run_dir", "")
         if effective_prev:
             cmd.extend(["--prev-run-dir", effective_prev])
+        if rag.get("outcome_file"):
+            cmd.extend(["--outcome-file", str(rag["outcome_file"])])
     return cmd
 
 

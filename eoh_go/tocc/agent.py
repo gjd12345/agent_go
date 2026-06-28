@@ -22,12 +22,12 @@ from eoh_go.tocc.controller import (
 SYSTEM_PROMPT = """You are a TOCC (Trace-Conditioned Operator-Card Controller) diagnosis specialist.
 You analyze EOH (Evolutionary Heuristic Optimization) run traces for combinatorial optimization problems.
 
-Your job: read the run trace, diagnose the failure mode, and propose the next operator-card set.
+Your job: read the run trace, diagnose the failure mode, and propose the next operator-card candidate pool.
 
 Output must be valid JSON with exactly these fields:
 {
   "diagnosis": "<one of 10 types>",
-  "cards": ["<card_id_1>", "<card_id_2>"],
+  "candidate_card_ids": ["<card_id_1>", "<card_id_2>", "..."],
   "query": "<rag query string>",
   "why": ["<reason 1>", "<reason 2>"],
   "risk": "<risk warning>",
@@ -56,11 +56,12 @@ Next action types:
 
 Rules:
 1. Cards must start with the problem prefix (tsp_ for tsp_construct, cvrp_ for cvrp_construct).
-2. Only propose cards from the available pool listed in the trace.
+2. Only propose candidate_card_ids from the available pool listed in the trace.
 3. If baseline_overlap, propose targeted diversity cards (regret, farthest, residual, savings).
 4. If wrong_bias, propose cards that correct the bias direction.
-5. Keep card count between 1 and 4.
-6. Query must be under 500 characters."""
+5. You are not the final card injector. Propose a candidate pool; retrieval/rerank selects final top_k injected cards.
+6. Prefer 4-8 candidate_card_ids when enough cards are available. If fewer than 4 are available, return the available useful candidates and explain the limitation in why.
+7. Query must be under 500 characters."""
 
 
 def _flatten_trace(summary_path: str) -> dict[str, Any]:

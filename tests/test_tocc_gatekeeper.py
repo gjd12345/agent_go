@@ -44,7 +44,7 @@ class ToccGatekeeperTests(unittest.TestCase):
     def test_accepts_valid_proposal_tsp(self):
         result = validate_proposal(self._good_proposal("tsp_construct"), problem="tsp_construct", available_card_ids=TSP_CARDS)
         self.assertTrue(result["accepted"])
-        self.assertEqual(result["safe_arm"]["selected_card_ids"], ["tsp_regret_insertion", "tsp_farthest_insertion"])
+        self.assertEqual(result["safe_arm"]["candidate_card_ids"], ["tsp_regret_insertion", "tsp_farthest_insertion"])
 
     def test_accepts_valid_proposal_cvrp(self):
         result = validate_proposal(self._good_proposal("cvrp_construct"), problem="cvrp_construct", available_card_ids=CVRP_CARDS)
@@ -72,10 +72,10 @@ class ToccGatekeeperTests(unittest.TestCase):
 
     def test_r4_truncates_too_many_cards(self):
         p = self._good_proposal()
-        p["cards"] = ["tsp_regret_insertion", "tsp_farthest_insertion", "tsp_nearest_neighbor", "tsp_nearest_insertion", "tsp_two_opt_awareness"]
-        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+        p["cards"] = [f"tsp_card_{i}" for i in range(12)]
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=p["cards"])
         self.assertTrue(result["accepted"])
-        self.assertEqual(len(result["safe_arm"]["selected_card_ids"]), 4)
+        self.assertEqual(len(result["safe_arm"]["candidate_card_ids"]), 10)
 
     def test_r5_fixes_unknown_diagnosis(self):
         p = self._good_proposal()
@@ -100,7 +100,7 @@ class ToccGatekeeperTests(unittest.TestCase):
     def test_r8_warns_baseline_overlap(self):
         p = self._good_proposal("tsp_construct")
         p["diagnosis"] = "wrong_bias"
-        p["cards"] = ["tsp_nearest_neighbor"]  # baseline card
+        p["cards"] = ["tsp_nearest_neighbor", "tsp_regret_insertion"]  # baseline card
         result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
         self.assertTrue(result["accepted"])
         self.assertIn("R8", str(result["warnings"]))
@@ -108,7 +108,7 @@ class ToccGatekeeperTests(unittest.TestCase):
     def test_r8_allows_baseline_overlap_diagnosis(self):
         p = self._good_proposal("tsp_construct")
         p["diagnosis"] = "baseline_overlap"
-        p["cards"] = ["tsp_nearest_neighbor"]  # baseline card is OK when diagnosis matches
+        p["cards"] = ["tsp_nearest_neighbor", "tsp_regret_insertion"]  # baseline card is OK when diagnosis matches
         result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
         self.assertTrue(result["accepted"])
 
@@ -187,7 +187,8 @@ class ToccGatekeeperTests(unittest.TestCase):
         }
         result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
         self.assertTrue(result["accepted"])
-        self.assertEqual(result["safe_arm"]["selected_card_ids"], ["tsp_regret_insertion", "tsp_farthest_insertion"])
+        self.assertEqual(result["safe_arm"]["candidate_card_ids"], ["tsp_regret_insertion", "tsp_farthest_insertion"])
+        self.assertEqual(result["safe_arm"]["candidate_card_source"], "selected_card_ids")
 
     def test_goal_schema_output_uses_canonical_names(self):
         p = {
@@ -200,7 +201,7 @@ class ToccGatekeeperTests(unittest.TestCase):
         }
         result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
         arm = result["safe_arm"]
-        self.assertIn("selected_card_ids", arm)
+        self.assertIn("candidate_card_ids", arm)
         self.assertIn("rag_query", arm)
         self.assertEqual(arm["rag_query"], "tsp regret farthest lookahead")
 
@@ -210,7 +211,30 @@ class ToccGatekeeperTests(unittest.TestCase):
         p["why"] = ["trace audit supports trying history_cvrp_far_destination_seed despite being deprioritized"]
         result = validate_proposal(p, problem="cvrp_construct", available_card_ids=CVRP_CARDS, arm="mixed_rag")
         self.assertTrue(result["accepted"])
-        self.assertEqual(result["safe_arm"]["selected_card_ids"], p["cards"])
+        self.assertEqual(result["safe_arm"]["candidate_card_ids"], p["cards"])
+
+    def test_candidate_card_ids_take_precedence_and_dedupe_order(self):
+        p = self._good_proposal()
+        p["candidate_card_ids"] = [
+            "tsp_farthest_insertion",
+            "tsp_regret_insertion",
+            "tsp_farthest_insertion",
+        ]
+        p["selected_card_ids"] = ["tsp_nearest_neighbor", "tsp_nearest_insertion"]
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+
+        self.assertTrue(result["accepted"])
+        self.assertEqual(result["safe_arm"]["candidate_card_ids"], ["tsp_farthest_insertion", "tsp_regret_insertion"])
+        self.assertEqual(result["safe_arm"]["candidate_card_source"], "candidate_card_ids")
+        self.assertIn("deduped", str(result["warnings"]))
+
+    def test_rejects_unknown_candidate_card_ids(self):
+        p = self._good_proposal()
+        p["candidate_card_ids"] = ["tsp_regret_insertion", "tsp_missing_card"]
+        result = validate_proposal(p, problem="tsp_construct", available_card_ids=TSP_CARDS)
+
+        self.assertFalse(result["accepted"])
+        self.assertIn("R1", str(result["violations"]))
 
     def test_rejects_hard_blocked_history_prior(self):
         p = self._good_proposal("cvrp_construct")

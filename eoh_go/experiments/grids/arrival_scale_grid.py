@@ -369,27 +369,27 @@ def run_ablation_pair(args: argparse.Namespace) -> dict[str, Any]:
     baseline_args.ablation_pair = False
     baseline_args.use_rag_context = False
     baseline_args.rag_context_path = ""
-    baseline_args.output_dir = str(Path(args.output_dir) / "baseline")
+    baseline_args.output_dir = (Path(args.output_dir) / "baseline").as_posix()
 
     rag_args = copy.deepcopy(args)
     rag_args.ablation_pair = False
     rag_args.use_rag_context = True
     rag_args.rag_context_path = ""
-    rag_args.output_dir = str(Path(args.output_dir) / "rag")
+    rag_args.output_dir = (Path(args.output_dir) / "rag").as_posix()
 
     baseline_payload = run_grid(baseline_args)
     rag_payload = run_grid(rag_args)
-    baseline_json = Path(baseline_payload["output_dir"]) / "eoh_arrival_grid_results.json"
-    rag_json = Path(rag_payload["output_dir"]) / "eoh_arrival_grid_results.json"
+    baseline_json = (Path(baseline_payload["output_dir"]) / "eoh_arrival_grid_results.json").as_posix()
+    rag_json = (Path(rag_payload["output_dir"]) / "eoh_arrival_grid_results.json").as_posix()
 
-    root = Path(args.root).resolve()
+    root = Path(args.root)
     summary_dir = root / "eoh_go_workspace" / "reports" / "tables" / "rag_ablation_summary"
-    summary = summarize_rag_ablation(str(baseline_json), str(rag_json), str(summary_dir))
+    summary = summarize_rag_ablation(baseline_json, rag_json, summary_dir.as_posix())
     return {
         "baseline": baseline_payload,
         "rag": rag_payload,
         "summary": summary,
-        "summary_output_dir": str(summary_dir),
+        "summary_output_dir": summary_dir.as_posix(),
     }
 
 
