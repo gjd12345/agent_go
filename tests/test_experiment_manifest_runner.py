@@ -59,6 +59,12 @@ class ExperimentManifestRunnerTests(unittest.TestCase):
         self.assertIn("--candidate-card-source", cmd)
         self.assertIn("candidate_card_ids", cmd)
 
+    def test_validate_manifest_accepts_canonical_and_legacy_context_strategies(self) -> None:
+        for strategy in ("tocc_candidate_pool", "tocc_selected_cards"):
+            manifest = self._minimal_manifest()
+            manifest["arms"][0]["context_strategy"] = strategy
+            self.assertEqual([], _validate_manifest(manifest))
+
     def test_no_run_is_read_only(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

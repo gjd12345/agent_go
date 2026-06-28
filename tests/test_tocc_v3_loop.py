@@ -54,6 +54,10 @@ class ToccV3LoopTests(unittest.TestCase):
         self.assertEqual(len(history), 1)
         self.assertTrue(history[0]["accepted"])
         self.assertEqual(history[0]["cards"], ["tsp_regret_insertion", "tsp_farthest_insertion"])
+        manifest_path = os.path.join(self.output, "v3_pilot_iter1.json")
+        with open(manifest_path, encoding="utf-8") as handle:
+            manifest = json.load(handle)
+        self.assertEqual("tocc_candidate_pool", manifest["arms"][0]["context_strategy"])
 
     @patch("eoh_go.tocc.loop.subprocess.run")
     def test_real_run_uses_force(self, mock_run):

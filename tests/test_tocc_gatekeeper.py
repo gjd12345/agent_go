@@ -203,6 +203,7 @@ class ToccGatekeeperTests(unittest.TestCase):
         arm = result["safe_arm"]
         self.assertIn("candidate_card_ids", arm)
         self.assertIn("rag_query", arm)
+        self.assertEqual("tocc_candidate_pool", arm["context_strategy"])
         self.assertEqual(arm["rag_query"], "tsp regret farthest lookahead")
 
     def test_accepts_history_prefix_for_mixed_cvrp(self):

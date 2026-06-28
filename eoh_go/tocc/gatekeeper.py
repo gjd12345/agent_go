@@ -20,6 +20,7 @@ from eoh_go.tocc.card_decisions import (
     WATCHLIST_DECISIONS,
     load_card_prior_decisions,
 )
+from eoh_go.tocc.contracts import TOCC_CANDIDATE_POOL_STRATEGY
 
 VALID_DIAGNOSES = {
     "baseline_overlap", "wrong_bias", "low_diversity",
@@ -230,7 +231,7 @@ def validate_proposal(
     safe_arm = {
         "name": f"agent_proposed_{diagnosis}",
         "runner_arm": arm,
-        "context_strategy": "tocc_selected_cards",
+        "context_strategy": TOCC_CANDIDATE_POOL_STRATEGY,
         "rag_query": effective_query,
         "candidate_card_ids": effective_cards,
         "candidate_card_source": card_source,
