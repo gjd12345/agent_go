@@ -170,5 +170,5 @@ def load_population_features(
     count = max(1, int(len(valid) * top_fraction))
     features: set[str] = set()
     for individual in valid[:count]:
-        features |= extract_code_features(individual["code"])
+        features |= extract_strategy_features(individual["code"])
     return features
