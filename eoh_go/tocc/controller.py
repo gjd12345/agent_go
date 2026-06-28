@@ -51,8 +51,8 @@ CARD_QUERIES: dict[str, str] = {
 
 def _get_code_family(code: str | None) -> set[str]:
     """Extract feature keywords from generated code."""
-    from eoh_go.rag.card_synthesis import get_code_family
-    return get_code_family(code)
+    from eoh_go.rag.features import extract_strategy_features
+    return extract_strategy_features(code)
 
 
 def _card_family(card_ids: list[str]) -> str:

@@ -1,23 +1,17 @@
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 
+from .features import extract_card_features, normalize_strategy_feature
 from .schemas import CorpusItem
 
 
-_TOKEN_RE = re.compile(r"[A-Za-z0-9_]+")
 _KIND_PRIORITY = {
     "algorithm_card": 0,
     "failure_case": 1,
     "api_constraint": 2,
     "code_example": 3,
 }
-
-
-def _tokens(text: str) -> list[str]:
-    return [token.lower() for token in _TOKEN_RE.findall(text)]
-
 
 @dataclass(frozen=True)
 class RerankConfig:
@@ -27,26 +21,9 @@ class RerankConfig:
     population_overlap_penalty: float = 0.5
 
 
-_FEATURE_STOPWORDS = frozenset({
-    "algorithm", "card", "history", "construct", "online",
-    "api", "safety", "evolved", "insertships", "bp", "obp",
-    "tsp", "cvrp", "vrp",
-})
-
-
 def _extract_card_features(item: CorpusItem) -> set[str]:
-    tag_features = {
-        tag.lower()
-        for tag in item.tags
-        if len(tag) >= 3 and tag.lower() not in _FEATURE_STOPWORDS
-    }
-    if tag_features:
-        return tag_features
-    raw: set[str] = set()
-    raw.update(_tokens(item.id))
-    raw.update(_tokens(item.title))
-    raw.update(_tokens(item.summary))
-    return {token for token in raw if len(token) >= 3 and token not in _FEATURE_STOPWORDS}
+    """Backward-compatible wrapper for the canonical card extractor."""
+    return extract_card_features(item)
 
 
 def _outcome_decision(summary: object) -> str:
@@ -81,6 +58,11 @@ def retrieve_with_rerank(
         return []
 
     scored: list[tuple[float, CorpusItem]] = []
+    normalized_pop = {
+        canonical
+        for feature in (population_features or set())
+        if (canonical := normalize_strategy_feature(feature)) is not None
+    }
     for item in candidates:
         base_score = float(score_item(query, item))
         multiplier = 1.0
@@ -92,10 +74,9 @@ def retrieve_with_rerank(
             elif decision == "suppress":
                 multiplier *= config.suppress_multiplier
 
-        if population_features:
-            card_features = _extract_card_features(item)
+        if normalized_pop:
+            card_features = extract_card_features(item)
             if card_features:
-                normalized_pop = {feature.lower() for feature in population_features}
                 overlap = len(card_features & normalized_pop) / len(card_features)
                 multiplier *= 1.0 - overlap * config.population_overlap_penalty
 
@@ -123,7 +104,11 @@ def score_corpus_with_rerank(
     from .retriever import score_item
 
     config = config or RerankConfig()
-    normalized_pop = {feature.lower() for feature in population_features} if population_features else set()
+    normalized_pop = {
+        canonical
+        for feature in (population_features or set())
+        if (canonical := normalize_strategy_feature(feature)) is not None
+    }
 
     results = []
     for item in corpus:
@@ -142,7 +127,7 @@ def score_corpus_with_rerank(
                 multiplier *= config.suppress_multiplier
 
         if normalized_pop:
-            card_features = _extract_card_features(item)
+            card_features = extract_card_features(item)
             if card_features:
                 overlap = len(card_features & normalized_pop) / len(card_features)
                 multiplier *= 1.0 - overlap * config.population_overlap_penalty

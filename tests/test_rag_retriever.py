@@ -195,6 +195,55 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertNotIn("nearest", features)
         self.assertNotIn("greedy", features)
 
+    def test_extract_card_features_normalizes_alias_tags(self) -> None:
+        from eoh_go.rag.features import extract_card_features
+
+        item = self._item(
+            "cluster_card",
+            "algorithm_card",
+            "spatial strategy",
+            tags=["cvrp", "clustering", "best-fit"],
+        )
+        self.assertEqual({"cluster", "best_fit"}, extract_card_features(item))
+
+    def test_extract_card_features_falls_back_when_tags_have_no_strategy(self) -> None:
+        from eoh_go.rag.features import extract_card_features
+
+        item = self._item(
+            "cvrp_savings",
+            "algorithm_card",
+            "route consolidation strategy",
+            tags=["cvrp", "construct", "reference"],
+        )
+        self.assertEqual({"savings"}, extract_card_features(item))
+
+    def test_extract_card_features_excludes_non_strategy_tags(self) -> None:
+        from eoh_go.rag.features import extract_card_features
+
+        item = self._item(
+            "generic_reference",
+            "algorithm_card",
+            "generic insertion strategy",
+            tags=["greedy", "optimal", "reference"],
+        )
+        self.assertEqual(set(), extract_card_features(item))
+
+    def test_population_overlap_uses_canonical_card_features(self) -> None:
+        from eoh_go.rag.retriever import score_corpus_with_rerank
+
+        item = self._item(
+            "regret_card",
+            "algorithm_card",
+            "insertion strategy",
+            tags=["regret2", "greedy"],
+        )
+        result = score_corpus_with_rerank(
+            "insertion strategy",
+            [item],
+            population_features={"regret"},
+        )
+        self.assertEqual(1.0, result[0]["population_overlap"])
+
     def test_score_corpus_with_rerank_returns_debug_info(self) -> None:
         from eoh_go.rag.retriever import score_corpus_with_rerank
 
@@ -275,20 +324,18 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertNotIn("matrix", features)
 
     def test_load_population_features_from_individuals(self) -> None:
+        from eoh_go.rag.features import STRATEGY_FEATURES
         from eoh_go.rag.retriever import load_population_features
 
         population = [
-            {"code": "func InsertShips() { bestDelta := 1.0 }", "objective": 100.5},
-            {"code": "func InsertShips() { nearestCost := 2.0 }", "objective": 98.2},
+            {"code": "func InsertShips() { regretScore := second_best - best }", "objective": 100.5},
+            {"code": "func InsertShips() { farFirst := distant_nodes[0] }", "objective": 98.2},
             {"code": "", "objective": None},
             "invalid_entry",
         ]
         features = load_population_features(population)
-        self.assertIn("best", features)
-        self.assertIn("delta", features)
-        self.assertIn("nearest", features)
-        self.assertIn("cost", features)
-        self.assertNotIn("func", features)
+        self.assertEqual({"regret", "farthest"}, features)
+        self.assertLessEqual(features, STRATEGY_FEATURES)
 
     def test_load_population_features_skips_invalid_individuals(self) -> None:
         from eoh_go.rag.retriever import load_population_features
@@ -299,7 +346,7 @@ class RagRetrieverTests(unittest.TestCase):
         ]
         features = load_population_features(population)
         self.assertIn("regret", features)
-        self.assertIn("calc", features)
+        self.assertNotIn("calc", features)
         self.assertNotIn("bad", features)
 
     def test_load_population_features_top_fraction(self) -> None:
@@ -312,6 +359,7 @@ class RagRetrieverTests(unittest.TestCase):
         features_half = load_population_features(population, top_fraction=0.5)
         self.assertIn("regret", features_half)
         self.assertNotIn("greedy", features_half)
+        self.assertNotIn("nearest", features_half)
 
     def test_load_population_features_empty_population(self) -> None:
         from eoh_go.rag.retriever import load_population_features
