@@ -98,6 +98,13 @@ def _literal_assignment(path: Path, name: str) -> Any:
     raise ValueError(f"Assignment {name!r} not found in {path}")
 
 
+def _optional_literal_assignment(path: Path, name: str) -> Any | None:
+    try:
+        return _literal_assignment(path, name)
+    except ValueError:
+        return None
+
+
 def _load_corpus_tags(corpus_dir: Path) -> tuple[Counter[str], Counter[str], dict[str, set[str]]]:
     all_tags: Counter[str] = Counter()
     history_tags: Counter[str] = Counter()
@@ -128,15 +135,35 @@ def build_inventory(repo_root: Path) -> dict[str, Any]:
     corpus_dir = repo_root / "eoh_go_workspace/rag/corpus"
 
     code_stopwords = set(_literal_assignment(features_path, "_CODE_STOPWORDS"))
-    synthesis_patterns = dict(_literal_assignment(synthesis_path, "FEATURE_PATTERNS"))
-    code_family = set(_literal_assignment(synthesis_path, "_CODE_FAMILY_FEATURES"))
+    legacy_patterns = _optional_literal_assignment(synthesis_path, "FEATURE_PATTERNS")
+    legacy_code_family = _optional_literal_assignment(synthesis_path, "_CODE_FAMILY_FEATURES")
+    synthesis_patterns = dict(
+        legacy_patterns
+        if legacy_patterns is not None
+        else _literal_assignment(features_path, "FEATURE_PATTERNS")
+    )
+    code_family = set(
+        legacy_code_family
+        if legacy_code_family is not None
+        else _literal_assignment(features_path, "STRATEGY_FEATURES")
+    )
+    pattern_source = (
+        "card_synthesis.FEATURE_PATTERNS"
+        if legacy_patterns is not None
+        else "features.FEATURE_PATTERNS"
+    )
+    family_source = (
+        "card_synthesis._CODE_FAMILY_FEATURES"
+        if legacy_code_family is not None
+        else "features.STRATEGY_FEATURES"
+    )
     reranker_stopwords = set(_literal_assignment(reranker_path, "_FEATURE_STOPWORDS"))
     all_tags, history_tags, observed_in = _load_corpus_tags(corpus_dir)
 
     for name in synthesis_patterns:
-        observed_in[name].add("card_synthesis.FEATURE_PATTERNS")
+        observed_in[name].add(pattern_source)
     for name in code_family:
-        observed_in[name].add("card_synthesis._CODE_FAMILY_FEATURES")
+        observed_in[name].add(family_source)
     for name in code_stopwords:
         observed_in[name].add("features._CODE_STOPWORDS")
     for name in reranker_stopwords:
@@ -188,11 +215,14 @@ def build_inventory(repo_root: Path) -> dict[str, Any]:
         "module_extractors": [
             {
                 "module": "eoh_go/rag/features.py",
-                "behavior": "identifier regex -> camel/snake/kebab split -> stopword filter; population unions valid individual tokens",
+                "behavior": (
+                    "identifier extraction remains compatible; canonical taxonomy uses aliases and bounded strong patterns; "
+                    "population unions canonical features from valid individuals"
+                ),
             },
             {
                 "module": "eoh_go/rag/card_synthesis.py",
-                "behavior": "lowercase substring matching through FEATURE_PATTERNS; code family uses an independent substring set",
+                "behavior": "delegates strategy extraction and code-family compatibility wrappers to rag.features",
             },
             {
                 "module": "eoh_go/rag/reranker.py",
@@ -200,7 +230,7 @@ def build_inventory(repo_root: Path) -> dict[str, Any]:
             },
             {
                 "module": "eoh_go/tocc/controller.py",
-                "behavior": "delegates code-family extraction to card_synthesis.get_code_family",
+                "behavior": "delegates code-family extraction directly to rag.features.extract_strategy_features",
             },
         ],
         "aliases": dict(sorted(FEATURE_ALIASES.items())),

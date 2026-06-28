@@ -38,7 +38,7 @@ FEATURE_PATTERNS: dict[str, tuple[str, ...]] = {
     "adaptive_weights": ("adaptive_weight", "dynamic_weight", "remaining_ratio"),
     "best_fit": ("best_fit", "bestfit"),
     "capacity": (
-        "capacity_aware", "capacity_penalty", "capacity_slack",
+        "capacity_aware", "capacity_check", "capacity_penalty", "capacity_slack",
         "capacity_utilization", "remaining_vehicle_capacity", "rest_capacity",
     ),
     "centrality": ("centrality", "closeness_centrality", "minimum_spanning_tree", "mst"),

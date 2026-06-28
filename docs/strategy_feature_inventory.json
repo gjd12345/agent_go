@@ -111,15 +111,15 @@
       "in_reranker_stopwords": false,
       "name": "adaptive_weights",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
         "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES",
         "history_card_tags"
       ],
       "overlap_enabled": true,
       "patterns": [
-        "alpha",
-        "beta",
-        "gamma",
+        "adaptive_weight",
+        "dynamic_weight",
         "remaining_ratio"
       ],
       "risk_notes": [
@@ -315,10 +315,14 @@
       "in_reranker_stopwords": false,
       "name": "best_fit",
       "observed_in": [
-        "card_synthesis._CODE_FAMILY_FEATURES"
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES"
       ],
       "overlap_enabled": true,
-      "patterns": [],
+      "patterns": [
+        "best_fit",
+        "bestfit"
+      ],
       "risk_notes": []
     },
     {
@@ -458,17 +462,21 @@
       "in_reranker_stopwords": false,
       "name": "capacity",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
-        "card_synthesis._CODE_FAMILY_FEATURES",
         "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES",
         "features._CODE_STOPWORDS",
         "history_card_tags"
       ],
       "overlap_enabled": true,
       "patterns": [
-        "capacity",
-        "demand",
-        "feasible"
+        "capacity_aware",
+        "capacity_check",
+        "capacity_penalty",
+        "capacity_slack",
+        "capacity_utilization",
+        "remaining_vehicle_capacity",
+        "rest_capacity"
       ],
       "risk_notes": [
         "feasible/demand are weak tokens; capacity is also an API variable"
@@ -516,16 +524,17 @@
       "in_reranker_stopwords": false,
       "name": "centrality",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
         "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES",
         "history_card_tags"
       ],
       "overlap_enabled": true,
       "patterns": [
         "centrality",
-        "closeness",
-        "mst",
-        "spanning"
+        "closeness_centrality",
+        "minimum_spanning_tree",
+        "mst"
       ],
       "risk_notes": []
     },
@@ -589,11 +598,18 @@
       "in_reranker_stopwords": false,
       "name": "cluster",
       "observed_in": [
-        "card_synthesis._CODE_FAMILY_FEATURES",
-        "corpus:algorithm_cards.jsonl"
+        "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES"
       ],
       "overlap_enabled": true,
-      "patterns": [],
+      "patterns": [
+        "cluster",
+        "clustering",
+        "centroid",
+        "kmeans",
+        "k_means"
+      ],
       "risk_notes": []
     },
     {
@@ -606,17 +622,11 @@
       "in_reranker_stopwords": false,
       "name": "clustering",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
         "corpus:algorithm_cards.jsonl",
         "history_card_tags"
       ],
       "overlap_enabled": false,
-      "patterns": [
-        "cluster",
-        "centroid",
-        "k-means",
-        "kmeans"
-      ],
+      "patterns": [],
       "risk_notes": []
     },
     {
@@ -907,11 +917,17 @@
       "in_reranker_stopwords": false,
       "name": "depot",
       "observed_in": [
-        "card_synthesis._CODE_FAMILY_FEATURES",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES",
         "features._CODE_STOPWORDS"
       ],
       "overlap_enabled": true,
-      "patterns": [],
+      "patterns": [
+        "depot_distance",
+        "distance_from_depot",
+        "distance_to_depot",
+        "from_depot"
+      ],
       "risk_notes": [
         "depot is commonly an API/interface token"
       ]
@@ -928,19 +944,20 @@
       "in_reranker_stopwords": false,
       "name": "destination",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
-        "card_synthesis._CODE_FAMILY_FEATURES",
         "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES",
         "features._CODE_STOPWORDS",
         "history_card_tags"
       ],
       "overlap_enabled": true,
       "patterns": [
-        "dest",
-        "destination",
-        "return",
-        "bwd",
-        "backward"
+        "backward_distance",
+        "bwd_distance",
+        "dist_to_dest",
+        "distance_to_destination",
+        "destination_penalty",
+        "return_distance"
       ],
       "risk_notes": [
         "return is a weak token and causes broad false positives"
@@ -956,10 +973,15 @@
       "in_reranker_stopwords": false,
       "name": "detour",
       "observed_in": [
-        "card_synthesis._CODE_FAMILY_FEATURES"
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES"
       ],
       "overlap_enabled": true,
-      "patterns": [],
+      "patterns": [
+        "detour",
+        "delta_distance",
+        "insertion_cost"
+      ],
       "risk_notes": []
     },
     {
@@ -987,14 +1009,9 @@
       "in_code_stopwords": false,
       "in_reranker_stopwords": false,
       "name": "diffusion",
-      "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS"
-      ],
+      "observed_in": [],
       "overlap_enabled": false,
-      "patterns": [
-        "diffusion",
-        "discount"
-      ],
+      "patterns": [],
       "risk_notes": []
     },
     {
@@ -1023,12 +1040,19 @@
       "in_reranker_stopwords": false,
       "name": "distance",
       "observed_in": [
-        "card_synthesis._CODE_FAMILY_FEATURES",
         "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES",
         "features._CODE_STOPWORDS"
       ],
       "overlap_enabled": true,
-      "patterns": [],
+      "patterns": [
+        "distance_heuristic",
+        "distance_penalty",
+        "distance_score",
+        "farthest_distance",
+        "nearest_distance"
+      ],
       "risk_notes": [
         "distance and distance_matrix are commonly API/interface tokens"
       ]
@@ -1255,16 +1279,17 @@
       "in_reranker_stopwords": false,
       "name": "farthest",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
-        "card_synthesis._CODE_FAMILY_FEATURES",
         "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES",
         "history_card_tags"
       ],
       "overlap_enabled": true,
       "patterns": [
         "farthest",
         "far_first",
-        "distant"
+        "distant",
+        "max_dist"
       ],
       "risk_notes": []
     },
@@ -1378,10 +1403,14 @@
       "in_reranker_stopwords": false,
       "name": "first_fit",
       "observed_in": [
-        "card_synthesis._CODE_FAMILY_FEATURES"
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES"
       ],
       "overlap_enabled": true,
-      "patterns": [],
+      "patterns": [
+        "first_fit",
+        "firstfit"
+      ],
       "risk_notes": []
     },
     {
@@ -1488,16 +1517,11 @@
       "in_reranker_stopwords": false,
       "name": "forward_score",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
         "corpus:algorithm_cards.jsonl",
         "history_card_tags"
       ],
       "overlap_enabled": false,
-      "patterns": [
-        "fwd_score",
-        "forward",
-        "dist_from_current"
-      ],
+      "patterns": [],
       "risk_notes": []
     },
     {
@@ -1668,10 +1692,15 @@
       "in_reranker_stopwords": false,
       "name": "harmonic",
       "observed_in": [
-        "corpus:algorithm_cards.jsonl"
+        "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES"
       ],
       "overlap_enabled": true,
-      "patterns": [],
+      "patterns": [
+        "harmonic",
+        "size_class"
+      ],
       "risk_notes": []
     },
     {
@@ -1846,9 +1875,7 @@
       "in_code_stopwords": false,
       "in_reranker_stopwords": false,
       "name": "isolation",
-      "observed_in": [
-        "card_synthesis._CODE_FAMILY_FEATURES"
-      ],
+      "observed_in": [],
       "overlap_enabled": false,
       "patterns": [],
       "risk_notes": []
@@ -2023,16 +2050,16 @@
       "in_reranker_stopwords": false,
       "name": "lookahead",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
-        "card_synthesis._CODE_FAMILY_FEATURES",
         "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES",
         "history_card_tags"
       ],
       "overlap_enabled": true,
       "patterns": [
         "lookahead",
         "look_ahead",
-        "future"
+        "two_step"
       ],
       "risk_notes": [
         "future is a weak token and must not trigger alone"
@@ -2208,17 +2235,19 @@
       "in_reranker_stopwords": false,
       "name": "nearest",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
-        "card_synthesis._CODE_FAMILY_FEATURES",
         "corpus:algorithm_cards.jsonl",
         "corpus:code_examples.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES",
         "history_card_tags"
       ],
       "overlap_enabled": true,
       "patterns": [
         "nearest",
+        "closest",
         "argmin",
-        "closest"
+        "min_dist",
+        "minimum_distance"
       ],
       "risk_notes": []
     },
@@ -2312,17 +2341,16 @@
       "in_reranker_stopwords": false,
       "name": "normalize",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
         "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES",
         "history_card_tags"
       ],
       "overlap_enabled": true,
       "patterns": [
         "normalize",
-        "range_fwd",
-        "/ range",
-        "[0, 1]",
-        "[0,1]"
+        "normalization",
+        "range_fwd"
       ],
       "risk_notes": []
     },
@@ -2498,14 +2526,16 @@
       "in_reranker_stopwords": false,
       "name": "penalty",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
         "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES",
         "history_card_tags"
       ],
       "overlap_enabled": true,
       "patterns": [
         "penalty",
-        "penalize"
+        "penalize",
+        "penalized"
       ],
       "risk_notes": []
     },
@@ -2550,9 +2580,7 @@
       "in_code_stopwords": false,
       "in_reranker_stopwords": false,
       "name": "progress",
-      "observed_in": [
-        "card_synthesis._CODE_FAMILY_FEATURES"
-      ],
+      "observed_in": [],
       "overlap_enabled": false,
       "patterns": [],
       "risk_notes": []
@@ -2602,16 +2630,16 @@
       "in_reranker_stopwords": false,
       "name": "regret",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
-        "card_synthesis._CODE_FAMILY_FEATURES",
         "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES",
         "history_card_tags"
       ],
       "overlap_enabled": true,
       "patterns": [
         "regret",
-        "second_best",
-        "second-best"
+        "regret2",
+        "second_best"
       ],
       "risk_notes": []
     },
@@ -2657,13 +2685,15 @@
       "in_reranker_stopwords": false,
       "name": "remaining_aware",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
         "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES",
         "history_card_tags"
       ],
       "overlap_enabled": true,
       "patterns": [
-        "remaining",
+        "remaining_aware",
+        "remaining_ratio",
         "n_rem",
         "n_unvisited"
       ],
@@ -2696,11 +2726,17 @@
       "in_reranker_stopwords": false,
       "name": "residual",
       "observed_in": [
-        "card_synthesis._CODE_FAMILY_FEATURES",
-        "corpus:algorithm_cards.jsonl"
+        "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES"
       ],
       "overlap_enabled": true,
-      "patterns": [],
+      "patterns": [
+        "residual",
+        "remaining_capacity",
+        "capacity_slack",
+        "slack"
+      ],
       "risk_notes": []
     },
     {
@@ -2891,16 +2927,17 @@
       "in_reranker_stopwords": false,
       "name": "savings",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
-        "card_synthesis._CODE_FAMILY_FEATURES",
         "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES",
         "history_card_tags"
       ],
       "overlap_enabled": true,
       "patterns": [
         "saving",
-        "clarke",
-        "wright"
+        "savings",
+        "clarke_wright",
+        "pair_savings"
       ],
       "risk_notes": []
     },
@@ -3185,11 +3222,16 @@
       "in_reranker_stopwords": false,
       "name": "sweep",
       "observed_in": [
-        "card_synthesis._CODE_FAMILY_FEATURES",
-        "corpus:algorithm_cards.jsonl"
+        "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES"
       ],
       "overlap_enabled": true,
-      "patterns": [],
+      "patterns": [
+        "sweep",
+        "polar_angle",
+        "angular_sector"
+      ],
       "risk_notes": []
     },
     {
@@ -3219,14 +3261,11 @@
       "in_reranker_stopwords": false,
       "name": "threshold",
       "observed_in": [
-        "card_synthesis.FEATURE_PATTERNS",
         "corpus:algorithm_cards.jsonl",
         "history_card_tags"
       ],
       "overlap_enabled": false,
-      "patterns": [
-        "threshold"
-      ],
+      "patterns": [],
       "risk_notes": []
     },
     {
@@ -3239,11 +3278,15 @@
       "in_reranker_stopwords": false,
       "name": "tightness",
       "observed_in": [
-        "card_synthesis._CODE_FAMILY_FEATURES",
-        "corpus:code_examples.jsonl"
+        "corpus:code_examples.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES"
       ],
       "overlap_enabled": true,
-      "patterns": [],
+      "patterns": [
+        "tightness",
+        "tight_fit"
+      ],
       "risk_notes": []
     },
     {
@@ -3386,9 +3429,7 @@
       "in_code_stopwords": false,
       "in_reranker_stopwords": false,
       "name": "two_hop",
-      "observed_in": [
-        "card_synthesis._CODE_FAMILY_FEATURES"
-      ],
+      "observed_in": [],
       "overlap_enabled": false,
       "patterns": [],
       "risk_notes": []
@@ -3404,9 +3445,15 @@
       "in_code_stopwords": false,
       "in_reranker_stopwords": false,
       "name": "two_opt",
-      "observed_in": [],
+      "observed_in": [
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES"
+      ],
       "overlap_enabled": true,
-      "patterns": [],
+      "patterns": [
+        "two_opt",
+        "2opt"
+      ],
       "risk_notes": []
     },
     {
@@ -3451,11 +3498,15 @@
       "in_reranker_stopwords": false,
       "name": "utilization",
       "observed_in": [
-        "card_synthesis._CODE_FAMILY_FEATURES",
-        "corpus:algorithm_cards.jsonl"
+        "corpus:algorithm_cards.jsonl",
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES"
       ],
       "overlap_enabled": true,
-      "patterns": [],
+      "patterns": [
+        "utilization",
+        "fill_ratio"
+      ],
       "risk_notes": []
     },
     {
@@ -3614,9 +3665,15 @@
       "in_code_stopwords": false,
       "in_reranker_stopwords": false,
       "name": "worst_fit",
-      "observed_in": [],
+      "observed_in": [
+        "features.FEATURE_PATTERNS",
+        "features.STRATEGY_FEATURES"
+      ],
       "overlap_enabled": true,
-      "patterns": [],
+      "patterns": [
+        "worst_fit",
+        "worstfit"
+      ],
       "risk_notes": []
     },
     {
@@ -3652,11 +3709,11 @@
   ],
   "module_extractors": [
     {
-      "behavior": "identifier regex -> camel/snake/kebab split -> stopword filter; population unions valid individual tokens",
+      "behavior": "identifier extraction remains compatible; canonical taxonomy uses aliases and bounded strong patterns; population unions canonical features from valid individuals",
       "module": "eoh_go/rag/features.py"
     },
     {
-      "behavior": "lowercase substring matching through FEATURE_PATTERNS; code family uses an independent substring set",
+      "behavior": "delegates strategy extraction and code-family compatibility wrappers to rag.features",
       "module": "eoh_go/rag/card_synthesis.py"
     },
     {
@@ -3664,93 +3721,147 @@
       "module": "eoh_go/rag/reranker.py"
     },
     {
-      "behavior": "delegates code-family extraction to card_synthesis.get_code_family",
+      "behavior": "delegates code-family extraction directly to rag.features.extract_strategy_features",
       "module": "eoh_go/tocc/controller.py"
     }
   ],
   "patterns": {
     "adaptive_weights": [
-      "alpha",
-      "beta",
-      "gamma",
+      "adaptive_weight",
+      "dynamic_weight",
       "remaining_ratio"
     ],
+    "best_fit": [
+      "best_fit",
+      "bestfit"
+    ],
     "capacity": [
-      "capacity",
-      "demand",
-      "feasible"
+      "capacity_aware",
+      "capacity_check",
+      "capacity_penalty",
+      "capacity_slack",
+      "capacity_utilization",
+      "remaining_vehicle_capacity",
+      "rest_capacity"
     ],
     "centrality": [
       "centrality",
-      "closeness",
-      "mst",
-      "spanning"
+      "closeness_centrality",
+      "minimum_spanning_tree",
+      "mst"
     ],
-    "clustering": [
+    "cluster": [
       "cluster",
+      "clustering",
       "centroid",
-      "k-means",
-      "kmeans"
+      "kmeans",
+      "k_means"
+    ],
+    "depot": [
+      "depot_distance",
+      "distance_from_depot",
+      "distance_to_depot",
+      "from_depot"
     ],
     "destination": [
-      "dest",
-      "destination",
-      "return",
-      "bwd",
-      "backward"
+      "backward_distance",
+      "bwd_distance",
+      "dist_to_dest",
+      "distance_to_destination",
+      "destination_penalty",
+      "return_distance"
     ],
-    "diffusion": [
-      "diffusion",
-      "discount"
+    "detour": [
+      "detour",
+      "delta_distance",
+      "insertion_cost"
+    ],
+    "distance": [
+      "distance_heuristic",
+      "distance_penalty",
+      "distance_score",
+      "farthest_distance",
+      "nearest_distance"
     ],
     "farthest": [
       "farthest",
       "far_first",
-      "distant"
+      "distant",
+      "max_dist"
     ],
-    "forward_score": [
-      "fwd_score",
-      "forward",
-      "dist_from_current"
+    "first_fit": [
+      "first_fit",
+      "firstfit"
+    ],
+    "harmonic": [
+      "harmonic",
+      "size_class"
     ],
     "lookahead": [
       "lookahead",
       "look_ahead",
-      "future"
+      "two_step"
     ],
     "nearest": [
       "nearest",
+      "closest",
       "argmin",
-      "closest"
+      "min_dist",
+      "minimum_distance"
     ],
     "normalize": [
       "normalize",
-      "range_fwd",
-      "/ range",
-      "[0, 1]",
-      "[0,1]"
+      "normalization",
+      "range_fwd"
     ],
     "penalty": [
       "penalty",
-      "penalize"
+      "penalize",
+      "penalized"
     ],
     "regret": [
       "regret",
-      "second_best",
-      "second-best"
+      "regret2",
+      "second_best"
     ],
     "remaining_aware": [
-      "remaining",
+      "remaining_aware",
+      "remaining_ratio",
       "n_rem",
       "n_unvisited"
     ],
+    "residual": [
+      "residual",
+      "remaining_capacity",
+      "capacity_slack",
+      "slack"
+    ],
     "savings": [
       "saving",
-      "clarke",
-      "wright"
+      "savings",
+      "clarke_wright",
+      "pair_savings"
     ],
-    "threshold": [
-      "threshold"
+    "sweep": [
+      "sweep",
+      "polar_angle",
+      "angular_sector"
+    ],
+    "tightness": [
+      "tightness",
+      "tight_fit"
+    ],
+    "two_opt": [
+      "two_opt",
+      "2opt"
+    ],
+    "utilization": [
+      "utilization",
+      "fill_ratio"
+    ],
+    "worst_fit": [
+      "worst_fit",
+      "worstfit"
     ]
   },
   "risks": [

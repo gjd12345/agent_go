@@ -13,65 +13,24 @@ import re
 from pathlib import Path
 from typing import Any
 
+from .features import (
+    extract_strategy_features as _extract_canonical_strategy_features,
+    normalize_strategy_feature,
+)
 from .schemas import CorpusItem, load_corpus, save_corpus
 
 # ---------------------------------------------------------------------------
 # Feature extraction
 # ---------------------------------------------------------------------------
 
-# Each feature maps to a list of lowercase substrings that signal its presence.
-# Checked via simple `token in code_lower` — no regex needed.
-FEATURE_PATTERNS: dict[str, list[str]] = {
-    # --- Scoring strategies ---
-    "nearest": ["nearest", "argmin", "closest"],
-    "farthest": ["farthest", "far_first", "distant"],
-    "regret": ["regret", "second_best", "second-best"],
-    "savings": ["saving", "clarke", "wright"],
-    "centrality": ["centrality", "closeness", "mst", "spanning"],
-    # --- Distance handling ---
-    "destination": ["dest", "destination", "return", "bwd", "backward"],
-    "normalize": ["normalize", "range_fwd", "/ range", "[0, 1]", "[0,1]"],
-    "forward_score": ["fwd_score", "forward", "dist_from_current"],
-    "penalty": ["penalty", "penalize"],
-    # --- Adaptive / lookahead ---
-    "adaptive_weights": ["alpha", "beta", "gamma", "remaining_ratio"],
-    "lookahead": ["lookahead", "look_ahead", "future"],
-    "remaining_aware": ["remaining", "n_rem", "n_unvisited"],
-    # --- Structural ---
-    "clustering": ["cluster", "centroid", "k-means", "kmeans"],
-    "capacity": ["capacity", "demand", "feasible"],
-    "diffusion": ["diffusion", "discount"],
-    "threshold": ["threshold"],
-}
-
-# Subset used by _get_code_family for backward compatibility.
-_CODE_FAMILY_FEATURES: set[str] = {
-    "nearest", "farthest", "regret", "capacity", "residual",
-    "best_fit", "first_fit", "utilization", "savings", "sweep",
-    "cluster", "lookahead", "two_hop", "progress", "tightness",
-    "isolation", "detour", "destination", "depot", "distance",
-}
-
-
 def extract_strategy_features(code: str | None) -> set[str]:
-    """Return the set of strategy feature names detected in *code*.
-
-    >>> sorted(extract_strategy_features("regret = second_best - best; dest = ..."))
-    ['destination', 'regret']
-    """
-    if not code:
-        return set()
-    code_lower = code.lower()
-    return {name for name, tokens in FEATURE_PATTERNS.items()
-            if any(tok in code_lower for tok in tokens)}
+    """Backward-compatible wrapper for canonical feature extraction."""
+    return _extract_canonical_strategy_features(code)
 
 
 def get_code_family(code: str | None) -> set[str]:
-    """Backward-compatible feature extraction (matches operator_card_controller)."""
-    if not code:
-        return set()
-    code_lower = code.lower()
-    return {f for f in _CODE_FAMILY_FEATURES if f in code_lower}
+    """Backward-compatible wrapper returning canonical strategy features."""
+    return _extract_canonical_strategy_features(code)
 
 
 # ---------------------------------------------------------------------------
@@ -85,7 +44,7 @@ _FEATURE_DO: dict[str, str] = {
     "adaptive_weights": "use remaining_ratio to dynamically adjust forward vs backward weights",
     "regret": "maximize regret = second_best - best and prefer high regret candidates",
     "farthest": "maximize depot/current distance early to seed distant clusters",
-    "clustering": "identify unvisited node clusters; visit distant clusters before nearby ones",
+    "cluster": "identify unvisited node clusters; visit distant clusters before nearby ones",
     "centrality": "prefer nodes with high closeness centrality or high MST edge weight",
     "penalty": "penalize candidates very close to destination unless few nodes remain",
     "lookahead": "consider 2-step lookahead; penalize choices that strand distant nodes",
@@ -104,7 +63,7 @@ _FEATURE_WHEN: dict[str, str] = {
     "adaptive_weights": "early tour steps should favor exploration, late steps should favor return",
     "regret": "several candidates compete and one may become costly later",
     "farthest": "distant clusters may be left until too late",
-    "clustering": "unvisited nodes form spatial clusters",
+    "cluster": "unvisited nodes form spatial clusters",
     "centrality": "some nodes are more central and should be visited strategically",
     "penalty": "premature return to destination wastes tour length",
     "lookahead": "greedy choices can strand distant nodes",
@@ -146,7 +105,7 @@ _CARD_FEATURE_PRIORITY: list[str] = [
     "regret",
     "farthest",
     "savings",
-    "clustering",
+    "cluster",
     "centrality",
     "destination",
     "capacity",
@@ -172,7 +131,7 @@ def _build_title(problem: str, features: set[str]) -> str:
     prefix = problem.split("_")[0].upper()  # TSP, CVRP, etc.
     # Pick the 2-3 most distinctive features
     priority = ["regret", "farthest", "destination", "normalize", "adaptive_weights",
-                "clustering", "centrality", "savings", "penalty", "lookahead"]
+                "cluster", "centrality", "savings", "penalty", "lookahead"]
     selected = [f for f in priority if f in features][:3]
     if not selected:
         selected = sorted(features)[:2]
@@ -184,7 +143,7 @@ def _build_summary(problem: str, features: set[str]) -> str:
     """Generate a one-line summary for retrieval scoring."""
     prefix = problem.split("_")[0].upper()
     priority = ["regret", "farthest", "destination", "normalize", "adaptive_weights",
-                "clustering", "centrality", "savings"]
+                "cluster", "centrality", "savings"]
     selected = [f for f in priority if f in features][:3]
     if not selected:
         selected = sorted(features)[:2]
@@ -347,7 +306,7 @@ def _build_formula_summary(features: set[str]) -> str:
         parts.append("savings = d(ref,i)+d(ref,j)-d(i,j)")
     if "farthest" in features:
         parts.append("prefer distant nodes early")
-    if "clustering" in features:
+    if "cluster" in features:
         parts.append("cluster-aware selection")
     if not parts:
         parts.append("composite scoring from detected features")
@@ -417,6 +376,12 @@ def synthesize_card(
     """
     if features is None:
         features = extract_strategy_features(code)
+    else:
+        features = {
+            canonical
+            for feature in features
+            if (canonical := normalize_strategy_feature(feature)) is not None
+        }
     if not features:
         raise ValueError("No strategy features detected in code; cannot synthesize card.")
     card_features = _select_card_features(features)

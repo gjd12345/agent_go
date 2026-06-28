@@ -13,6 +13,7 @@ from eoh_go.rag.card_synthesis import (
     get_code_family,
     synthesize_card,
 )
+from eoh_go.rag.features import STRATEGY_FEATURES
 from eoh_go.rag.schemas import CorpusItem, load_corpus, save_corpus
 
 
@@ -52,7 +53,7 @@ class TestExtractStrategyFeatures:
         mst = minimum_spanning_tree(graph)
         """
         features = extract_strategy_features(code)
-        assert "clustering" in features
+        assert "cluster" in features
         assert "centrality" in features
 
     def test_far_first_and_penalty(self):
@@ -74,11 +75,17 @@ class TestExtractStrategyFeatures:
 
 class TestGetCodeFamily:
     def test_backward_compatible(self):
-        code = "regret = second_best; nearest = argmin(dists); capacity = rest"
+        code = "regret = second_best; nearest = argmin(dists); rest_capacity = capacity - used"
         family = get_code_family(code)
         assert "regret" in family
         assert "nearest" in family
         assert "capacity" in family
+
+    def test_matches_canonical_strategy_extractor(self):
+        from eoh_go.rag.features import extract_strategy_features as canonical_extract
+
+        code = "far_first = distant_nodes[0]; regret_score = second_best - best"
+        assert get_code_family(code) == canonical_extract(code)
 
     def test_empty(self):
         assert get_code_family(None) == set()
@@ -121,6 +128,7 @@ class TestSynthesizeCard:
         card = synthesize_card("cvrp_construct", code)
         strategy_tags = [tag for tag in card.tags if tag not in {"cvrp", "construct", "evolved"}]
         assert len(strategy_tags) <= 3
+        assert set(strategy_tags) <= STRATEGY_FEATURES
         assert "alpha" in card.content
         assert "α" not in card.content
         # Core section (before Feature tags) should stay bounded
@@ -130,6 +138,17 @@ class TestSynthesizeCard:
         assert "Feature tags:" in card.content
         assert "Formula summary:" in card.content
         assert "Code pattern:" in card.content
+
+    def test_explicit_legacy_features_are_normalized_or_excluded(self):
+        card = synthesize_card(
+            "tsp_construct",
+            "regret = second_best",
+            features={"clustering", "regret", "threshold"},
+        )
+        assert "cluster" in card.tags
+        assert "regret" in card.tags
+        assert "clustering" not in card.tags
+        assert "threshold" not in card.tags
 
     def test_cvrp_synthesis(self):
         code = "farthest = argmax(dist_depot); capacity_check = demand <= rest"

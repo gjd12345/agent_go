@@ -208,11 +208,14 @@ class TOCCControllerTests(unittest.TestCase):
         self.assertEqual(_card_family(["tsp_regret_insertion"]), "regret_mixed")
 
     def test_code_family(self) -> None:
+        from eoh_go.rag.features import extract_strategy_features
+
         code = "import numpy as np\n# nearest and farthest regret\ncombined = regret_val * dist"
         features = _get_code_family(code)
         self.assertIn("nearest", features)
         self.assertIn("farthest", features)
         self.assertIn("regret", features)
+        self.assertEqual(extract_strategy_features(code), features)
 
     def test_tox_decision_defaults(self) -> None:
         d = TOCCDecision()
