@@ -109,13 +109,18 @@ class ExperimentManifestRunnerTests(unittest.TestCase):
             self.assertIn("--force", proc.stdout + proc.stderr)
             self.assertFalse(output_dir.exists())
 
-    def test_validate_manifest_rejects_missing_selected_cards_for_tocc_strategy(self) -> None:
+    def test_validate_manifest_lists_all_supported_card_fields_for_tocc_strategy(self) -> None:
         manifest = self._minimal_manifest()
         manifest["arms"][0]["selected_card_ids"] = []
 
         errors = _validate_manifest(manifest)
 
-        self.assertTrue(any("candidate_card_ids or selected_card_ids" in error for error in errors))
+        self.assertTrue(
+            any(
+                "tocc_* strategy requires candidate_card_ids, selected_card_ids, or cards" in error
+                for error in errors
+            )
+        )
 
     def test_validate_manifest_accepts_candidate_card_ids_for_tocc_strategy(self) -> None:
         manifest = self._minimal_manifest()

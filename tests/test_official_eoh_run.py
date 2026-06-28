@@ -209,6 +209,25 @@ class OfficialEohRunTests(unittest.TestCase):
         self.assertEqual(["tsp_construct_api_skeleton"], [item["id"] for item in trace["rag_global_items"]])
         self.assertIn("API RULES", context)
 
+    def test_candidate_pool_lte_top_k_emits_selection_space_warning(self) -> None:
+        _, trace = build_official_rag_context(
+            Path.cwd(),
+            "tsp_construct",
+            "literature_rag",
+            top_k=2,
+            max_chars=3000,
+            query="tsp regret farthest",
+            candidate_card_ids=["tsp_regret_insertion", "tsp_farthest_insertion"],
+        )
+
+        self.assertEqual(2, trace["rag_candidate_pool_size_after_filter"])
+        self.assertTrue(
+            any(
+                "candidate_pool_size_lte_top_k" in warning
+                for warning in trace["rag_selection_space_warning"]
+            )
+        )
+
     def test_candidate_allowlist_does_not_fallback_when_empty(self) -> None:
         with self.assertRaisesRegex(ValueError, "No matching strategy cards"):
             build_official_rag_context(

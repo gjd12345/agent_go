@@ -52,7 +52,9 @@ def _validate_manifest(manifest: dict[str, Any]) -> list[str]:
         strategy = arm.get("context_strategy", "")
         card_ids, _ = _arm_card_ids(arm)
         if strategy.startswith("tocc_") and not card_ids:
-            errors.append(f"arm[{i}] tocc_* strategy requires candidate_card_ids or selected_card_ids")
+            errors.append(
+                f"arm[{i}] tocc_* strategy requires candidate_card_ids, selected_card_ids, or cards"
+            )
 
     problems = manifest.get("problems", [])
     for p in problems:
