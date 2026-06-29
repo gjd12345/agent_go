@@ -121,6 +121,8 @@ def _build_cmd(
             cmd.extend(["--prev-run-dir", effective_prev])
         if rag.get("outcome_file"):
             cmd.extend(["--outcome-file", str(rag["outcome_file"])])
+        if rag.get("rerank_mode"):
+            cmd.extend(["--rag-rerank", rag["rerank_mode"]])
     return cmd
 
 
