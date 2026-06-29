@@ -1,0 +1,62 @@
+[
+  {
+    "tag": "run_tsp_construct_E2_data_g4_r1",
+    "problem": "tsp_construct",
+    "arm": "E2_data",
+    "generation": 4,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 180.8,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_tsp/run_tsp_construct_E2_data_g4_r1",
+    "best_objective": 6.29095,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_tsp_construct_E2_data_g4_r2",
+    "problem": "tsp_construct",
+    "arm": "E2_data",
+    "generation": 4,
+    "repeat": 2,
+    "status": "ok",
+    "runtime_s": 238.7,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_tsp/run_tsp_construct_E2_data_g4_r2",
+    "best_objective": 6.49972,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_tsp_construct_E2_data_g4_r3",
+    "problem": "tsp_construct",
+    "arm": "E2_data",
+    "generation": 4,
+    "repeat": 3,
+    "status": "ok",
+    "runtime_s": 235.7,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_tsp/run_tsp_construct_E2_data_g4_r3",
+    "best_objective": 6.34985,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_tsp_construct_E2_data_g4_r4",
+    "problem": "tsp_construct",
+    "arm": "E2_data",
+    "generation": 4,
+    "repeat": 4,
+    "status": "ok",
+    "runtime_s": 165.7,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_tsp/run_tsp_construct_E2_data_g4_r4",
+    "best_objective": 6.50779,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_tsp_construct_E2_data_g4_r5",
+    "problem": "tsp_construct",
+    "arm": "E2_data",
+    "generation": 4,
+    "repeat": 5,
+    "status": "ok",
+    "runtime_s": 137.3,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_tsp/run_tsp_construct_E2_data_g4_r5",
+    "best_objective": 6.44441,
+    "valid_candidates": 4
+  }
+]
