@@ -298,6 +298,14 @@ def _runner_script() -> str:
                 use_seed=args.use_official_seed,
                 seed_path=str(seed_path),
             )
+            # Seed codes injection: replace part of init population with elite codes
+            if args.seed_codes and Path(args.seed_codes).exists():
+                try:
+                    seed_data = json.loads(Path(args.seed_codes).read_text())
+                    if seed_data and hasattr(eoh, '_seed_elite_codes'):
+                        eoh._seed_elite_codes(seed_data)
+                except Exception:
+                    pass
             eoh.run()
 
 
@@ -559,6 +567,7 @@ def main() -> None:
     parser.add_argument("--rag-rerank", default="feature_outcome", choices=["keyword", "feature_outcome", "llm"], help="Rerank mode")
     parser.add_argument("--rag-rerank-temperature", type=float, default=0.0, help="LLM rerank temperature (0=deterministic)")
     parser.add_argument("--rag-top-fraction", type=float, default=1.0, help="Population top fraction for feature extraction")
+    parser.add_argument("--seed-codes", default="", help="JSON file with seed codes for population init")
     parser.add_argument("--pop-size", type=int, default=2)
     parser.add_argument("--generations", type=int, default=1)
     parser.add_argument("--operators", default="i1")

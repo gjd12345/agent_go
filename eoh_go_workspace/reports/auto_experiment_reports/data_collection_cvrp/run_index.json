@@ -6,9 +6,9 @@
     "generation": 4,
     "repeat": 1,
     "status": "ok",
-    "runtime_s": 368.0,
+    "runtime_s": 369.3,
     "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_cvrp/run_cvrp_construct_E2_data_g4_r1",
-    "best_objective": 12.97178,
+    "best_objective": 13.28321,
     "valid_candidates": 4
   },
   {
@@ -18,9 +18,9 @@
     "generation": 4,
     "repeat": 2,
     "status": "ok",
-    "runtime_s": 226.3,
+    "runtime_s": 248.9,
     "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_cvrp/run_cvrp_construct_E2_data_g4_r2",
-    "best_objective": 12.8123,
+    "best_objective": 13.14576,
     "valid_candidates": 4
   },
   {
@@ -30,9 +30,9 @@
     "generation": 4,
     "repeat": 3,
     "status": "ok",
-    "runtime_s": 211.3,
+    "runtime_s": 250.4,
     "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_cvrp/run_cvrp_construct_E2_data_g4_r3",
-    "best_objective": 12.65386,
+    "best_objective": 13.28321,
     "valid_candidates": 4
   },
   {
@@ -42,7 +42,7 @@
     "generation": 4,
     "repeat": 4,
     "status": "ok",
-    "runtime_s": 308.1,
+    "runtime_s": 220.3,
     "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_cvrp/run_cvrp_construct_E2_data_g4_r4",
     "best_objective": 13.23646,
     "valid_candidates": 4
@@ -54,9 +54,9 @@
     "generation": 4,
     "repeat": 5,
     "status": "ok",
-    "runtime_s": 194.2,
+    "runtime_s": 223.0,
     "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_cvrp/run_cvrp_construct_E2_data_g4_r5",
-    "best_objective": 13.23646,
+    "best_objective": 13.28321,
     "valid_candidates": 4
   }
 ]

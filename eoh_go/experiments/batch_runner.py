@@ -54,6 +54,117 @@ def shared_pool_best(pool_dir: Path, problem: str) -> str:
             best_dir = entry["run_dir"]
     return best_dir
 
+
+# ---------------------------------------------------------------------------
+# Best-Code Pool: cross-process elite code sharing
+# ---------------------------------------------------------------------------
+
+def _best_codes_path(pool_dir: Path, problem: str) -> Path:
+    return pool_dir / f"best_codes_{problem}.jsonl"
+
+
+def shared_pool_register_code(pool_dir: Path, problem: str, code: str, objective: float) -> None:
+    """Register a high-quality code in the shared best-code pool."""
+    pool_dir.mkdir(parents=True, exist_ok=True)
+    path = _best_codes_path(pool_dir, problem)
+    entry = json.dumps({"code": code, "objective": objective, "ts": time.time()}, ensure_ascii=False)
+    with open(path, "a") as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        f.write(entry + "\n")
+        fcntl.flock(f, fcntl.LOCK_UN)
+
+
+def shared_pool_best_codes(pool_dir: Path, problem: str, top_k: int = 3) -> list[dict]:
+    """Get top-k best codes for seeding new runs."""
+    path = _best_codes_path(pool_dir, problem)
+    if not path.exists():
+        return []
+    entries = []
+    for line in path.read_text().strip().split("\n"):
+        if not line:
+            continue
+        entries.append(json.loads(line))
+    entries.sort(key=lambda x: x["objective"])
+    seen_objs: set[float] = set()
+    unique = []
+    for e in entries:
+        if e["objective"] not in seen_objs:
+            seen_objs.add(e["objective"])
+            unique.append(e)
+        if len(unique) >= top_k:
+            break
+    return unique
+
+
+# ---------------------------------------------------------------------------
+# Online Outcome: append outcome records after each successful run
+# ---------------------------------------------------------------------------
+
+# Problem baselines for card synthesis threshold
+_PROBLEM_BASELINES = {
+    "tsp_construct": 6.560,
+    "cvrp_construct": 13.519,
+    "bp_online": 0.0398,
+}
+
+
+def _maybe_synthesize_card(pool_dir: str, problem: str, code: str, objective: float) -> None:
+    """Auto-synthesize a new card if objective beats baseline by >5%."""
+    baseline = _PROBLEM_BASELINES.get(problem)
+    if baseline is None:
+        return
+    improvement = (baseline - objective) / abs(baseline)
+    if improvement < 0.05:
+        return
+    try:
+        from eoh_go.rag.card_synthesis import synthesize_card
+        from eoh_go.rag.schemas import load_corpus, save_corpus
+        corpus_path = Path("eoh_go_workspace/rag/corpus/algorithm_cards.jsonl")
+        card = synthesize_card(problem, code, run_info={"objective": objective})
+        existing = load_corpus(corpus_path)
+        if any(c.id == card.id for c in existing):
+            return
+        existing.append(card)
+        with open(corpus_path, "a") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)
+            f.write(json.dumps(card.__dict__, ensure_ascii=False) + "\n")
+            fcntl.flock(f, fcntl.LOCK_UN)
+    except Exception:
+        pass
+
+
+def _append_online_outcome(summary_path: Path, problem: str, outcome_file: str) -> None:
+    """Extract outcome records from a run summary and append to outcome file."""
+    from eoh_go.rag.card_outcomes import build_outcome_records, save_outcomes
+    try:
+        data = json.loads(summary_path.read_text(encoding="utf-8"))
+        rag_trace = data.get("rag_trace") or {}
+        run_summary = data.get("run_summary") or {}
+        injected = rag_trace.get("rag_injected_items", [])
+        if not injected:
+            return
+        injection_audit = {
+            "rag_injected_items": injected,
+            "rag_omitted_items": rag_trace.get("rag_omitted_items", []),
+        }
+        gen_result = {
+            "population_size": run_summary.get("population_size", 4),
+            "valid_candidates": run_summary.get("valid_candidates", 0),
+            "best_objective": run_summary.get("best_objective"),
+            "pure_baseline": None,
+        }
+        records = build_outcome_records(
+            run_id=summary_path.parent.name,
+            problem=problem,
+            generation=run_summary.get("latest_generation", 4),
+            injection_audit=injection_audit,
+            generation_result=gen_result,
+        )
+        if records and outcome_file:
+            save_outcomes(records, Path(outcome_file), append=True)
+    except Exception:
+        pass
+
 # Reuse existing EOH runner CLI directly
 RUNNER_MODULE = "eoh_go.experiments.eoh_single_runner"
 
@@ -122,6 +233,7 @@ def _build_cmd(
     repeat: int,
     output_dir: str,
     prev_run_dir: str = "",
+    seed_codes_path: str = "",
 ) -> list[str]:
     cmd = [
         manifest.get("python_exe") or _DEFAULT_PYTHON or sys.executable,
@@ -164,6 +276,8 @@ def _build_cmd(
             cmd.extend(["--rag-rerank-temperature", str(rag["rerank_temperature"])])
         if rag.get("top_fraction") and rag["top_fraction"] != 1.0:
             cmd.extend(["--rag-top-fraction", str(rag["top_fraction"])])
+    if seed_codes_path:
+        cmd.extend(["--seed-codes", seed_codes_path])
     return cmd
 
 
@@ -263,11 +377,17 @@ def main() -> None:
                     print(f"[RUN] {run_tag}  start={time.strftime('%H:%M:%S')}")
                     # Island model: use shared pool best as prev_run_dir if better than local chain
                     effective_prev = prev_run_dir
+                    seed_codes_path = ""
                     if shared_pool_dir:
                         pool_best = shared_pool_best(Path(shared_pool_dir), problem)
                         if pool_best and pool_best != prev_run_dir:
                             effective_prev = pool_best
-                    cmd = _build_cmd(manifest, problem, arm, gen, rep, run_out, prev_run_dir=effective_prev)
+                        # Seed codes: write top codes to temp file for init seeding
+                        best_codes = shared_pool_best_codes(Path(shared_pool_dir), problem, top_k=3)
+                        if best_codes:
+                            seed_codes_path = str(Path(shared_pool_dir) / f"_seed_{problem}_{os.getpid()}.json")
+                            Path(seed_codes_path).write_text(json.dumps(best_codes, ensure_ascii=False))
+                    cmd = _build_cmd(manifest, problem, arm, gen, rep, run_out, prev_run_dir=effective_prev, seed_codes_path=seed_codes_path)
                     started = time.time()
                     try:
                         proc = subprocess.run(cmd, text=True, capture_output=True, timeout=manifest.get("run_timeout_s", 1800) + 60)
@@ -304,13 +424,51 @@ def main() -> None:
                         # Island model: register successful run in shared pool
                         if shared_pool_dir and summary_path.exists():
                             try:
-                                obj = json.loads(summary_path.read_text(encoding="utf-8")).get("run_summary", {}).get("best_objective")
+                                sm = json.loads(summary_path.read_text(encoding="utf-8"))
+                                obj = (sm.get("run_summary") or {}).get("best_objective")
+                                code = (sm.get("run_summary") or {}).get("best_code", "")
                                 if obj is not None:
                                     shared_pool_register(Path(shared_pool_dir), problem, run_out, obj)
+                                    # Best-code pool
+                                    if code:
+                                        shared_pool_register_code(Path(shared_pool_dir), problem, code, obj)
+                                    # Dynamic card synthesis: if objective beats baseline by >5%
+                                    if code:
+                                        _maybe_synthesize_card(shared_pool_dir, problem, code, obj)
+                            except Exception:
+                                pass
+                        # Online outcome update
+                        if summary_path.exists():
+                            outcome_file = rag.get("outcome_file", "")
+                            if outcome_file:
+                                _append_online_outcome(summary_path, problem, outcome_file)
+                        # Adaptive operator: register improvement
+                        if shared_pool_dir:
+                            try:
+                                from eoh_go.experiments.adaptive_operators import register_operator_result
+                                # Compare with previous best in pool
+                                pool_codes = shared_pool_best_codes(Path(shared_pool_dir), problem, top_k=1)
+                                prev_best = pool_codes[0]["objective"] if pool_codes else None
+                                if prev_best is not None and obj is not None:
+                                    improved = obj < prev_best
+                                    delta = (prev_best - obj) / abs(prev_best) if prev_best else 0
+                                    register_operator_result(Path(shared_pool_dir), problem, "mixed", improved, delta)
                             except Exception:
                                 pass
                     else:
                         prev_run_dir = ""
+                        # Failure pattern sharing
+                        if shared_pool_dir and summary_path.exists():
+                            try:
+                                from eoh_go.experiments.shared_failures import register_failure
+                                sm = json.loads(summary_path.read_text(encoding="utf-8"))
+                                rs = sm.get("run_summary") or {}
+                                fail_reason = sm.get("failure_reason", "")
+                                code = rs.get("best_code", "")
+                                if fail_reason and code:
+                                    register_failure(Path(shared_pool_dir), problem, code, fail_reason)
+                            except Exception:
+                                pass
 
     if not args.dry_run and not args.no_run:
         index_path = output_root / "run_index.json"

@@ -166,11 +166,17 @@ def extract_card_features(item: CorpusItem) -> set[str]:
 def load_population_features(
     population: list[dict],
     top_fraction: float = 1.0,
+    diversity_mode: str = "all",
 ) -> set[str]:
     """Extract strategy features from valid individuals in a population.
 
     Only considers individuals with objective != None.
     top_fraction limits to the best N% by objective (lower is better).
+
+    diversity_mode:
+      "all" — extract features from top_fraction individuals (default)
+      "elite_only" — equivalent to top_fraction=0.25
+      "diversity" — return features of best individual only (for complementary card selection)
     """
     valid = [
         individual for individual in population
@@ -181,6 +187,13 @@ def load_population_features(
     if not valid:
         return set()
     valid.sort(key=lambda item: item["objective"])
+
+    if diversity_mode == "elite_only":
+        top_fraction = 0.25
+    elif diversity_mode == "diversity":
+        # Only the single best individual's features
+        return extract_strategy_features(valid[0]["code"])
+
     count = max(1, int(len(valid) * top_fraction))
     features: set[str] = set()
     for individual in valid[:count]:

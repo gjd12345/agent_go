@@ -6,9 +6,9 @@
     "generation": 4,
     "repeat": 1,
     "status": "ok",
-    "runtime_s": 356.9,
+    "runtime_s": 391.6,
     "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_bp_online/run_bp_online_E2_data_g4_r1",
-    "best_objective": 0.0168,
+    "best_objective": 0.03984,
     "valid_candidates": 4
   },
   {
@@ -18,9 +18,9 @@
     "generation": 4,
     "repeat": 2,
     "status": "ok",
-    "runtime_s": 350.0,
+    "runtime_s": 381.7,
     "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_bp_online/run_bp_online_E2_data_g4_r2",
-    "best_objective": 0.03984,
+    "best_objective": 0.02918,
     "valid_candidates": 4
   },
   {
@@ -30,9 +30,9 @@
     "generation": 4,
     "repeat": 3,
     "status": "ok",
-    "runtime_s": 277.0,
+    "runtime_s": 374.5,
     "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_bp_online/run_bp_online_E2_data_g4_r3",
-    "best_objective": 0.03984,
+    "best_objective": 0.03884,
     "valid_candidates": 4
   },
   {
@@ -42,9 +42,9 @@
     "generation": 4,
     "repeat": 4,
     "status": "ok",
-    "runtime_s": 297.6,
+    "runtime_s": 353.6,
     "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_bp_online/run_bp_online_E2_data_g4_r4",
-    "best_objective": 0.02938,
+    "best_objective": 0.03954,
     "valid_candidates": 4
   },
   {
@@ -53,10 +53,11 @@
     "arm": "E2_data",
     "generation": 4,
     "repeat": 5,
-    "status": "ok",
-    "runtime_s": 325.3,
+    "status": "ok_but_summary_failure",
+    "runtime_s": 127.4,
     "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/data_collection_bp_online/run_bp_online_E2_data_g4_r5",
-    "best_objective": 0.03984,
-    "valid_candidates": 4
+    "best_objective": null,
+    "valid_candidates": 0,
+    "failure_reason": "return_code_1"
   }
 ]
