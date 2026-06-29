@@ -1,0 +1,38 @@
+[
+  {
+    "tag": "run_bp_online_E2_seeded_g4_r1",
+    "problem": "bp_online",
+    "arm": "E2_seeded",
+    "generation": 4,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 309.2,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/phase4b_bp_online_E2_seeded/run_bp_online_E2_seeded_g4_r1",
+    "best_objective": 0.08844,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_bp_online_E2_seeded_g4_r2",
+    "problem": "bp_online",
+    "arm": "E2_seeded",
+    "generation": 4,
+    "repeat": 2,
+    "status": "ok",
+    "runtime_s": 350.5,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/phase4b_bp_online_E2_seeded/run_bp_online_E2_seeded_g4_r2",
+    "best_objective": 0.02485,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_bp_online_E2_seeded_g4_r3",
+    "problem": "bp_online",
+    "arm": "E2_seeded",
+    "generation": 4,
+    "repeat": 3,
+    "status": "ok",
+    "runtime_s": 330.4,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/phase4b_bp_online_E2_seeded/run_bp_online_E2_seeded_g4_r3",
+    "best_objective": 0.02505,
+    "valid_candidates": 4
+  }
+]
