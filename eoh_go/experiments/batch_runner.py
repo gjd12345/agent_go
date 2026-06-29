@@ -347,6 +347,7 @@ def main() -> None:
             arm_problems = arm.get("problems", problems)
             if problem not in arm_problems:
                 continue
+            rag = {**manifest.get("rag", {}), **arm.get("rag", {})}
             for gen in generations:
                 prev_run_dir = ""
                 for rep in range(1, repeats + 1):
