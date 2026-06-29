@@ -163,10 +163,12 @@ def _runner_script() -> str:
                 payload = json.dumps({
                     "model": self.model_LLM,
                     "messages": [{"role": "user", "content": prompt_content}],
+                    "thinking": {"type": "disabled"},
                 }).encode("utf-8")
                 headers = {
                     "Authorization": f"Bearer {self.api_key}",
                     "Content-Type": "application/json",
+                    "User-Agent": "eoh-experiment/1.0",
                 }
                 url = api_url(self.api_endpoint)
                 for attempt in range(max_retries):

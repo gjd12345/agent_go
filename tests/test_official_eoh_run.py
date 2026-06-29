@@ -33,6 +33,8 @@ class OfficialEohRunTests(unittest.TestCase):
         compile(script, "_run_official_eoh.py", "exec")
         self.assertIn("install_api_url_patch", script)
         self.assertIn("api_url(self.api_endpoint)", script)
+        self.assertIn('"User-Agent": "eoh-experiment/1.0"', script)
+        self.assertIn('"thinking": {"type": "disabled"}', script)
 
     def test_redact_log_tail_removes_endpoint_and_bearer_token(self) -> None:
         text = "LLM @ https://api.example.com/v1/chat endpoint=api.example.com Bearer TOKEN"

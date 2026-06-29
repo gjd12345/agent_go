@@ -1,0 +1,110 @@
+[
+  {
+    "tag": "run_bp_online_A_pure_g4_r1",
+    "problem": "bp_online",
+    "arm": "A_pure",
+    "generation": 4,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 200.9,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/phase4b_bp_online_ADE2/run_bp_online_A_pure_g4_r1",
+    "best_objective": 0.03984,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_bp_online_A_pure_g4_r2",
+    "problem": "bp_online",
+    "arm": "A_pure",
+    "generation": 4,
+    "repeat": 2,
+    "status": "ok",
+    "runtime_s": 318.7,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/phase4b_bp_online_ADE2/run_bp_online_A_pure_g4_r2",
+    "best_objective": 0.03763,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_bp_online_A_pure_g4_r3",
+    "problem": "bp_online",
+    "arm": "A_pure",
+    "generation": 4,
+    "repeat": 3,
+    "status": "ok",
+    "runtime_s": 223.3,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/phase4b_bp_online_ADE2/run_bp_online_A_pure_g4_r3",
+    "best_objective": 0.03984,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_bp_online_D_feature_outcome_g4_r1",
+    "problem": "bp_online",
+    "arm": "D_feature_outcome",
+    "generation": 4,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 250.6,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/phase4b_bp_online_ADE2/run_bp_online_D_feature_outcome_g4_r1",
+    "best_objective": 0.03964,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_bp_online_D_feature_outcome_g4_r2",
+    "problem": "bp_online",
+    "arm": "D_feature_outcome",
+    "generation": 4,
+    "repeat": 2,
+    "status": "ok",
+    "runtime_s": 197.2,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/phase4b_bp_online_ADE2/run_bp_online_D_feature_outcome_g4_r2",
+    "best_objective": 0.03984,
+    "valid_candidates": 1
+  },
+  {
+    "tag": "run_bp_online_D_feature_outcome_g4_r3",
+    "problem": "bp_online",
+    "arm": "D_feature_outcome",
+    "generation": 4,
+    "repeat": 3,
+    "status": "ok",
+    "runtime_s": 234.1,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/phase4b_bp_online_ADE2/run_bp_online_D_feature_outcome_g4_r3",
+    "best_objective": 0.03984,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_bp_online_E2_llm_rerank_full_g4_r1",
+    "problem": "bp_online",
+    "arm": "E2_llm_rerank_full",
+    "generation": 4,
+    "repeat": 1,
+    "status": "ok",
+    "runtime_s": 279.4,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/phase4b_bp_online_ADE2/run_bp_online_E2_llm_rerank_full_g4_r1",
+    "best_objective": 0.02747,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_bp_online_E2_llm_rerank_full_g4_r2",
+    "problem": "bp_online",
+    "arm": "E2_llm_rerank_full",
+    "generation": 4,
+    "repeat": 2,
+    "status": "ok",
+    "runtime_s": 267.6,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/phase4b_bp_online_ADE2/run_bp_online_E2_llm_rerank_full_g4_r2",
+    "best_objective": 0.082,
+    "valid_candidates": 4
+  },
+  {
+    "tag": "run_bp_online_E2_llm_rerank_full_g4_r3",
+    "problem": "bp_online",
+    "arm": "E2_llm_rerank_full",
+    "generation": 4,
+    "repeat": 3,
+    "status": "ok",
+    "runtime_s": 305.1,
+    "output_dir": "/Users/guojiadong.9/agent_ad/agent_go/eoh_go_workspace/reports/auto_experiment_reports/phase4b_bp_online_ADE2/run_bp_online_E2_llm_rerank_full_g4_r3",
+    "best_objective": 0.03984,
+    "valid_candidates": 4
+  }
+]
