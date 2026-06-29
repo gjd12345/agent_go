@@ -9,6 +9,7 @@ Supports: --dry-run, --no-run, --resume, --force.
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import os
 import subprocess
@@ -16,6 +17,42 @@ import sys
 import time
 from pathlib import Path
 from typing import Any
+
+
+# ---------------------------------------------------------------------------
+# Island Model: Shared Pool for cross-process population sharing
+# ---------------------------------------------------------------------------
+
+def _pool_index_path(pool_dir: Path) -> Path:
+    return pool_dir / "pool_index.jsonl"
+
+
+def shared_pool_register(pool_dir: Path, problem: str, run_dir: str, objective: float) -> None:
+    """Register a completed run in the shared pool (file-lock safe)."""
+    pool_dir.mkdir(parents=True, exist_ok=True)
+    idx_path = _pool_index_path(pool_dir)
+    entry = json.dumps({"problem": problem, "run_dir": run_dir, "objective": objective, "ts": time.time()})
+    with open(idx_path, "a") as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        f.write(entry + "\n")
+        fcntl.flock(f, fcntl.LOCK_UN)
+
+
+def shared_pool_best(pool_dir: Path, problem: str) -> str:
+    """Get the best run_dir for a problem from the shared pool."""
+    idx_path = _pool_index_path(pool_dir)
+    if not idx_path.exists():
+        return ""
+    best_obj = float("inf")
+    best_dir = ""
+    for line in idx_path.read_text().strip().split("\n"):
+        if not line:
+            continue
+        entry = json.loads(line)
+        if entry["problem"] == problem and entry["objective"] < best_obj:
+            best_obj = entry["objective"]
+            best_dir = entry["run_dir"]
+    return best_dir
 
 # Reuse existing EOH runner CLI directly
 RUNNER_MODULE = "eoh_go.experiments.eoh_single_runner"
@@ -138,6 +175,7 @@ def main() -> None:
     parser.add_argument("--no-run", action="store_true", help="Validate manifest only")
     parser.add_argument("--resume", action="store_true", help="Skip runs with existing summary")
     parser.add_argument("--force", action="store_true", help="Skip run-count safety check")
+    parser.add_argument("--shared-pool-dir", default="", help="Cross-process shared pool for island model population sharing")
     args = parser.parse_args()
 
     manifest_path = Path(args.manifest).resolve()
@@ -157,6 +195,7 @@ def main() -> None:
     max_runs = manifest.get("max_runs", 2)
     suite = manifest["suite"]
     output_root = Path(args.output_dir).resolve() / suite
+    shared_pool_dir = args.shared_pool_dir or ""
 
     gens = manifest.get("generations", [1])
     has_deep_gen = any(g > 1 for g in gens)
@@ -222,7 +261,13 @@ def main() -> None:
                             print(f"[RETRY] {run_tag} (previous run failed: {prev.get('failure_reason','unknown')})")
 
                     print(f"[RUN] {run_tag}  start={time.strftime('%H:%M:%S')}")
-                    cmd = _build_cmd(manifest, problem, arm, gen, rep, run_out, prev_run_dir=prev_run_dir)
+                    # Island model: use shared pool best as prev_run_dir if better than local chain
+                    effective_prev = prev_run_dir
+                    if shared_pool_dir:
+                        pool_best = shared_pool_best(Path(shared_pool_dir), problem)
+                        if pool_best and pool_best != prev_run_dir:
+                            effective_prev = pool_best
+                    cmd = _build_cmd(manifest, problem, arm, gen, rep, run_out, prev_run_dir=effective_prev)
                     started = time.time()
                     try:
                         proc = subprocess.run(cmd, text=True, capture_output=True, timeout=manifest.get("run_timeout_s", 1800) + 60)
@@ -256,6 +301,14 @@ def main() -> None:
                     print(f"[DONE] {run_tag}  status={status}  elapsed={elapsed}s")
                     if status == "ok" or (summary_path.exists() and json.loads(summary_path.read_text(encoding="utf-8")).get("run_summary", {}).get("ok")):
                         prev_run_dir = run_out
+                        # Island model: register successful run in shared pool
+                        if shared_pool_dir and summary_path.exists():
+                            try:
+                                obj = json.loads(summary_path.read_text(encoding="utf-8")).get("run_summary", {}).get("best_objective")
+                                if obj is not None:
+                                    shared_pool_register(Path(shared_pool_dir), problem, run_out, obj)
+                            except Exception:
+                                pass
                     else:
                         prev_run_dir = ""
 
