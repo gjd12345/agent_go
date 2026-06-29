@@ -46,6 +46,7 @@ class RagContextRequest:
     population_features: set[str] | None = None
     rerank_config: RerankConfig | None = None
     rerank_mode: str = "feature_outcome"
+    rerank_temperature: float = 0.0
 
 
 def _matches_problem_strategy(item: CorpusItem, problem: str) -> bool:
@@ -244,6 +245,7 @@ def build_rag_context(
             problem=request.problem,
             population_features=request.population_features,
             outcome_summaries=request.outcome_summaries,
+            temperature=request.rerank_temperature,
         )
         if llm_selected:
             retrieved = llm_selected
@@ -362,6 +364,7 @@ def build_official_rag_context(
     candidate_card_ids: list[str] | None = None,
     cards: list[str] | None = None,
     rerank_mode: str = "feature_outcome",
+    rerank_temperature: float = 0.0,
 ) -> tuple[str, dict[str, Any]]:
     candidate_source, effective_candidate_ids = resolve_candidate_card_fields(
         candidate_card_ids=candidate_card_ids,
@@ -382,5 +385,6 @@ def build_official_rag_context(
             population_features=population_features,
             rerank_config=rerank_config,
             rerank_mode=rerank_mode,
+            rerank_temperature=rerank_temperature,
         ),
     )

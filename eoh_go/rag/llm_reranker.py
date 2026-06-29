@@ -88,6 +88,7 @@ def llm_rerank(
     problem: str = "",
     population_features: set[str] | None = None,
     outcome_summaries: dict[str, Any] | None = None,
+    temperature: float = 0.0,
 ) -> tuple[list[CorpusItem], LlmRerankTrace]:
     """Use LLM to select cards from candidate pool.
 
@@ -108,7 +109,7 @@ def llm_rerank(
     try:
         response = chat_completion(
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.0,
+            temperature=temperature,
             timeout_s=30,
             max_retries=2,
         )

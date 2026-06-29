@@ -353,7 +353,7 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
             if prev_pops:
                 prev_population = _load_json(prev_pops[-1])
                 if isinstance(prev_population, list):
-                    population_features = load_population_features(prev_population) or None
+                    population_features = load_population_features(prev_population, top_fraction=args.rag_top_fraction) or None
         outcome_summaries: dict[str, object] | None = None
         if getattr(args, "outcome_file", ""):
             outcome_path = Path(args.outcome_file)
@@ -384,6 +384,7 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
             outcome_summaries=outcome_summaries,
             population_features=population_features,
             rerank_mode=args.rag_rerank,
+            rerank_temperature=args.rag_rerank_temperature,
             **candidate_kwargs,
         )
         context_path = run_dir / "rag_context.txt"
@@ -554,6 +555,8 @@ def main() -> None:
     parser.add_argument("--prev-run-dir", default="", help="Previous run dir to extract population features for rerank")
     parser.add_argument("--outcome-file", default="", help="Card outcome JSONL file used for outcome-aware rerank")
     parser.add_argument("--rag-rerank", default="feature_outcome", choices=["keyword", "feature_outcome", "llm"], help="Rerank mode")
+    parser.add_argument("--rag-rerank-temperature", type=float, default=0.0, help="LLM rerank temperature (0=deterministic)")
+    parser.add_argument("--rag-top-fraction", type=float, default=1.0, help="Population top fraction for feature extraction")
     parser.add_argument("--pop-size", type=int, default=2)
     parser.add_argument("--generations", type=int, default=1)
     parser.add_argument("--operators", default="i1")

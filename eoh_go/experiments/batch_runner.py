@@ -123,6 +123,10 @@ def _build_cmd(
             cmd.extend(["--outcome-file", str(rag["outcome_file"])])
         if rag.get("rerank_mode"):
             cmd.extend(["--rag-rerank", rag["rerank_mode"]])
+        if rag.get("rerank_temperature"):
+            cmd.extend(["--rag-rerank-temperature", str(rag["rerank_temperature"])])
+        if rag.get("top_fraction") and rag["top_fraction"] != 1.0:
+            cmd.extend(["--rag-top-fraction", str(rag["top_fraction"])])
     return cmd
 
 
