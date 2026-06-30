@@ -1,98 +1,59 @@
-# agent_go
+# EOH-RAG: Trace-Conditioned Small-Model Controllers for Heuristic Evolution
 
-Research workspace for LLM-based heuristic evolution and TOCC (Trace-Conditioned Operator-Card Controller).
+Research workspace for training small models to select strategy cards (RAG reranker) and generate/repair heuristic code, using traces from LLM-driven evolutionary optimization experiments.
 
-The current codebase is organized around two layers:
+## Current Research Direction
 
-- Go dynamic dispatch solver: `main.go`, `routing.go`, `go.mod`, `go.sum`
-- Python experiment/control layer: `eoh_go/`
-- Patched Agent_EOH core and Go `InsertShips` example: `Agent_EOH/eoh/src/eoh/`
-- Dynamic Solomon-style source data for RC101-RC105: `solomon_benchmark_d25/`, `solomon_benchmark_d50/`, `solomon_benchmark_d75/`
-- Candidate Go heuristics used during the EOH-Go experiments: `eoh_go_workspace/candidate_sources/`
-- Current TOCC reports and decks: `eoh_go_workspace/reports/auto_experiment_reports/`
-- Paper notes and related-work drafts: `eoh_go_workspace/reports/paper_notes/`
-- Historical reports and figures: `archived_experiments/reports_20260619/`
+1. **Batch data collection**: Island Model parallel experiments (gen=8/16, shared pool, 3 problems)
+2. **RAG reranker small model**: Learn strategy-card selection from experiment traces
+3. **Code gen/repair small model**: Learn heuristic code generation from successful evolution trajectories
 
-## Main Artifacts
+## Active Pipeline
 
-- Current TOCC progress report: `eoh_go_workspace/reports/auto_experiment_reports/tocc_current_progress_20260619.md`
-- Current TOCC progress deck: `eoh_go_workspace/reports/auto_experiment_reports/tocc_current_progress_20260619.pptx`
-- Best evolved code records: `eoh_go_workspace/reports/auto_experiment_reports/tocc_best_code_records.md`
-- Current auto-experiment report index: `eoh_go_workspace/reports/auto_experiment_reports/README.md`
-- Reports layout guide: `eoh_go_workspace/reports/README.md`
-- Historical Guarded EOH-Go tables, figures, and paper drafts: `archived_experiments/reports_20260619/`
-- Phase summary: `eoh_go/eoh_go_phase0_summary.md`
+```
+eoh_go/experiments/      — batch_runner, eoh_single_runner, rag_context_builder
+eoh_go/rag/              — retriever, reranker, llm_reranker, card_outcomes, features, card_synthesis
+eoh_go/tocc/             — agent, gatekeeper, pipeline, controller
+eoh_go/llm/              — LLM client (JoyAI / OpenCode)
+eoh_go_workspace/        — corpus, manifests, reports, shared_pool
+```
 
-## Quick Checks
+## Problems (Official EOH Benchmarks)
 
-After cloning, install the project Codex skills:
+| Problem | Type | Best Result | vs Baseline |
+|---------|------|------------|-------------|
+| `tsp_construct` | TSP50, 8 instances | 6.004 | +8.5% |
+| `cvrp_construct` | CVRP50, 16 instances | 12.423 | +8.1% |
+| `bp_online` | Online Bin Packing | 0.00674 | +83.1% |
+
+## Quick Start
 
 ```bash
-bash scripts/install_codex_skills.sh
+# Run batch experiment with shared pool (island model)
+export $(grep -v '^#' ~/.config/agent_go/opencode.env | xargs)
+python3 -m eoh_go.experiments.batch_runner \
+  --manifest eoh_go_workspace/experiments/manifests/high_gen_tsp_construct.json \
+  --force --shared-pool-dir eoh_go_workspace/shared_pool
+
+# Run tests
+python3 -m pytest tests/ -q
 ```
 
-This installs the project-local TOCC workflow, presentation, and pseudocode skills into `$CODEX_HOME/skills`. See `docs/codex_skills.md`.
+## Repository Structure
 
-```powershell
-go build -o mainbin_sa.exe .
-python -m pytest tests/ -q
-python -m unittest discover -s tests -q
+```
+eoh_go/                  — Python experiment framework (active)
+eoh_go_workspace/        — Data: corpus, manifests, reports, shared pool
+scripts/                 — Launch scripts for parallel experiments
+docs/                    — Architecture docs, cleanup plan, isolation contract
+tests/                   — Test suite (284 pass)
+legacy/                  — Archived: InsertShips v0, old grids, old reports
+main.go, routing.go      — Go dispatch solver (frozen, historical)
 ```
 
-To run a small EOH grid, configure the DeepSeek/OpenAI-compatible API key in your environment first, then use:
+## Key Design Decisions
 
-```powershell
-python -m eoh_go.experiments.grids.arrival_scale_grid `
-  --root "." `
-  --problem rc101.json `
-  --density d25 --density d50 --density d75 `
-  --arrival-scale 1.0 --arrival-scale 0.9 --arrival-scale 0.8 --arrival-scale 0.7 --arrival-scale 0.6 `
-  --use-density-source-dirs `
-  --llm-model deepseek-v4-flash `
-  --output-dir eoh_go_workspace/reports/auto_experiment_reports/manual_eoh_arrival_grid `
-  --generations 1 `
-  --pop-size 4 `
-  --eva-timeout 120 `
-  --run-timeout-s 60 `
-  --objective-res-weight 0.2
-```
-
-## Development Workflow
-
-### Build
-
-```bash
-go build -o mainbin_sa.exe .
-```
-
-Or use the Makefile:
-
-```bash
-make build          # build the main solver
-```
-
-### Run tests
-
-**Python unit tests (guard, operator, templates):**
-
-```bash
-python -m pytest tests/ -q
-```
-
-**Go benchmark integration tests (requires solomon_benchmark data):**
-
-```bash
-make test           # run SA solver benchmarks
-```
-
-### Code quality
-
-The project currently has no automated Go linting or formatting hooks. When contributing:
-
-- Ensure `go build .` succeeds with no errors.
-- Run `python -m pytest tests/ -q` and confirm all tests pass.
-- Keep Python imports clean; the project uses `pytest` and `unittest`.
-
-## Notes
-
-The private reference PDF is not included. The report cites it as the local reference manuscript and aligns the experiments with its `Res.`/`J` evaluation style.
+- **Island Model**: 15+ parallel processes share best-code pool, outcome memory, failure patterns
+- **Go/Python isolation**: Go solver frozen as evaluator, Python is research layer (see `docs/ISOLATION.md`)
+- **Shared pool**: Cross-process elite sharing via `--shared-pool-dir` (see `docs/CLEANUP_PLAN.md`)
+- **Baselines fixed**: TSP=6.560, CVRP=13.519, BP=0.0398 (Round 1 A_pure median, never re-run)

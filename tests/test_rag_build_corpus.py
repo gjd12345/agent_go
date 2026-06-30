@@ -35,8 +35,9 @@ class RagBuildCorpusTests(unittest.TestCase):
                 {"code_examples.jsonl", "algorithm_cards.jsonl", "api_constraints.jsonl", "failure_cases.jsonl"},
             )
             self.assertTrue((corpus_dir / "code_examples.jsonl").exists())
-            self.assertEqual({"code_example", "api_constraint", "failure_case"}, {item.kind for item in loaded})
-            self.assertTrue(any(item.source_path.endswith("topk_delta.go") for item in loaded))
+            kinds = {item.kind for item in loaded}
+            self.assertIn("api_constraint", kinds)
+            self.assertIn("failure_case", kinds)
             api_items = [item for item in loaded if item.kind == "api_constraint"]
             self.assertEqual(
                 {

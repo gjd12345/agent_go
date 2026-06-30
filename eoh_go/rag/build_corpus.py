@@ -100,27 +100,8 @@ def _tags_from_name(name: str) -> list[str]:
 
 
 def build_code_examples(project_root: str | Path) -> list[CorpusItem]:
-    root = Path(project_root).resolve()
-    source_dir = root / "eoh_go_workspace" / "candidate_sources"
-    items: list[CorpusItem] = []
-    for path in sorted(source_dir.glob("*.go")):
-        content = path.read_text(encoding="utf-8", errors="replace").strip()
-        if not content:
-            continue
-        item_id = path.stem
-        items.append(
-            CorpusItem(
-                id=item_id,
-                kind="code_example",
-                title=_title_from_id(item_id),
-                tags=_tags_from_name(item_id),
-                source_path=_source_path(root, path),
-                summary=f"Candidate InsertShips heuristic from {path.name}.",
-                constraints=list(_STANDARD_INSERTSHIPS_CONSTRAINTS),
-                content=content,
-            )
-        )
-    return items
+    """Legacy InsertShips code examples — disabled. Source moved to legacy/."""
+    return []
 
 
 def build_algorithm_cards(project_root: str | Path) -> list[CorpusItem]:

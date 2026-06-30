@@ -18,7 +18,7 @@ dev = ["pytest"]
 official-eoh = ["requests", "torch", "numba", "python-docx"]
 
 [project.scripts]
-eoh-go = "eoh_go.cli:main"
+eoh-batch = "eoh_go.experiments.batch_runner:main"
 
 [tool.setuptools.packages.find]
 include = ["eoh_go*"]

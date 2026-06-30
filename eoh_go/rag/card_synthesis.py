@@ -17,6 +17,7 @@ from .features import (
     extract_strategy_features as _extract_canonical_strategy_features,
     normalize_strategy_feature,
 )
+from .problem_vocab import get_feature_vocab
 from .schemas import CorpusItem, load_corpus, save_corpus
 
 # ---------------------------------------------------------------------------
