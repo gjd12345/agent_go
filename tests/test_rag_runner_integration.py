@@ -7,10 +7,10 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from eoh_go.eoh_runner.config import EOHConfig
-from eoh_go.eoh_runner.runner import _automatic_rag_query, _build_retrieved_rag_context, _set_rag_context_env, run_v0_eoh
-from eoh_go.rag.build_corpus import LITERATURE_IDS, build_api_constraints, filter_corpus_by_mode, load_all_corpora
-from eoh_go.rag.schemas import CorpusItem
+from eoh_rag.eoh_runner.config import EOHConfig
+from eoh_rag.eoh_runner.runner import _automatic_rag_query, _build_retrieved_rag_context, _set_rag_context_env, run_v0_eoh
+from eoh_rag.rag.build_corpus import LITERATURE_IDS, build_api_constraints, filter_corpus_by_mode, load_all_corpora
+from eoh_rag.rag.schemas import CorpusItem
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -202,7 +202,7 @@ class RagRunnerIntegrationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._write_minimal_sources(root)
-            manual_dir = root / "eoh_go_workspace" / "rag" / "manual_contexts"
+            manual_dir = root / "eoh_rag_workspace" / "rag" / "manual_contexts"
             manual_dir.mkdir(parents=True)
             (manual_dir / "manual.txt").write_text("manual context", encoding="utf-8")
 
@@ -356,12 +356,12 @@ class RagRunnerIntegrationTests(unittest.TestCase):
 
     def _write_minimal_sources(self, root: Path) -> None:
         (root / "Agent_EOH").mkdir(parents=True)
-        (root / "eoh_go_workspace" / "candidate_sources").mkdir(parents=True)
-        (root / "eoh_go_workspace" / "candidate_sources" / "topk_delta.go").write_text(
+        (root / "eoh_rag_workspace" / "candidate_sources").mkdir(parents=True)
+        (root / "eoh_rag_workspace" / "candidate_sources" / "topk_delta.go").write_text(
             "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch { return dispatch }\n",
             encoding="utf-8",
         )
-        corpus_dir = root / "eoh_go_workspace" / "rag" / "corpus"
+        corpus_dir = root / "eoh_rag_workspace" / "rag" / "corpus"
         corpus_dir.mkdir(parents=True)
         (corpus_dir / "algorithm_cards.jsonl").write_text(
             json.dumps(

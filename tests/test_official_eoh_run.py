@@ -9,7 +9,7 @@ from argparse import Namespace
 from pathlib import Path
 from unittest.mock import patch
 
-from eoh_go.experiments.eoh_single_runner import (
+from eoh_rag.experiments.eoh_single_runner import (
     _runner_script,
     _tail_text,
     build_official_rag_context,
@@ -19,7 +19,7 @@ from eoh_go.experiments.eoh_single_runner import (
     run_official_eoh,
     summarize_run,
 )
-from eoh_go.rag.card_synthesis import synthesize_card
+from eoh_rag.rag.card_synthesis import synthesize_card
 
 
 class OfficialEohRunTests(unittest.TestCase):
@@ -126,7 +126,7 @@ class OfficialEohRunTests(unittest.TestCase):
         self.assertIn("API RULES", context)
 
     def test_build_mixed_rag_context_blocks_overcompound_history_cards(self) -> None:
-        from eoh_go.rag.build_corpus import _is_history_card, load_all_corpora
+        from eoh_rag.rag.build_corpus import _is_history_card, load_all_corpora
 
         history_id = next(
             item.id
@@ -290,7 +290,7 @@ class OfficialEohRunTests(unittest.TestCase):
             )
 
     def test_candidate_allowlist_blocked_history_fails_fast(self) -> None:
-        from eoh_go.rag.build_corpus import _is_history_card, load_all_corpora
+        from eoh_rag.rag.build_corpus import _is_history_card, load_all_corpora
 
         history_id = next(
             item.id
@@ -340,7 +340,7 @@ class OfficialEohRunTests(unittest.TestCase):
                     rag_query="",
                 )
                 with patch(
-                    "eoh_go.experiments.eoh_single_runner.subprocess.run",
+                    "eoh_rag.experiments.eoh_single_runner.subprocess.run",
                     side_effect=subprocess.TimeoutExpired(cmd=["python"], timeout=1, output=b"", stderr=b""),
                 ):
                     payload = run_official_eoh(args)
@@ -407,7 +407,7 @@ class OfficialEohRunTests(unittest.TestCase):
             self.assertIsNone(persisted["return_code"])
 
     def test_missing_outcome_file_causes_nonzero_cli_exit(self) -> None:
-        from eoh_go.experiments.eoh_single_runner import main
+        from eoh_rag.experiments.eoh_single_runner import main
 
         with tempfile.TemporaryDirectory() as tmp:
             output_dir = Path(tmp) / "out"

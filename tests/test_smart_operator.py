@@ -15,14 +15,14 @@ import pytest
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from eoh_go.operator.self_repair import (
+from eoh_rag.operator.self_repair import (
     _extract_code_from_response,
     _replace_insertships_func,
     _try_compile,
     repair_compile_errors,
 )
-from eoh_go.operator.failure_memory import FailureMemory, FAILURE_PATTERNS
-from eoh_go.operator.directed_mutate import (
+from eoh_rag.operator.failure_memory import FailureMemory, FAILURE_PATTERNS
+from eoh_rag.operator.directed_mutate import (
     DirectedMutator,
     _extract_code as _extract_mutation_code,
     MUTATION_SYSTEM_PROMPT,
@@ -344,7 +344,7 @@ func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispat
 class TestIntegration:
     def test_full_pipeline_mocked(self, tmp_path):
         """End-to-end test with mocked LLM and Go compiler."""
-        from eoh_go.operator.agent_controller import SmartOperator
+        from eoh_rag.operator.agent_controller import SmartOperator
 
         # Setup project
         project = tmp_path / "project"
@@ -383,7 +383,7 @@ class TestIntegration:
         assert mem.exists()
 
     def test_guard_rules(self):
-        from eoh_go.operator.agent_controller import SmartOperator
+        from eoh_rag.operator.agent_controller import SmartOperator
 
         op = SmartOperator.__new__(SmartOperator)
         op.baseline_cost = 500.0
@@ -407,7 +407,7 @@ class TestIntegration:
 
     def test_metric_definitions(self):
         """All metrics have descriptions."""
-        from eoh_go.operator.agent_controller import METRIC_DEFS
+        from eoh_rag.operator.agent_controller import METRIC_DEFS
 
         assert len(METRIC_DEFS) >= 10
         for key, desc in METRIC_DEFS.items():

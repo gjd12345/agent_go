@@ -5,13 +5,13 @@ from unittest.mock import patch
 
 import pytest
 
-from eoh_go.rag.llm_reranker import (
+from eoh_rag.rag.llm_reranker import (
     LlmRerankTrace,
     _extract_json,
     _parse_rerank_response,
     llm_rerank,
 )
-from eoh_go.rag.schemas import CorpusItem
+from eoh_rag.rag.schemas import CorpusItem
 
 
 def _make_card(card_id: str, title: str = "", summary: str = "") -> CorpusItem:
@@ -82,7 +82,7 @@ class TestParseRerankResponse:
 class TestLlmRerank:
     def test_success_returns_selected_items(self, candidates):
         mock_response = '{"selected": ["tsp_regret_insertion", "tsp_farthest_insertion"], "reasoning": "complementary"}'
-        with patch("eoh_go.rag.llm_reranker.chat_completion", return_value=mock_response):
+        with patch("eoh_rag.rag.llm_reranker.chat_completion", return_value=mock_response):
             result, trace = llm_rerank("test query", candidates, top_k=2, problem="tsp")
 
         assert len(result) == 2
@@ -94,7 +94,7 @@ class TestLlmRerank:
         assert trace.latency_ms >= 0
 
     def test_llm_call_failure_returns_empty_with_fallback_reason(self, candidates):
-        with patch("eoh_go.rag.llm_reranker.chat_completion", side_effect=TimeoutError("api timeout")):
+        with patch("eoh_rag.rag.llm_reranker.chat_completion", side_effect=TimeoutError("api timeout")):
             result, trace = llm_rerank("test query", candidates, top_k=2)
 
         assert result == []
@@ -102,7 +102,7 @@ class TestLlmRerank:
         assert "TimeoutError" in trace.fallback_reason
 
     def test_parse_failure_returns_empty_with_fallback_reason(self, candidates):
-        with patch("eoh_go.rag.llm_reranker.chat_completion", return_value="this is not json"):
+        with patch("eoh_rag.rag.llm_reranker.chat_completion", return_value="this is not json"):
             result, trace = llm_rerank("test query", candidates, top_k=2)
 
         assert result == []
@@ -110,7 +110,7 @@ class TestLlmRerank:
 
     def test_unknown_ids_returns_empty_with_fallback_reason(self, candidates):
         mock_response = '{"selected": ["nonexistent_card_a", "nonexistent_card_b"]}'
-        with patch("eoh_go.rag.llm_reranker.chat_completion", return_value=mock_response):
+        with patch("eoh_rag.rag.llm_reranker.chat_completion", return_value=mock_response):
             result, trace = llm_rerank("test query", candidates, top_k=2)
 
         assert result == []
@@ -118,7 +118,7 @@ class TestLlmRerank:
 
     def test_partial_match_keeps_valid_ids(self, candidates):
         mock_response = '{"selected": ["tsp_regret_insertion", "nonexistent_card"]}'
-        with patch("eoh_go.rag.llm_reranker.chat_completion", return_value=mock_response):
+        with patch("eoh_rag.rag.llm_reranker.chat_completion", return_value=mock_response):
             result, trace = llm_rerank("test query", candidates, top_k=2)
 
         assert len(result) == 1
@@ -127,7 +127,7 @@ class TestLlmRerank:
 
     def test_top_k_truncation(self, candidates):
         mock_response = '{"selected": ["tsp_regret_insertion", "tsp_nearest_neighbor", "tsp_farthest_insertion"]}'
-        with patch("eoh_go.rag.llm_reranker.chat_completion", return_value=mock_response):
+        with patch("eoh_rag.rag.llm_reranker.chat_completion", return_value=mock_response):
             result, trace = llm_rerank("test query", candidates, top_k=2)
 
         assert len(result) == 2
@@ -140,7 +140,7 @@ class TestLlmRerank:
             captured["prompt"] = messages[0]["content"]
             return '{"selected": ["tsp_regret_insertion"]}'
 
-        with patch("eoh_go.rag.llm_reranker.chat_completion", side_effect=fake_chat):
+        with patch("eoh_rag.rag.llm_reranker.chat_completion", side_effect=fake_chat):
             llm_rerank("test query", candidates, top_k=1,
                        population_features={"nearest", "regret"})
 
@@ -154,7 +154,7 @@ class TestLlmRerank:
             captured["prompt"] = messages[0]["content"]
             return '{"selected": ["tsp_regret_insertion"]}'
 
-        with patch("eoh_go.rag.llm_reranker.chat_completion", side_effect=fake_chat):
+        with patch("eoh_rag.rag.llm_reranker.chat_completion", side_effect=fake_chat):
             llm_rerank("test query", candidates, top_k=1, population_features=None)
 
         assert "首轮进化" in captured["prompt"] or "无种群信息" in captured["prompt"]
@@ -170,7 +170,7 @@ class TestLlmRerank:
             "tsp_regret_insertion": {"decision": "boost", "avg_delta_pct": -3.5, "total_injections": 9},
             "tsp_nearest_neighbor": {"decision": "suppress", "avg_delta_pct": 1.2, "total_injections": 4},
         }
-        with patch("eoh_go.rag.llm_reranker.chat_completion", side_effect=fake_chat):
+        with patch("eoh_rag.rag.llm_reranker.chat_completion", side_effect=fake_chat):
             llm_rerank("test query", candidates, top_k=1, outcome_summaries=outcome_summaries)
 
         prompt = captured["prompt"]

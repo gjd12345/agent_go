@@ -3,7 +3,7 @@ import unittest
 
 class RagPromptContextTests(unittest.TestCase):
     def _item(self, content: str, *, kind: str = "algorithm_card", item_id: str = "topk_delta"):
-        from eoh_go.rag.schemas import CorpusItem
+        from eoh_rag.rag.schemas import CorpusItem
 
         return CorpusItem(
             id=item_id,
@@ -17,7 +17,7 @@ class RagPromptContextTests(unittest.TestCase):
         )
 
     def _api_item(self):
-        from eoh_go.rag.schemas import CorpusItem
+        from eoh_rag.rag.schemas import CorpusItem
 
         return CorpusItem(
             id="insertships_api_skeleton",
@@ -31,7 +31,7 @@ class RagPromptContextTests(unittest.TestCase):
         )
 
     def _large_api_item(self):
-        from eoh_go.rag.schemas import CorpusItem
+        from eoh_rag.rag.schemas import CorpusItem
 
         return CorpusItem(
             id="insertships_api_skeleton",
@@ -45,7 +45,7 @@ class RagPromptContextTests(unittest.TestCase):
         )
 
     def test_format_prompt_context_has_global_and_strategy_sections(self) -> None:
-        from eoh_go.rag.prompt_context import format_prompt_context
+        from eoh_rag.rag.prompt_context import format_prompt_context
 
         context = format_prompt_context(
             [self._item("for each request: try top-k candidates")],
@@ -63,7 +63,7 @@ class RagPromptContextTests(unittest.TestCase):
         self.assertNotIn("You must", context)
 
     def test_global_block_has_no_retrieved_item_prefix(self) -> None:
-        from eoh_go.rag.prompt_context import format_prompt_context
+        from eoh_rag.rag.prompt_context import format_prompt_context
 
         context = format_prompt_context([], max_chars=1000, global_items=[self._api_item()])
 
@@ -72,7 +72,7 @@ class RagPromptContextTests(unittest.TestCase):
         self.assertNotIn("Retrieved item", global_section)
 
     def test_failure_case_global_warning_skips_content_dump(self) -> None:
-        from eoh_go.rag.prompt_context import format_prompt_context
+        from eoh_rag.rag.prompt_context import format_prompt_context
 
         failure = self._item(
             "SECRET FAILURE BODY",
@@ -100,7 +100,7 @@ class RagPromptContextTests(unittest.TestCase):
         self.assertNotIn("SECRET FAILURE BODY", context)
 
     def test_format_prompt_context_truncates_content_before_exceeding_limit(self) -> None:
-        from eoh_go.rag.prompt_context import format_prompt_context
+        from eoh_rag.rag.prompt_context import format_prompt_context
 
         context = format_prompt_context([self._item("x" * 5000)], max_chars=700)
 
@@ -110,7 +110,7 @@ class RagPromptContextTests(unittest.TestCase):
         self.assertIn("...[truncated]", context)
 
     def test_format_prompt_context_keeps_nonempty_reference_when_limit_is_tight(self) -> None:
-        from eoh_go.rag.prompt_context import format_prompt_context
+        from eoh_rag.rag.prompt_context import format_prompt_context
 
         context = format_prompt_context([self._item("content")], max_chars=80)
 
@@ -118,7 +118,7 @@ class RagPromptContextTests(unittest.TestCase):
         self.assertIn("RETRIEVED", context)
 
     def test_format_prompt_context_keeps_strategy_header_when_global_exceeds_limit(self) -> None:
-        from eoh_go.rag.prompt_context import format_prompt_context
+        from eoh_rag.rag.prompt_context import format_prompt_context
 
         context = format_prompt_context(
             [self._item("content")],
@@ -131,7 +131,7 @@ class RagPromptContextTests(unittest.TestCase):
         self.assertIn("RETRIEVED STRATEGY CARDS", context)
 
     def test_failure_case_strategy_skips_content_dump(self) -> None:
-        from eoh_go.rag.prompt_context import format_prompt_context
+        from eoh_rag.rag.prompt_context import format_prompt_context
 
         context = format_prompt_context(
             [self._item("SECRET FAILURE BODY", kind="failure_case", item_id="timeout_or_unbounded_search")],
@@ -145,7 +145,7 @@ class RagPromptContextTests(unittest.TestCase):
     # ── audit interface tests ──────────────────────────────────────────────
 
     def test_audit_returns_injected_items_with_correct_sections(self) -> None:
-        from eoh_go.rag.prompt_context import format_prompt_context_with_audit
+        from eoh_rag.rag.prompt_context import format_prompt_context_with_audit
 
         context, audit = format_prompt_context_with_audit(
             [self._item("strategy content")],
@@ -172,7 +172,7 @@ class RagPromptContextTests(unittest.TestCase):
         self.assertEqual(audit["rag_omitted_items"], [])
 
     def test_audit_marks_truncated_item(self) -> None:
-        from eoh_go.rag.prompt_context import format_prompt_context_with_audit
+        from eoh_rag.rag.prompt_context import format_prompt_context_with_audit
 
         context, audit = format_prompt_context_with_audit(
             [self._item("x" * 5000)],
@@ -186,7 +186,7 @@ class RagPromptContextTests(unittest.TestCase):
         self.assertEqual(injected[0]["status"], "truncated")
 
     def test_audit_marks_omitted_items_when_budget_exceeded(self) -> None:
-        from eoh_go.rag.prompt_context import format_prompt_context_with_audit
+        from eoh_rag.rag.prompt_context import format_prompt_context_with_audit
 
         items = [
             self._item("short content", item_id="card_1"),
@@ -200,7 +200,7 @@ class RagPromptContextTests(unittest.TestCase):
         self.assertTrue(audit["rag_context_truncated"])
 
     def test_audit_sections_chars_are_consistent(self) -> None:
-        from eoh_go.rag.prompt_context import format_prompt_context_with_audit
+        from eoh_rag.rag.prompt_context import format_prompt_context_with_audit
 
         context, audit = format_prompt_context_with_audit(
             [self._item("content")],
@@ -214,7 +214,7 @@ class RagPromptContextTests(unittest.TestCase):
         self.assertGreater(sections["strategy"], 0)
 
     def test_audit_empty_input_returns_empty_audit(self) -> None:
-        from eoh_go.rag.prompt_context import format_prompt_context_with_audit
+        from eoh_rag.rag.prompt_context import format_prompt_context_with_audit
 
         context, audit = format_prompt_context_with_audit([], max_chars=1000)
 

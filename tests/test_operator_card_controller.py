@@ -3,7 +3,7 @@
 import json
 import unittest
 
-from eoh_go.tocc.controller import (
+from eoh_rag.tocc.controller import (
     BASELINE_OVERLAP_CARDS,
     TARGETED_CANDIDATE_CARDS,
     TOCCDecision,
@@ -208,7 +208,7 @@ class TOCCControllerTests(unittest.TestCase):
         self.assertEqual(_card_family(["tsp_regret_insertion"]), "regret_mixed")
 
     def test_code_family(self) -> None:
-        from eoh_go.rag.features import extract_strategy_features
+        from eoh_rag.rag.features import extract_strategy_features
 
         code = "import numpy as np\n# nearest and farthest regret\ncombined = regret_val * dist"
         features = _get_code_family(code)

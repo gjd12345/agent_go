@@ -3,7 +3,7 @@ import unittest
 
 class RagRetrieverTests(unittest.TestCase):
     def _item(self, item_id: str, kind: str, summary: str, tags=None):
-        from eoh_go.rag.schemas import CorpusItem
+        from eoh_rag.rag.schemas import CorpusItem
 
         return CorpusItem(
             id=item_id,
@@ -17,7 +17,7 @@ class RagRetrieverTests(unittest.TestCase):
         )
 
     def test_retrieve_is_deterministic_with_kind_priority_tiebreak(self) -> None:
-        from eoh_go.rag.retriever import retrieve
+        from eoh_rag.rag.retriever import retrieve
 
         corpus = [
             self._item("z_code", "code_example", "dynamic insertion heuristic"),
@@ -33,7 +33,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertEqual([item.kind for item in first], ["algorithm_card", "failure_case", "api_constraint", "code_example"])
 
     def test_empty_corpus_and_top_k_are_respected(self) -> None:
-        from eoh_go.rag.retriever import retrieve
+        from eoh_rag.rag.retriever import retrieve
 
         corpus = [
             self._item("a", "algorithm_card", "delta insertion"),
@@ -47,7 +47,7 @@ class RagRetrieverTests(unittest.TestCase):
     # ── Phase 4a: retrieve_with_rerank tests ──
 
     def test_rerank_without_signals_matches_retrieve(self) -> None:
-        from eoh_go.rag.retriever import retrieve, retrieve_with_rerank
+        from eoh_rag.rag.retriever import retrieve, retrieve_with_rerank
 
         corpus = [
             self._item("regret_insertion", "algorithm_card", "regret insertion heuristic"),
@@ -62,7 +62,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertEqual([i.id for i in plain], [i.id for i in reranked])
 
     def test_outcome_boost_promotes_item(self) -> None:
-        from eoh_go.rag.retriever import retrieve_with_rerank
+        from eoh_rag.rag.retriever import retrieve_with_rerank
         from types import SimpleNamespace
 
         corpus = [
@@ -84,7 +84,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertEqual(with_boost[0].id, "low_score_card")
 
     def test_outcome_suppress_demotes_item(self) -> None:
-        from eoh_go.rag.retriever import retrieve_with_rerank
+        from eoh_rag.rag.retriever import retrieve_with_rerank
         from types import SimpleNamespace
 
         corpus = [
@@ -105,7 +105,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertEqual(with_suppress[0].id, "weak_card")
 
     def test_population_overlap_penalty_demotes_redundant_card(self) -> None:
-        from eoh_go.rag.retriever import retrieve_with_rerank
+        from eoh_rag.rag.retriever import retrieve_with_rerank
 
         corpus = [
             self._item("greedy_nearest", "algorithm_card", "nearest neighbor greedy",
@@ -122,7 +122,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertEqual(result[0].id, "regret_based")
 
     def test_candidate_k_expands_rerank_pool(self) -> None:
-        from eoh_go.rag.retriever import RerankConfig, retrieve_with_rerank
+        from eoh_rag.rag.retriever import RerankConfig, retrieve_with_rerank
         from types import SimpleNamespace
 
         corpus = [
@@ -140,7 +140,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertIn("card_11", [i.id for i in result])
 
     def test_extract_card_features_filters_stopwords(self) -> None:
-        from eoh_go.rag.retriever import _extract_card_features
+        from eoh_rag.rag.retriever import _extract_card_features
 
         item = self._item(
             "history_tsp_regret_abc",
@@ -155,7 +155,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertNotIn("algorithm", features)
 
     def test_rerank_empty_corpus_returns_empty(self) -> None:
-        from eoh_go.rag.retriever import retrieve_with_rerank
+        from eoh_rag.rag.retriever import retrieve_with_rerank
         from types import SimpleNamespace
 
         result = retrieve_with_rerank(
@@ -165,7 +165,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertEqual(result, [])
 
     def test_outcome_summaries_supports_dict(self) -> None:
-        from eoh_go.rag.retriever import retrieve_with_rerank
+        from eoh_rag.rag.retriever import retrieve_with_rerank
 
         corpus = [
             self._item("strong_card", "algorithm_card", "regret insertion heuristic"),
@@ -182,7 +182,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertEqual(result[0].id, "weak_card")
 
     def test_extract_features_prefers_tags_over_text(self) -> None:
-        from eoh_go.rag.retriever import _extract_card_features
+        from eoh_rag.rag.retriever import _extract_card_features
 
         item = self._item(
             "regret_insertion_card",
@@ -196,7 +196,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertNotIn("greedy", features)
 
     def test_extract_card_features_normalizes_alias_tags(self) -> None:
-        from eoh_go.rag.features import extract_card_features
+        from eoh_rag.rag.features import extract_card_features
 
         item = self._item(
             "cluster_card",
@@ -207,7 +207,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertEqual({"cluster", "best_fit"}, extract_card_features(item))
 
     def test_extract_card_features_falls_back_when_tags_have_no_strategy(self) -> None:
-        from eoh_go.rag.features import extract_card_features
+        from eoh_rag.rag.features import extract_card_features
 
         item = self._item(
             "cvrp_savings",
@@ -218,7 +218,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertEqual({"savings"}, extract_card_features(item))
 
     def test_extract_card_features_excludes_non_strategy_tags(self) -> None:
-        from eoh_go.rag.features import extract_card_features
+        from eoh_rag.rag.features import extract_card_features
 
         item = self._item(
             "generic_reference",
@@ -229,7 +229,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertEqual(set(), extract_card_features(item))
 
     def test_population_overlap_uses_canonical_card_features(self) -> None:
-        from eoh_go.rag.retriever import score_corpus_with_rerank
+        from eoh_rag.rag.retriever import score_corpus_with_rerank
 
         item = self._item(
             "regret_card",
@@ -245,7 +245,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertEqual(1.0, result[0]["population_overlap"])
 
     def test_score_corpus_with_rerank_returns_debug_info(self) -> None:
-        from eoh_go.rag.retriever import score_corpus_with_rerank
+        from eoh_rag.rag.retriever import score_corpus_with_rerank
 
         corpus = [
             self._item("card_a", "algorithm_card", "regret insertion"),
@@ -266,7 +266,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertLess(suppressed["multiplier"], 1.0)
 
     def test_extract_code_features_from_go_code(self) -> None:
-        from eoh_go.rag.retriever import extract_code_features
+        from eoh_rag.rag.retriever import extract_code_features
 
         code = """func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch {
     bestDelta := math.MaxFloat64
@@ -291,7 +291,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertNotIn("for", features)
 
     def test_extract_code_features_splits_camelcase(self) -> None:
-        from eoh_go.rag.retriever import extract_code_features
+        from eoh_rag.rag.retriever import extract_code_features
 
         code = "nearestCost = calcRegretValue(bestDelta)"
         features = extract_code_features(code)
@@ -305,7 +305,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertNotIn("bestdelta", features)
 
     def test_extract_code_features_python_code(self) -> None:
-        from eoh_go.rag.retriever import extract_code_features
+        from eoh_rag.rag.retriever import extract_code_features
 
         code = """def select_next_node(current_node, destination_node, unvisited_nodes, distance_matrix):
     regret_values = []
@@ -324,8 +324,8 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertNotIn("matrix", features)
 
     def test_load_population_features_from_individuals(self) -> None:
-        from eoh_go.rag.features import STRATEGY_FEATURES
-        from eoh_go.rag.retriever import load_population_features
+        from eoh_rag.rag.features import STRATEGY_FEATURES
+        from eoh_rag.rag.retriever import load_population_features
 
         population = [
             {"code": "func InsertShips() { regretScore := second_best - best }", "objective": 100.5},
@@ -338,7 +338,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertLessEqual(features, STRATEGY_FEATURES)
 
     def test_load_population_features_skips_invalid_individuals(self) -> None:
-        from eoh_go.rag.retriever import load_population_features
+        from eoh_rag.rag.retriever import load_population_features
 
         population = [
             {"code": "badStrategy()", "objective": None},
@@ -350,7 +350,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertNotIn("bad", features)
 
     def test_load_population_features_top_fraction(self) -> None:
-        from eoh_go.rag.retriever import load_population_features
+        from eoh_rag.rag.retriever import load_population_features
 
         population = [
             {"code": "topHalfStrategy(regretCalc)", "objective": 10.0},
@@ -362,7 +362,7 @@ class RagRetrieverTests(unittest.TestCase):
         self.assertNotIn("nearest", features_half)
 
     def test_load_population_features_empty_population(self) -> None:
-        from eoh_go.rag.retriever import load_population_features
+        from eoh_rag.rag.retriever import load_population_features
 
         self.assertEqual(load_population_features([]), set())
 

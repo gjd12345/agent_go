@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from eoh_go.experiments.reports.run_summarizer import _best_code_snippet, _compute_success_funnel, _write_markdown
+from eoh_rag.experiments.reports.run_summarizer import _best_code_snippet, _compute_success_funnel, _write_markdown
 
 
 class SummarizeManifestRunsTests(unittest.TestCase):

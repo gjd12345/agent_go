@@ -6,12 +6,12 @@ from pathlib import Path
 
 class RagBuildCorpusTests(unittest.TestCase):
     def test_build_all_corpora_writes_expected_jsonl_files_from_local_sources(self) -> None:
-        from eoh_go.rag.build_corpus import build_all_corpora, load_all_corpora, resolve_corpus_dir
+        from eoh_rag.rag.build_corpus import build_all_corpora, load_all_corpora, resolve_corpus_dir
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            (root / "eoh_go_workspace" / "candidate_sources").mkdir(parents=True)
-            (root / "eoh_go_workspace" / "candidate_sources" / "topk_delta.go").write_text(
+            (root / "eoh_rag_workspace" / "candidate_sources").mkdir(parents=True)
+            (root / "eoh_rag_workspace" / "candidate_sources" / "topk_delta.go").write_text(
                 "func InsertShips(dispatch Dispatch, oris, dess []Station, total_ship int) Dispatch { return dispatch }\n",
                 encoding="utf-8",
             )
@@ -56,7 +56,7 @@ class RagBuildCorpusTests(unittest.TestCase):
                 self.assertNotIn("package main", item.content)
 
     def test_resolve_corpus_dir_rejects_paths_outside_workspace_corpus(self) -> None:
-        from eoh_go.rag.build_corpus import resolve_corpus_dir
+        from eoh_rag.rag.build_corpus import resolve_corpus_dir
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -64,7 +64,7 @@ class RagBuildCorpusTests(unittest.TestCase):
                 resolve_corpus_dir(root, "../../../outside")
 
     def test_build_algorithm_cards_is_manual_only(self) -> None:
-        from eoh_go.rag.build_corpus import build_algorithm_cards
+        from eoh_rag.rag.build_corpus import build_algorithm_cards
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -78,8 +78,8 @@ class RagBuildCorpusTests(unittest.TestCase):
             self.assertEqual([], build_algorithm_cards(root))
 
     def test_build_all_corpora_preserves_curated_algorithm_cards_without_sa_seed(self) -> None:
-        from eoh_go.rag.build_corpus import build_all_corpora, resolve_corpus_dir
-        from eoh_go.rag.schemas import CorpusItem, load_corpus, save_corpus
+        from eoh_rag.rag.build_corpus import build_all_corpora, resolve_corpus_dir
+        from eoh_rag.rag.schemas import CorpusItem, load_corpus, save_corpus
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -89,7 +89,7 @@ class RagBuildCorpusTests(unittest.TestCase):
                 json.dumps([{"algorithm": "Fresh SA seed", "code": "fresh seed code"}]),
                 encoding="utf-8",
             )
-            (root / "eoh_go_workspace" / "candidate_sources").mkdir(parents=True)
+            (root / "eoh_rag_workspace" / "candidate_sources").mkdir(parents=True)
             (root / "main.go").write_text("type Dispatch struct{}\n", encoding="utf-8")
             guard_dir = root / "eoh_go" / "eoh_runner"
             guard_dir.mkdir(parents=True)
@@ -122,7 +122,7 @@ class RagBuildCorpusTests(unittest.TestCase):
             self.assertEqual({"nearest_insertion", "farthest_insertion", "solomon_i1", "regret2_insertion", "cw_savings"}, set(by_id))
 
     def test_existing_curated_literature_cards_and_literature_filter(self) -> None:
-        from eoh_go.rag.build_corpus import LITERATURE_IDS, filter_corpus_by_mode, load_all_corpora
+        from eoh_rag.rag.build_corpus import LITERATURE_IDS, filter_corpus_by_mode, load_all_corpora
 
         root = Path(__file__).resolve().parents[1]
         corpus = load_all_corpora(root)

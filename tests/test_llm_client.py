@@ -1,4 +1,4 @@
-"""Tests for eoh_go.llm.client and eoh_go.llm.utils."""
+"""Tests for eoh_rag.llm.client and eoh_rag.llm.utils."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from eoh_go.llm.client import chat_completion, normalize_endpoint
-from eoh_go.llm.utils import extract_code_block
+from eoh_rag.llm.client import chat_completion, normalize_endpoint
+from eoh_rag.llm.utils import extract_code_block
 
 
 class TestNormalizeEndpoint:
@@ -45,7 +45,7 @@ class TestChatCompletion:
         with pytest.raises(RuntimeError, match="endpoint not provided"):
             chat_completion([{"role": "user", "content": "hi"}], api_key="sk-xxx")
 
-    @patch("eoh_go.llm.client.urllib.request.urlopen")
+    @patch("eoh_rag.llm.client.urllib.request.urlopen")
     def test_success(self, mock_urlopen, monkeypatch):
         monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
         monkeypatch.delenv("DEEPSEEK_API_ENDPOINT", raising=False)
@@ -67,7 +67,7 @@ class TestChatCompletion:
         )
         assert result == "hello world"
 
-    @patch("eoh_go.llm.client.urllib.request.urlopen")
+    @patch("eoh_rag.llm.client.urllib.request.urlopen")
     def test_retries_on_failure(self, mock_urlopen, monkeypatch):
         monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
         monkeypatch.delenv("DEEPSEEK_API_ENDPOINT", raising=False)

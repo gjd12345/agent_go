@@ -1,4 +1,4 @@
-"""Tests for eoh_go.rag.card_synthesis — best-code → card feedback loop."""
+"""Tests for eoh_rag.rag.card_synthesis — best-code → card feedback loop."""
 from __future__ import annotations
 
 import json
@@ -7,14 +7,14 @@ from pathlib import Path
 
 import pytest
 
-from eoh_go.rag.card_synthesis import (
+from eoh_rag.rag.card_synthesis import (
     append_card_to_corpus,
     extract_strategy_features,
     get_code_family,
     synthesize_card,
 )
-from eoh_go.rag.features import STRATEGY_FEATURES
-from eoh_go.rag.schemas import CorpusItem, load_corpus, save_corpus
+from eoh_rag.rag.features import STRATEGY_FEATURES
+from eoh_rag.rag.schemas import CorpusItem, load_corpus, save_corpus
 
 
 # ── Feature extraction ──────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ class TestGetCodeFamily:
         assert "capacity" in family
 
     def test_matches_canonical_strategy_extractor(self):
-        from eoh_go.rag.features import extract_strategy_features as canonical_extract
+        from eoh_rag.rag.features import extract_strategy_features as canonical_extract
 
         code = "far_first = distant_nodes[0]; regret_score = second_best - best"
         assert get_code_family(code) == canonical_extract(code)
@@ -220,7 +220,7 @@ class TestAppendCardToCorpus:
 class TestHistoryCardPreservation:
     def test_rebuild_keeps_history_cards(self, tmp_path):
         """build_all_corpora should preserve history cards, not strip them."""
-        from eoh_go.rag.build_corpus import build_all_corpora, _is_history_card
+        from eoh_rag.rag.build_corpus import build_all_corpora, _is_history_card
 
         # Create a history card
         code = "regret = second_best"
@@ -266,7 +266,7 @@ class TestExtractScoringCore:
     """Tests for _extract_scoring_core code snippet extraction."""
 
     def test_extracts_scoring_lines_from_simple_function(self):
-        from eoh_go.rag.card_synthesis import _extract_scoring_core
+        from eoh_rag.rag.card_synthesis import _extract_scoring_core
         code = """
 def select_next_node(current, unvisited, distance_matrix):
     scores = []
@@ -283,12 +283,12 @@ def select_next_node(current, unvisited, distance_matrix):
         assert len(snippet.splitlines()) <= 15
 
     def test_returns_none_for_empty_code(self):
-        from eoh_go.rag.card_synthesis import _extract_scoring_core
+        from eoh_rag.rag.card_synthesis import _extract_scoring_core
         assert _extract_scoring_core(None) is None
         assert _extract_scoring_core("") is None
 
     def test_filters_dangerous_lines(self):
-        from eoh_go.rag.card_synthesis import _extract_scoring_core
+        from eoh_rag.rag.card_synthesis import _extract_scoring_core
         code = """
 def heuristic(nodes):
     import os
@@ -302,7 +302,7 @@ def heuristic(nodes):
             assert "print(" not in snippet
 
     def test_rejects_deeply_nested_code(self):
-        from eoh_go.rag.card_synthesis import _extract_scoring_core
+        from eoh_rag.rag.card_synthesis import _extract_scoring_core
         code = """
 def deep():
     for i in range(10):
@@ -316,7 +316,7 @@ def deep():
         assert snippet is None
 
     def test_rejects_infinite_loop(self):
-        from eoh_go.rag.card_synthesis import _extract_scoring_core
+        from eoh_rag.rag.card_synthesis import _extract_scoring_core
         code = """
 def bad():
     while True:
@@ -327,7 +327,7 @@ def bad():
         assert snippet is None
 
     def test_snippet_respects_max_chars(self):
-        from eoh_go.rag.card_synthesis import _extract_scoring_core
+        from eoh_rag.rag.card_synthesis import _extract_scoring_core
         code = "def f():\n" + "\n".join(f"    score_{i} = {i} * distance" for i in range(50)) + "\n    return score_0"
         snippet = _extract_scoring_core(code)
         if snippet:

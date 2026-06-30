@@ -11,11 +11,11 @@ __pycache__/
 *.tmp
 Agent_EOH/eoh/src/eoh/examples/user_insertships_go/results_insertships*/
 Agent_EOH/eoh/src/eoh/examples/user_insertships_go/v2_agent/run_logs/
-eoh_go_workspace/candidates/
-eoh_go_workspace/runs/
-eoh_go_workspace/memory/
-eoh_go_workspace/reports/tables/eoh_arrival_grid*/
-eoh_go_workspace/generated/
+eoh_rag_workspace/candidates/
+eoh_rag_workspace/runs/
+eoh_rag_workspace/memory/
+eoh_rag_workspace/reports/tables/eoh_arrival_grid*/
+eoh_rag_workspace/generated/
 node_modules/
 package.json
 package-lock.json
@@ -26,15 +26,15 @@ build_slides.js
 **/pops_best/population_generation_*.json
 
 # Raw experiment outputs (never tracked)
-eoh_go_workspace/local_runs/
-eoh_go_workspace/local_notes/
-eoh_go_workspace/reports/official_eoh_runs/
-eoh_go_workspace/reports/auto_experiment_reports/**/run_*/
-eoh_go_workspace/reports/auto_experiment_reports/island_*/
-eoh_go_workspace/reports/auto_experiment_reports/gen16_*/
-eoh_go_workspace/reports/auto_experiment_reports/gen16_island_*/
-eoh_go_workspace/shared_pool/*.jsonl
-eoh_go_workspace/shared_pool/_seed_*
+eoh_rag_workspace/local_runs/
+eoh_rag_workspace/local_notes/
+eoh_rag_workspace/reports/official_eoh_runs/
+eoh_rag_workspace/reports/auto_experiment_reports/**/run_*/
+eoh_rag_workspace/reports/auto_experiment_reports/island_*/
+eoh_rag_workspace/reports/auto_experiment_reports/gen16_*/
+eoh_rag_workspace/reports/auto_experiment_reports/gen16_island_*/
+eoh_rag_workspace/shared_pool/*.jsonl
+eoh_rag_workspace/shared_pool/_seed_*
 archived_experiments/raw_runs_*/
 archived_experiments/ignored_artifacts_*/
 outputs/

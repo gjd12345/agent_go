@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from eoh_go.experiments.reports.backfill_card_outcomes import build_backfill_records
+from eoh_rag.experiments.reports.backfill_card_outcomes import build_backfill_records
 
 
 def _write_summary(root: Path, suite: str, payload: dict) -> Path:

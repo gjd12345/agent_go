@@ -5,7 +5,7 @@ from pathlib import Path
 
 class RagSchemasTests(unittest.TestCase):
     def test_jsonl_roundtrip_preserves_corpus_item_fields(self) -> None:
-        from eoh_go.rag.schemas import CorpusItem, load_corpus, save_corpus
+        from eoh_rag.rag.schemas import CorpusItem, load_corpus, save_corpus
 
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "items.jsonl"
@@ -28,7 +28,7 @@ class RagSchemasTests(unittest.TestCase):
         self.assertEqual(loaded, items)
 
     def test_load_missing_or_empty_corpus_returns_empty_list(self) -> None:
-        from eoh_go.rag.schemas import load_corpus
+        from eoh_rag.rag.schemas import load_corpus
 
         with tempfile.TemporaryDirectory() as tmp:
             missing = Path(tmp) / "missing.jsonl"

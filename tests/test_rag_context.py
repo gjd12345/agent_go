@@ -6,8 +6,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from eoh_go.eoh_runner.config import EOHConfig
-from eoh_go.eoh_runner.runner import run_v0_eoh
+from eoh_rag.eoh_runner.config import EOHConfig
+from eoh_rag.eoh_runner.runner import run_v0_eoh
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -89,7 +89,7 @@ class RagContextTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "Agent_EOH").mkdir()
-            context_dir = root / "eoh_go_workspace" / "rag" / "manual_contexts"
+            context_dir = root / "eoh_rag_workspace" / "rag" / "manual_contexts"
             context_dir.mkdir(parents=True)
             context_path = context_dir / "case.txt"
             context_path.write_text("seed before Evaluation", encoding="utf-8")

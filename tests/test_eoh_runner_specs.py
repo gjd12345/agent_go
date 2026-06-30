@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from eoh_go.eoh_runner.registry import PROBLEM_SPECS, TARGET_SPECS, get_problem_spec, get_target_spec
+from eoh_rag.eoh_runner.registry import PROBLEM_SPECS, TARGET_SPECS, get_problem_spec, get_target_spec
 
 
 class TestEOHRunnerSpecs(unittest.TestCase):
@@ -37,15 +37,15 @@ class TestEOHRunnerSpecs(unittest.TestCase):
         main_text = (root / "main.go").read_text(encoding="utf-8")
         self.assertIsNotNone(re.search(TARGET_SPECS["InsertShips"].extract_regex, main_text))
         self.assertIsNotNone(re.search(TARGET_SPECS["Optimization"].extract_regex, main_text))
-        knapsack_text = (root / "eoh_go_workspace" / "problems" / "knapsack" / "knapsack_solver.go").read_text(
+        knapsack_text = (root / "eoh_rag_workspace" / "problems" / "knapsack" / "knapsack_solver.go").read_text(
             encoding="utf-8"
         )
         self.assertIsNotNone(re.search(TARGET_SPECS["SelectItems"].extract_regex, knapsack_text))
-        mixer_text = (root / "eoh_go_workspace" / "problems" / "mixer_split" / "mixer_split_solver.go").read_text(
+        mixer_text = (root / "eoh_rag_workspace" / "problems" / "mixer_split" / "mixer_split_solver.go").read_text(
             encoding="utf-8"
         )
         self.assertIsNotNone(re.search(TARGET_SPECS["SplitOrders"].extract_regex, mixer_text))
-        obp_text = (root / "eoh_go_workspace" / "problems" / "bin_packing_online" / "bin_packing_solver.go").read_text(
+        obp_text = (root / "eoh_rag_workspace" / "problems" / "bin_packing_online" / "bin_packing_solver.go").read_text(
             encoding="utf-8"
         )
         self.assertIsNotNone(re.search(TARGET_SPECS["ScoreBin"].extract_regex, obp_text))
@@ -111,7 +111,7 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
 
     @unittest.skip("Legacy InsertShips smoke moved to legacy/")
     def test_obp_smoke_loads_latest_offspring_audit(self) -> None:
-        from eoh_go.experiments.legacy.smokes.eoh_obp_smoke import _latest_offspring_audit
+        from eoh_rag.experiments.legacy.smokes.eoh_obp_smoke import _latest_offspring_audit
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

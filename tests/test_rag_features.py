@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from eoh_go.rag.features import (
+from eoh_rag.rag.features import (
     STRATEGY_FEATURES,
     extract_code_features,
     extract_identifier_tokens,

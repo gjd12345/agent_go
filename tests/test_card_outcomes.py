@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from eoh_go.rag.card_outcomes import (
+from eoh_rag.rag.card_outcomes import (
     CardOutcomeRecord,
     CardOutcomeSummary,
     build_outcome_records,

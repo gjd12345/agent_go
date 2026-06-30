@@ -1,18 +1,13 @@
-"""EOH-Go experiment framework — Trace-Conditioned Small-Model Controller.
+"""Deprecated compatibility shim. Use `eoh_rag` instead.
 
-Active modules:
-- eoh_go.experiments: batch_runner, eoh_single_runner, rag_context_builder
-- eoh_go.rag: retriever, reranker, llm_reranker, card_outcomes, features
-- eoh_go.tocc: agent, gatekeeper, pipeline, controller
-- eoh_go.llm: client
-
-Legacy modules moved to legacy/insertships_eoh_v0/
+The `eoh_go` package name is from the earlier InsertShips/Go phase.
+Current mainline is EOH-RAG (Trace-Conditioned Small-Model Controllers).
+All active code is now in `eoh_rag/`.
 """
-
-from .memory import read_text_file, write_text_file, append_research_note
-
-__all__ = [
-    "read_text_file",
-    "write_text_file",
-    "append_research_note",
-]
+import warnings
+warnings.warn(
+    "eoh_go is deprecated, use eoh_rag instead",
+    DeprecationWarning,
+    stacklevel=2,
+)
+from eoh_rag import *  # noqa: F401,F403

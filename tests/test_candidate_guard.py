@@ -1,6 +1,6 @@
 import unittest
 
-from eoh_go.eoh_runner.candidate_guard import classify_candidate, select_best_candidate
+from eoh_rag.eoh_runner.candidate_guard import classify_candidate, select_best_candidate
 
 
 class CandidateGuardTests(unittest.TestCase):

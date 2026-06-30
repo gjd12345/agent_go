@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from eoh_go.tocc.contracts import (
+from eoh_rag.tocc.contracts import (
     LEGACY_TOCC_SELECTED_CARDS_STRATEGY,
     TOCC_CANDIDATE_POOL_STRATEGY,
     normalize_tocc_context_strategy,

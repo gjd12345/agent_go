@@ -2,7 +2,7 @@
 
 import unittest
 
-from eoh_go.tocc.gatekeeper import (
+from eoh_rag.tocc.gatekeeper import (
     VALID_DIAGNOSES,
     VALID_ACTIONS,
     PROBLEM_PREFIXES,

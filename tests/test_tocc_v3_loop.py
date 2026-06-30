@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch, MagicMock
 
-from eoh_go.tocc.loop import run_v3_loop, MAX_ITERATIONS
+from eoh_rag.tocc.loop import run_v3_loop, MAX_ITERATIONS
 
 
 class ToccV3LoopTests(unittest.TestCase):
@@ -22,7 +22,7 @@ class ToccV3LoopTests(unittest.TestCase):
             run_v3_loop(self.trace, problem=self.problem, available_cards=self.cards,
                         output_dir=self.output, max_iterations=5)
 
-    @patch("eoh_go.tocc.loop.subprocess.run")
+    @patch("eoh_rag.tocc.loop.subprocess.run")
     def test_dry_run_no_cards_marks_rejected(self, mock_run):
         mock_proc = MagicMock()
         mock_proc.returncode = 0
@@ -37,7 +37,7 @@ class ToccV3LoopTests(unittest.TestCase):
         self.assertEqual(len(history), 1)
         self.assertEqual(history[0]["status"], "no_cards_recommended")
 
-    @patch("eoh_go.tocc.loop.subprocess.run")
+    @patch("eoh_rag.tocc.loop.subprocess.run")
     def test_dry_run_with_cards_accepted(self, mock_run):
         mock_proc = MagicMock()
         mock_proc.returncode = 0
@@ -59,7 +59,7 @@ class ToccV3LoopTests(unittest.TestCase):
             manifest = json.load(handle)
         self.assertEqual("tocc_candidate_pool", manifest["arms"][0]["context_strategy"])
 
-    @patch("eoh_go.tocc.loop.subprocess.run")
+    @patch("eoh_rag.tocc.loop.subprocess.run")
     def test_real_run_uses_force(self, mock_run):
         mock_proc = MagicMock()
         mock_proc.returncode = 0
@@ -82,7 +82,7 @@ class ToccV3LoopTests(unittest.TestCase):
         self.assertTrue(len(force_calls) > 0, "real-run should pass --force to manifest runner")
 
     def test_prompt_contains_baseline_objectives(self):
-        from eoh_go.tocc.agent import _flatten_trace, _build_user_prompt
+        from eoh_rag.tocc.agent import _flatten_trace, _build_user_prompt
 
         trace = {
             "problem": "cvrp_construct", "arm": "literature_rag",
@@ -114,7 +114,7 @@ class ToccV3LoopTests(unittest.TestCase):
         self.assertIn("cvrp_far_first", prompt)
 
     def test_prompt_contains_candidate_pool_and_rerank_trace(self):
-        from eoh_go.tocc.agent import _build_user_prompt, _flatten_trace
+        from eoh_rag.tocc.agent import _build_user_prompt, _flatten_trace
 
         rerank_scores = [
             {"id": f"card_{index}", "final_score": 20 - index, "population_overlap": 0.1}
