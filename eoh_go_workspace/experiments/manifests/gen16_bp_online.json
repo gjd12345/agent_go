@@ -1,13 +1,22 @@
 {
   "suite": "gen16_bp_online",
   "model": "deepseek-v4-flash",
-  "problems": ["bp_online"],
+  "problems": [
+    "bp_online"
+  ],
   "arms": [
     {
       "name": "E2_gen16",
       "runner_arm": "literature_rag",
       "context_strategy": "tocc_candidate_pool",
-      "candidate_card_ids": ["obp_first_fit","obp_best_fit","obp_worst_fit","obp_harmonic","obp_funsearch_residual_poly","obp_eoh_util_sqrt_exp"],
+      "candidate_card_ids": [
+        "obp_first_fit",
+        "obp_best_fit",
+        "obp_worst_fit",
+        "obp_harmonic",
+        "obp_funsearch_residual_poly",
+        "obp_eoh_util_sqrt_exp"
+      ],
       "rag_query": "online bin packing item size fit residual capacity utilization heuristic adaptive",
       "rag": {
         "outcome_file": "eoh_go_workspace/rag/corpus/card_outcomes.jsonl",
@@ -17,7 +26,9 @@
       }
     }
   ],
-  "generations": [16],
+  "generations": [
+    16
+  ],
   "pop_size": 6,
   "repeats": 10,
   "max_runs": 10,
@@ -27,7 +38,5 @@
   "rag": {
     "top_k": 2,
     "max_chars": 2500
-  },
-  "python_exe": "/private/tmp/eoh_official_venv/bin/python",
-  "official_root": "/private/tmp/EoH-main"
+  }
 }

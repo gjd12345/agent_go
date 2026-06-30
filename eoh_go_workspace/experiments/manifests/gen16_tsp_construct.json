@@ -1,13 +1,21 @@
 {
   "suite": "gen16_tsp_construct",
   "model": "deepseek-v4-flash",
-  "problems": ["tsp_construct"],
+  "problems": [
+    "tsp_construct"
+  ],
   "arms": [
     {
       "name": "E2_gen16",
       "runner_arm": "literature_rag",
       "context_strategy": "tocc_candidate_pool",
-      "candidate_card_ids": ["tsp_regret_insertion","tsp_nearest_neighbor","tsp_farthest_insertion","tsp_nearest_insertion","tsp_two_opt_awareness"],
+      "candidate_card_ids": [
+        "tsp_regret_insertion",
+        "tsp_nearest_neighbor",
+        "tsp_farthest_insertion",
+        "tsp_nearest_insertion",
+        "tsp_two_opt_awareness"
+      ],
       "rag_query": "tsp construct select next node distance nearest insertion regret farthest",
       "rag": {
         "outcome_file": "eoh_go_workspace/rag/corpus/card_outcomes.jsonl",
@@ -17,7 +25,9 @@
       }
     }
   ],
-  "generations": [16],
+  "generations": [
+    16
+  ],
   "pop_size": 6,
   "repeats": 10,
   "max_runs": 10,
@@ -27,7 +37,5 @@
   "rag": {
     "top_k": 2,
     "max_chars": 2500
-  },
-  "python_exe": "/private/tmp/eoh_official_venv/bin/python",
-  "official_root": "/private/tmp/EoH-main"
+  }
 }

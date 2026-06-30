@@ -70,9 +70,9 @@ def run_go_solver(
             result["ok"] = True
             return result
         except json.JSONDecodeError:
-            # Legacy format: parse from stdout lines
             return {
-                "ok": True,
+                "ok": False,
+                "error": "solver stdout is not valid JSON (legacy format)",
                 "raw_stdout": proc.stdout[:500],
                 "objective": None,
                 "runtime_ms": None,

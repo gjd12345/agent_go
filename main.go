@@ -199,6 +199,10 @@ func (assign *Assign) TriggerTime(time int) {
 
 // 增加以个订单
 func (assign *Assign) AddShip(id int, ori, des Station) bool {
+	// Early exit: no room for more ships
+	if assign.StaIndexesLen >= MAXSHIPS {
+		return false
+	}
 	// Bounds check: we might need up to 2 new stations
 	neededSlots := 0
 	if assign.StationsLen+2 > MAXSTATIONS {
@@ -244,9 +248,6 @@ func (assign *Assign) AddShip(id int, ori, des Station) bool {
 		ship.Des = assign.StationsLen
 		assign.Stations[assign.StationsLen] = des
 		assign.StationsLen += 1
-	}
-	if assign.StaIndexesLen >= MAXSHIPS {
-		return false
 	}
 	assign.StaIndexes[assign.StaIndexesLen] = ship
 	assign.StaIndexesLen += 1

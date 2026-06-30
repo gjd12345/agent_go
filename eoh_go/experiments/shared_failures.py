@@ -7,6 +7,7 @@ runtime errors) and provides failure hints for injection into LLM prompts.
 from __future__ import annotations
 
 import fcntl
+import hashlib
 import json
 import re
 import time
@@ -34,7 +35,7 @@ def register_failure(
     entry = json.dumps({
         "failure_type": failure_type,
         "pattern_hint": pattern_hint,
-        "code_hash": hash(code_snippet) % 10**8,
+        "code_hash": hashlib.sha1(code_snippet.encode()).hexdigest()[:12],
         "ts": time.time(),
     }, ensure_ascii=False)
     with open(path, "a") as f:

@@ -452,19 +452,6 @@ def main() -> None:
                             outcome_file = rag.get("outcome_file", "")
                             if outcome_file:
                                 _append_online_outcome(summary_path, problem, outcome_file)
-                        # Adaptive operator: register improvement
-                        if shared_pool_dir:
-                            try:
-                                from eoh_go.experiments.adaptive_operators import register_operator_result
-                                # Compare with previous best in pool
-                                pool_codes = shared_pool_best_codes(Path(shared_pool_dir), problem, top_k=1)
-                                prev_best = pool_codes[0]["objective"] if pool_codes else None
-                                if prev_best is not None and obj is not None:
-                                    improved = obj < prev_best
-                                    delta = (prev_best - obj) / abs(prev_best) if prev_best else 0
-                                    register_operator_result(Path(shared_pool_dir), problem, "mixed", improved, delta)
-                            except Exception as e:
-                                print(f"[WARN] adaptive_operator failed: {e}")
                     else:
                         prev_run_dir = ""
                         # Failure pattern sharing
