@@ -20,7 +20,6 @@
       "rag": {
         "outcome_file": "eoh_go_workspace/rag/corpus/card_outcomes.jsonl",
         "use_prev_run_dir_chain": true,
-        "prev_run_dir": "eoh_go_workspace/reports/auto_experiment_reports/island_5/high_gen_tsp_construct/run_tsp_construct_E2_highgen_g8_r17",
         "rerank_mode": "llm"
       }
     }

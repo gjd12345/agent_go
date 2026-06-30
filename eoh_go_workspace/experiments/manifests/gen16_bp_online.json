@@ -21,7 +21,6 @@
       "rag": {
         "outcome_file": "eoh_go_workspace/rag/corpus/card_outcomes.jsonl",
         "use_prev_run_dir_chain": true,
-        "prev_run_dir": "eoh_go_workspace/reports/auto_experiment_reports/island_4/high_gen_bp_online/run_bp_online_E2_highgen_g8_r17",
         "rerank_mode": "llm"
       }
     }

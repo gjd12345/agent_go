@@ -128,7 +128,7 @@ P0/P1 findings block completion.
 ## Project: EOH-VRP / TOCC
 
 Evolutionary optimization with Trace-Conditioned Operator-Card Controller (TOCC).
-Current phase: V2 agent assisted controller, preparing V3 bounded auto-loop.
+Current phase: data collection for trace-conditioned small-model reranker and code generation/repair models. Batch experiments running (gen=8/16 island model, 3 problems, shared pool).
 
 ### TOCC V2 Agent Pipeline
 

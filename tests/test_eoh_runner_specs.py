@@ -109,6 +109,7 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
             except ValueError:
                 pass
 
+    @unittest.skip("Legacy InsertShips smoke moved to legacy/")
     def test_obp_smoke_loads_latest_offspring_audit(self) -> None:
         from eoh_go.experiments.legacy.smokes.eoh_obp_smoke import _latest_offspring_audit
 
