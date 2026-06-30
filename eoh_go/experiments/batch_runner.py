@@ -129,8 +129,8 @@ def _maybe_synthesize_card(pool_dir: str, problem: str, code: str, objective: fl
             fcntl.flock(f, fcntl.LOCK_EX)
             f.write(json.dumps(card.__dict__, ensure_ascii=False) + "\n")
             fcntl.flock(f, fcntl.LOCK_UN)
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[WARN] card_synthesis failed: {e}")
 
 
 def _append_online_outcome(summary_path: Path, problem: str, outcome_file: str) -> None:
@@ -162,8 +162,8 @@ def _append_online_outcome(summary_path: Path, problem: str, outcome_file: str) 
         )
         if records and outcome_file:
             save_outcomes(records, Path(outcome_file), append=True)
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[WARN] online_outcome_update failed: {e}")
 
 # Reuse existing EOH runner CLI directly
 RUNNER_MODULE = "eoh_go.experiments.eoh_single_runner"
@@ -429,15 +429,24 @@ def main() -> None:
                                 obj = (sm.get("run_summary") or {}).get("best_objective")
                                 code = (sm.get("run_summary") or {}).get("best_code", "")
                                 if obj is not None:
+                                    # Adaptive operator: compare BEFORE registering
+                                    pool_codes_before = shared_pool_best_codes(Path(shared_pool_dir), problem, top_k=1)
+                                    prev_best = pool_codes_before[0]["objective"] if pool_codes_before else None
+
                                     shared_pool_register(Path(shared_pool_dir), problem, run_out, obj)
-                                    # Best-code pool
                                     if code:
                                         shared_pool_register_code(Path(shared_pool_dir), problem, code, obj)
-                                    # Dynamic card synthesis: if objective beats baseline by >5%
-                                    if code:
                                         _maybe_synthesize_card(shared_pool_dir, problem, code, obj)
-                            except Exception:
-                                pass
+
+                                    # Register operator result with correct ordering
+                                    if prev_best is not None:
+                                        from eoh_go.experiments.adaptive_operators import register_operator_result
+                                        improved = obj < prev_best
+                                        delta = (prev_best - obj) / abs(prev_best) if prev_best else 0
+                                        operators_str = manifest.get("operators", "e1,e2,m1,m2")
+                                        register_operator_result(Path(shared_pool_dir), problem, operators_str, improved, delta)
+                            except Exception as e:
+                                print(f"[WARN] shared_pool_register failed: {e}")
                         # Online outcome update
                         if summary_path.exists():
                             outcome_file = rag.get("outcome_file", "")
@@ -454,8 +463,8 @@ def main() -> None:
                                     improved = obj < prev_best
                                     delta = (prev_best - obj) / abs(prev_best) if prev_best else 0
                                     register_operator_result(Path(shared_pool_dir), problem, "mixed", improved, delta)
-                            except Exception:
-                                pass
+                            except Exception as e:
+                                print(f"[WARN] adaptive_operator failed: {e}")
                     else:
                         prev_run_dir = ""
                         # Failure pattern sharing
@@ -468,8 +477,8 @@ def main() -> None:
                                 code = rs.get("best_code", "")
                                 if fail_reason and code:
                                     register_failure(Path(shared_pool_dir), problem, code, fail_reason)
-                            except Exception:
-                                pass
+                            except Exception as e:
+                                print(f"[WARN] failure_sharing failed: {e}")
 
     if not args.dry_run and not args.no_run:
         index_path = output_root / "run_index.json"

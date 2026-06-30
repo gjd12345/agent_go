@@ -456,6 +456,8 @@ def run_official_eoh(args: argparse.Namespace) -> dict[str, Any]:
         cmd.extend(["--context-file", context_file])
     if args.use_official_seed:
         cmd.append("--use-official-seed")
+    if args.seed_codes:
+        cmd.extend(["--seed-codes", args.seed_codes])
 
     started = time.time()
     return_code: int | None = None

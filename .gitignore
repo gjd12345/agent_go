@@ -30,6 +30,10 @@ eoh_go_workspace/local_runs/
 eoh_go_workspace/local_notes/
 eoh_go_workspace/reports/official_eoh_runs/
 eoh_go_workspace/reports/auto_experiment_reports/**/run_*/
+eoh_go_workspace/reports/auto_experiment_reports/island_*/
+eoh_go_workspace/reports/auto_experiment_reports/gen16_*/
+eoh_go_workspace/reports/auto_experiment_reports/gen16_island_*/
+eoh_go_workspace/shared_pool/*.jsonl
 archived_experiments/raw_runs_*/
 archived_experiments/ignored_artifacts_*/
 outputs/
