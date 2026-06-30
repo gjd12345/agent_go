@@ -265,6 +265,7 @@ def _runner_script() -> str:
             parser.add_argument("--api-endpoint-env", default="DEEPSEEK_API_ENDPOINT")
             parser.add_argument("--model-env", default="DEEPSEEK_MODEL")
             parser.add_argument("--llm-model", default="")
+            parser.add_argument("--seed-codes", default="")
             args = parser.parse_args()
 
             official_root = Path(args.official_root).resolve()
