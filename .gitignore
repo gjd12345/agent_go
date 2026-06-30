@@ -34,6 +34,7 @@ eoh_go_workspace/reports/auto_experiment_reports/island_*/
 eoh_go_workspace/reports/auto_experiment_reports/gen16_*/
 eoh_go_workspace/reports/auto_experiment_reports/gen16_island_*/
 eoh_go_workspace/shared_pool/*.jsonl
+eoh_go_workspace/shared_pool/_seed_*
 archived_experiments/raw_runs_*/
 archived_experiments/ignored_artifacts_*/
 outputs/
