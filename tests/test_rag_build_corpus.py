@@ -22,9 +22,6 @@ class RagBuildCorpusTests(unittest.TestCase):
                 encoding="utf-8",
             )
             (root / "main.go").write_text("type Dispatch struct{}\nfunc InsertShips() {}\n", encoding="utf-8")
-            guard_dir = root / "eoh_go" / "eoh_runner"
-            guard_dir.mkdir(parents=True)
-            (guard_dir / "candidate_guard.py").write_text("suspicious low negative timeout missing result\n", encoding="utf-8")
 
             written = build_all_corpora(root)
             corpus_dir = resolve_corpus_dir(root, "")
@@ -91,9 +88,6 @@ class RagBuildCorpusTests(unittest.TestCase):
             )
             (root / "eoh_rag_workspace" / "candidate_sources").mkdir(parents=True)
             (root / "main.go").write_text("type Dispatch struct{}\n", encoding="utf-8")
-            guard_dir = root / "eoh_go" / "eoh_runner"
-            guard_dir.mkdir(parents=True)
-            (guard_dir / "candidate_guard.py").write_text("guard text\n", encoding="utf-8")
 
             corpus_dir = resolve_corpus_dir(root, "")
             algorithm_path = corpus_dir / "algorithm_cards.jsonl"
@@ -155,23 +149,21 @@ class RagBuildCorpusTests(unittest.TestCase):
         self.assertTrue(any(item.id == "insertships_api_skeleton" for item in literature))
         self.assertTrue(any(item.id == "obp_api_skeleton" for item in literature))
 
-    def test_failure_cases_read_current_candidate_guard_path(self) -> None:
-        """failure_case 卡片必须读取当前 eoh_rag/eoh_runner/candidate_guard.py，
-        content 不能因旧 eoh_go 路径失效而退化为空。"""
+    def test_failure_cases_are_curated_and_non_empty(self) -> None:
+        """failure_case 语料由 curated 模块提供：source_path 恒为 'curated'，
+        content 非空，且不再依赖任何 eoh_go/eoh_rag 下的旧 candidate_guard 文件。"""
         from eoh_rag.rag.build_corpus import build_failure_cases
 
-        root = Path(__file__).resolve().parents[1]
-        items = build_failure_cases(root)
-        self.assertTrue(items)
+        items = build_failure_cases()
+        self.assertEqual(3, len(items))
+        expected_ids = {"suspicious_low_objective", "negative_or_missing_result", "timeout_or_unbounded_search"}
+        self.assertEqual(expected_ids, {item.id for item in items})
         for item in items:
-            self.assertTrue(
-                item.source_path == "curated"
-                or "eoh_rag/eoh_runner/candidate_guard.py" in item.source_path,
-                f"{item.id} has stale source_path: {item.source_path!r}",
-            )
-            self.assertNotIn("eoh_go/", item.source_path, item.id)
-        # candidate_guard.py 存在时，failure 记忆内容必须非空。
-        self.assertTrue(any(item.content for item in items))
+            self.assertEqual("failure_case", item.kind)
+            self.assertEqual("curated", item.source_path)
+            self.assertTrue(item.content.strip(), f"{item.id} has empty content")
+            self.assertNotIn("candidate_guard", item.source_path)
+            self.assertNotIn("eoh_go", item.source_path)
 
 
 if __name__ == "__main__":

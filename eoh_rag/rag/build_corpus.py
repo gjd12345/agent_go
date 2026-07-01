@@ -5,6 +5,10 @@ from pathlib import Path
 
 from .schemas import CorpusItem, load_corpus, save_corpus
 
+# failure_case 语料现由 curated 模块提供（不再读取旧 candidate_guard.py 源码）。
+# 保留从 build_corpus 导入 build_failure_cases 的历史调用点。
+from .failure_cases import build_failure_cases  # noqa: F401  (re-export)
+
 
 CORPUS_FILES = {
     "code_example": "code_examples.jsonl",
@@ -77,13 +81,6 @@ def resolve_corpus_dir(project_root: str | Path, corpus_dir: str | Path | None) 
     except ValueError:
         raise ValueError("RAG corpus directory must stay under eoh_rag_workspace/rag/corpus")
     return candidate
-
-
-def _source_path(project_root: Path, path: Path) -> str:
-    try:
-        return str(path.resolve().relative_to(project_root.resolve()))
-    except ValueError:
-        return str(path.resolve())
 
 
 def _title_from_id(item_id: str) -> str:
@@ -269,45 +266,6 @@ def build_api_constraints(project_root: str | Path) -> list[CorpusItem]:
                 "- Do not mutate arrays.\n"
                 "- Keep deterministic and bounded."
             ),
-        ),
-    ]
-
-
-def build_failure_cases(project_root: str | Path) -> list[CorpusItem]:
-    root = Path(project_root).resolve()
-    guard_path = root / "eoh_rag" / "eoh_runner" / "candidate_guard.py"
-    guard_text = guard_path.read_text(encoding="utf-8", errors="replace") if guard_path.exists() else ""
-    source = _source_path(root, guard_path) if guard_path.exists() else "eoh_rag/eoh_runner/candidate_guard.py"
-    return [
-        CorpusItem(
-            id="suspicious_low_objective",
-            kind="failure_case",
-            title="Suspiciously low objective",
-            tags=["all", "suspicious-low", "guard", "objective"],
-            source_path=source,
-            summary="Very low objective values can indicate skipped orders, broken costs, or incomplete evaluation.",
-            constraints=["Do not treat suspicious-low objective values as valid.", "Preserve all data and recompute total."],
-            content=guard_text,
-        ),
-        CorpusItem(
-            id="negative_or_missing_result",
-            kind="failure_case",
-            title="Negative cost or missing result",
-            tags=["all", "negative", "missing-result", "guard"],
-            source_path=source,
-            summary="Negative costs and missing results are invalid candidate outcomes.",
-            constraints=["Return a complete result object.", "Do not allow negative cost artifacts."],
-            content=guard_text,
-        ),
-        CorpusItem(
-            id="timeout_or_unbounded_search",
-            kind="failure_case",
-            title="Timeout or unbounded search",
-            tags=["all", "timeout", "guard", "fallback"],
-            source_path=source,
-            summary="Expensive exhaustive search can timeout on dense or large instances.",
-            constraints=["Limit candidate scans.", "Use bounded attempts and safe fallback logic."],
-            content=guard_text,
         ),
     ]
 
