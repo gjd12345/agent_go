@@ -108,6 +108,16 @@ class Evaluation:
         self.per_instance_penalty = float(per_instance_penalty)
         self.build_timeout_s = int(build_timeout_s)
         self.run_timeout_s = int(run_timeout_s)
+        # 显式校验：路径解析错误（如子目录单独拷贝、未来 rename）应立即报错，
+        # 而非在 evaluate() 里被静默吞成 per_instance_penalty(1e9)。
+        if not os.path.exists(self.solver_path):
+            raise FileNotFoundError(
+                f"Solver not found: {self.solver_path} (project_root={self.project_root})"
+            )
+        if not os.path.exists(self.instance_path):
+            raise FileNotFoundError(
+                f"Instance not found: {self.instance_path} (project_root={self.project_root})"
+            )
 
     def _build_and_run(self, method_go: str) -> float | None:
         tmp = tempfile.mkdtemp(prefix="eoh_knapsack_go_")

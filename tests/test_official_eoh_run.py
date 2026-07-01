@@ -22,6 +22,43 @@ from eoh_rag.experiments.eoh_single_runner import (
 from eoh_rag.rag.card_synthesis import synthesize_card
 
 
+def make_official_runner_args(**overrides) -> Namespace:
+    """构造 run_official_eoh 的 args，字段默认值对齐 eoh_single_runner 的 argparse。
+
+    真实 CLI 的 Namespace 总是带全字段；测试用本 helper 统一默认值，
+    以后新增 CLI 参数只需改这里一处，不会让各测试因缺字段而零散失败。
+    """
+    defaults = dict(
+        official_root="",
+        python="python",
+        output_dir="",
+        problem="bp_online",
+        arm="pure_eoh",
+        context_file="",
+        pop_size=2,
+        generations=1,
+        operators="i1",
+        n_processes=1,
+        eval_timeout_s=1,
+        llm_timeout_s=1,
+        run_timeout_s=1,
+        use_official_seed=False,
+        seed_codes="",
+        api_key_env="",
+        api_endpoint_env="",
+        model_env="",
+        llm_model="",
+        rag_top_k=2,
+        rag_max_chars=1800,
+        rag_query="",
+        selected_card_ids="",
+        prev_run_dir="",
+        outcome_file="",
+    )
+    defaults.update(overrides)
+    return Namespace(**defaults)
+
+
 class OfficialEohRunTests(unittest.TestCase):
     def test_normalize_api_endpoint_strips_scheme_and_path(self) -> None:
         self.assertEqual(normalize_api_endpoint("https://api.example.com/v1/chat/completions"), "api.example.com")
@@ -325,29 +362,15 @@ class OfficialEohRunTests(unittest.TestCase):
         os.environ["TEST_OFFICIAL_MODEL"] = "test-model"
         try:
             with tempfile.TemporaryDirectory() as tmp:
-                args = Namespace(
+                args = make_official_runner_args(
                     official_root=tmp,
                     python="/bin/python3",
                     output_dir=str(Path(tmp) / "out"),
                     problem="bp_online",
                     arm="pure_eoh",
-                    context_file="",
-                    pop_size=2,
-                    generations=1,
-                    operators="i1",
-                    n_processes=1,
-                    eval_timeout_s=1,
-                    llm_timeout_s=1,
-                    run_timeout_s=1,
-                    use_official_seed=False,
-                    seed_codes="",
                     api_key_env="TEST_OFFICIAL_KEY",
                     api_endpoint_env="TEST_OFFICIAL_ENDPOINT",
                     model_env="TEST_OFFICIAL_MODEL",
-                    llm_model="",
-                    rag_top_k=2,
-                    rag_max_chars=1800,
-                    rag_query="",
                 )
                 with patch(
                     "eoh_rag.experiments.eoh_single_runner.subprocess.run",
@@ -377,32 +400,18 @@ class OfficialEohRunTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             output_dir = Path(tmp) / "out"
             missing_outcome = Path(tmp) / "missing_outcomes.jsonl"
-            args = Namespace(
+            args = make_official_runner_args(
                 official_root=tmp,
                 python="python",
                 output_dir=str(output_dir),
                 problem="tsp_construct",
                 arm="literature_rag",
-                context_file="",
-                pop_size=2,
-                generations=1,
-                operators="i1",
-                n_processes=1,
-                eval_timeout_s=1,
-                llm_timeout_s=1,
-                run_timeout_s=1,
-                use_official_seed=False,
-                seed_codes="",
                 api_key_env="MISSING_TEST_KEY",
                 api_endpoint_env="MISSING_TEST_ENDPOINT",
                 model_env="MISSING_TEST_MODEL",
-                llm_model="",
-                rag_top_k=2,
-                rag_max_chars=1800,
                 rag_query="regret",
                 selected_card_ids="tsp_regret_insertion",
                 candidate_card_source="candidate_card_ids",
-                prev_run_dir="",
                 outcome_file=str(missing_outcome),
             )
 

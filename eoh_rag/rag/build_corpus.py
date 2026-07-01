@@ -275,9 +275,9 @@ def build_api_constraints(project_root: str | Path) -> list[CorpusItem]:
 
 def build_failure_cases(project_root: str | Path) -> list[CorpusItem]:
     root = Path(project_root).resolve()
-    guard_path = root / "eoh_go" / "eoh_runner" / "candidate_guard.py"
+    guard_path = root / "eoh_rag" / "eoh_runner" / "candidate_guard.py"
     guard_text = guard_path.read_text(encoding="utf-8", errors="replace") if guard_path.exists() else ""
-    source = _source_path(root, guard_path) if guard_path.exists() else "eoh_go/eoh_runner/candidate_guard.py"
+    source = _source_path(root, guard_path) if guard_path.exists() else "eoh_rag/eoh_runner/candidate_guard.py"
     return [
         CorpusItem(
             id="suspicious_low_objective",

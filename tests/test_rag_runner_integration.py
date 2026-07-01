@@ -17,7 +17,7 @@ from eoh_rag.rag.build_corpus import (
     load_all_corpora,
     resolve_corpus_dir,
 )
-from eoh_rag.rag.schemas import CorpusItem, save_corpus
+from eoh_rag.rag.schemas import CorpusItem, load_corpus, save_corpus
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -284,6 +284,43 @@ class RagRunnerIntegrationTests(unittest.TestCase):
             )
             self.assertNotIn("insertships_api_skeleton", [item["id"] for item in auto_trace["rag_selected_items"]])
             self.assertLessEqual(auto_trace["rag_context_chars"], 2200)
+
+    def test_history_mode_retrieves_synthesized_history_algorithm_card(self) -> None:
+        """P1b/Option B: legacy history 模式除 code_example 外，也检索主线 history-card
+        体系的合成卡（algorithm_card 且 id 以 history_ 开头），与 build_official_rag_context
+        的 history 语义对齐。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_minimal_sources(root)
+            corpus_dir = resolve_corpus_dir(str(root), "")
+            algo_path = Path(corpus_dir) / "algorithm_cards.jsonl"
+            history_card = CorpusItem(
+                id="history_insertships_topk_delta",
+                kind="algorithm_card",
+                title="Evolved top-k delta insertion (history)",
+                tags=["insertships", "topk", "delta", "history"],
+                source_path="history",
+                summary="Synthesized from best evolved insertion: rank top-k candidates by cost delta.",
+                constraints=[],
+                content="Rank top-k feasible insertion candidates by route cost delta before committing.",
+            )
+            # 保留原 curated 卡，追加一张合成 history_ 卡（algorithm_cards.jsonl 已存在，
+            # build_all_corpora 不会覆盖它，故两张卡都会被加载）。
+            save_corpus(load_corpus(algo_path) + [history_card], algo_path)
+
+            _, trace = _build_retrieved_rag_context(
+                EOHConfig(
+                    agent_eoh_root=str(root / "Agent_EOH"),
+                    use_rag_context=True,
+                    rag_query="topk delta insertion",
+                    rag_top_k=3,
+                    rag_mode="history",
+                    rag_max_chars=2200,
+                ),
+                str(root),
+            )
+            selected_ids = {item["id"] for item in trace["rag_selected_items"]}
+            self.assertIn("history_insertships_topk_delta", selected_ids)
 
     def test_rag_truncation_semantics(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

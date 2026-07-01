@@ -155,6 +155,24 @@ class RagBuildCorpusTests(unittest.TestCase):
         self.assertTrue(any(item.id == "insertships_api_skeleton" for item in literature))
         self.assertTrue(any(item.id == "obp_api_skeleton" for item in literature))
 
+    def test_failure_cases_read_current_candidate_guard_path(self) -> None:
+        """failure_case 卡片必须读取当前 eoh_rag/eoh_runner/candidate_guard.py，
+        content 不能因旧 eoh_go 路径失效而退化为空。"""
+        from eoh_rag.rag.build_corpus import build_failure_cases
+
+        root = Path(__file__).resolve().parents[1]
+        items = build_failure_cases(root)
+        self.assertTrue(items)
+        for item in items:
+            self.assertTrue(
+                item.source_path == "curated"
+                or "eoh_rag/eoh_runner/candidate_guard.py" in item.source_path,
+                f"{item.id} has stale source_path: {item.source_path!r}",
+            )
+            self.assertNotIn("eoh_go/", item.source_path, item.id)
+        # candidate_guard.py 存在时，failure 记忆内容必须非空。
+        self.assertTrue(any(item.content for item in items))
+
 
 if __name__ == "__main__":
     unittest.main()

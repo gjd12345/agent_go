@@ -127,7 +127,7 @@ def _target_rag_tags(target_function: str) -> set[str]:
 
 
 def _build_retrieved_rag_context(config: EOHConfig, project_root: str) -> tuple[str, dict[str, Any]]:
-    from eoh_rag.rag.build_corpus import filter_corpus_by_mode, load_all_corpora, resolve_corpus_dir
+    from eoh_rag.rag.build_corpus import _is_history_card, filter_corpus_by_mode, load_all_corpora, resolve_corpus_dir
     from eoh_rag.rag.prompt_context import format_prompt_context
     from eoh_rag.rag.retriever import retrieve, score_corpus
 
@@ -145,10 +145,14 @@ def _build_retrieved_rag_context(config: EOHConfig, project_root: str) -> tuple[
         item for item in global_items_available
         if item.kind == "api_constraint" or (item.kind == "failure_case" and config.rag_include_warnings)
     ]
+    # NOTE: 这是 legacy InsertShips v0 检索路径（仅被 eoh_runner 自身及其测试使用）；
+    # 主线 tsp/cvrp/bp 走 experiments.rag_context_builder.build_official_rag_context。
+    # history 模式除 legacy 的 code_example 外，也接受主线 history-card 体系的
+    # 合成卡（algorithm_card 且 id 以 history_ 开头），使两条路径的 "history" 语义一致。
     if config.rag_mode == "history":
-        strategy_pool = [item for item in filtered_corpus if item.kind == "code_example"]
+        strategy_pool = [item for item in filtered_corpus if item.kind == "code_example" or _is_history_card(item)]
     elif config.rag_mode == "literature":
-        strategy_pool = [item for item in filtered_corpus if item.kind == "algorithm_card"]
+        strategy_pool = [item for item in filtered_corpus if item.kind == "algorithm_card" and not _is_history_card(item)]
     else:
         strategy_pool = [item for item in filtered_corpus if item.kind in {"algorithm_card", "code_example"}]
     target_relevant_strategy = [item for item in strategy_pool if target_tags.intersection(set(item.tags))]
