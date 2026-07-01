@@ -6,11 +6,11 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from eoh_rag.eoh_runner.config import EOHConfig
-from eoh_rag.eoh_runner.runner import run_v0_eoh
+from legacy.eoh_runner_v0.config import EOHConfig
+from legacy.eoh_runner_v0.runner import run_v0_eoh
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 PROMPT_DIR = ROOT / "Agent_EOH" / "eoh" / "src" / "eoh" / "examples" / "user_insertships_go"
 
 
