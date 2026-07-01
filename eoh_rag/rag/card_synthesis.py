@@ -318,18 +318,23 @@ def _build_content(problem: str, features: set[str], code: str | None = None) ->
     """Generate Skill Card content (When/Do/Fallback/Safety + Formula + Code)."""
     prefix = problem.split("_")[0].upper()
 
+    # 使用 problem-specific 词表，防止 TSP/CVRP 语言泄漏到 BP card
+    prob_do, prob_when = get_feature_vocab(problem)
+    feature_do = prob_do if prob_do else _FEATURE_DO
+    feature_when = prob_when if prob_when else _FEATURE_WHEN
+
     # When: combine relevant conditions
     when_parts = []
     for f in sorted(features):
-        if f in _FEATURE_WHEN:
-            when_parts.append(_FEATURE_WHEN[f])
+        if f in feature_when:
+            when_parts.append(feature_when[f])
     when = "; ".join(when_parts[:3]) if when_parts else f"constructing a {prefix} solution step by step."
 
     # Do: combine algorithmic steps
     do_parts = []
     for f in sorted(features):
-        if f in _FEATURE_DO:
-            do_parts.append(_FEATURE_DO[f])
+        if f in feature_do:
+            do_parts.append(feature_do[f])
     do = ". ".join(do_parts[:4]) if do_parts else "apply the evolved scoring formula from best code."
 
     content = (

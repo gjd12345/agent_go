@@ -1,22 +1,26 @@
-"""Shared Failure Patterns — cross-process failure memory.
+"""
+模块：shared_failures —— 已保留为兼容层
+功能：Step 1 之后失败模式记录/查询统一由 PoolAPI 承担。本文件仅保留 shim。
+职责：调用 PoolAPI.register_failure / failure_hints。
+不负责：定义新的失败类型或提示逻辑（请修改 PoolAPI._extract_pattern）。
+主要调用方：batch_runner.py（旧调用），未来会全部改直连 PoolAPI。
 
-Records code patterns that cause evaluation failures (timeout, invalid output,
-runtime errors) and provides failure hints for injection into LLM prompts.
+接口：
+    register_failure(pool_dir, problem, code_snippet, failure_type, pattern_hint="") -> None
+    get_failure_hints(pool_dir, problem, top_k=5) -> list[str]
+
+输入：pool_dir (Path)
+输出：JSONL 追加 / 提示字符串列表
+示例：
+    from eoh_rag.experiments.shared_failures import get_failure_hints
+    hints = get_failure_hints(Path("shared_pool"), "bp_online", top_k=3)
 """
 
 from __future__ import annotations
 
-import fcntl
-import hashlib
-import json
-import re
-import time
-from collections import Counter
 from pathlib import Path
 
-
-def _failures_path(pool_dir: Path, problem: str) -> Path:
-    return pool_dir / f"failures_{problem}.jsonl"
+from eoh_rag.experiments.pool_api import PoolAPI
 
 
 def register_failure(
@@ -26,56 +30,10 @@ def register_failure(
     failure_type: str,
     pattern_hint: str = "",
 ) -> None:
-    """Register a code failure pattern in the shared pool."""
-    pool_dir.mkdir(parents=True, exist_ok=True)
-    path = _failures_path(pool_dir, problem)
-    # Extract a short pattern from the code
-    if not pattern_hint:
-        pattern_hint = _extract_pattern(code_snippet, failure_type)
-    entry = json.dumps({
-        "failure_type": failure_type,
-        "pattern_hint": pattern_hint,
-        "code_hash": hashlib.sha1(code_snippet.encode()).hexdigest()[:12],
-        "ts": time.time(),
-    }, ensure_ascii=False)
-    with open(path, "a") as f:
-        fcntl.flock(f, fcntl.LOCK_EX)
-        f.write(entry + "\n")
-        fcntl.flock(f, fcntl.LOCK_UN)
+    """[DEPRECATED shim] 请改用 PoolAPI(pool_dir).register_failure(...)。"""
+    PoolAPI(pool_dir).register_failure(problem, code_snippet, failure_type, pattern_hint)
 
 
 def get_failure_hints(pool_dir: Path, problem: str, top_k: int = 5) -> list[str]:
-    """Get top-k most common failure patterns as hints for LLM prompt."""
-    path = _failures_path(pool_dir, problem)
-    if not path.exists():
-        return []
-    counter: Counter[str] = Counter()
-    for line in path.read_text().strip().split("\n"):
-        if not line:
-            continue
-        entry = json.loads(line)
-        hint = entry.get("pattern_hint", "")
-        if hint:
-            counter[hint] += 1
-    return [hint for hint, _ in counter.most_common(top_k)]
-
-
-def _extract_pattern(code: str, failure_type: str) -> str:
-    """Extract a short actionable hint from failed code."""
-    if failure_type == "eval_timeout":
-        if re.search(r"for .+ in .+:\s*\n\s*for", code):
-            return "AVOID nested loops over all nodes (causes timeout)"
-        if "while" in code and "break" not in code:
-            return "AVOID unbounded while loops without break condition"
-        return "AVOID O(n^3) or higher complexity operations"
-    if failure_type == "invalid_output":
-        if "return None" in code or "return []" in code:
-            return "MUST return valid output (not None or empty)"
-        return "ENSURE return value matches expected type and range"
-    if failure_type == "runtime_error":
-        if "/ 0" in code or "divide" in code.lower():
-            return "AVOID division by zero — add epsilon to denominators"
-        return "CHECK array index bounds and division operations"
-    if failure_type == "valid_collapse":
-        return "AVOID strategies that produce identical outputs for all inputs"
-    return f"AVOID pattern causing {failure_type}"
+    """[DEPRECATED shim] 请改用 PoolAPI(pool_dir).failure_hints(problem, top_k)。"""
+    return PoolAPI(pool_dir).failure_hints(problem, top_k=top_k)

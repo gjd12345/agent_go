@@ -20,92 +20,42 @@ from typing import Any
 
 
 # ---------------------------------------------------------------------------
-# Island Model: Shared Pool for cross-process population sharing
+# Shared Pool 兼容层
+# ---------------------------------------------------------------------------
+# 说明：从 Step 1 起，所有跨进程共享池的读写统一由 PoolAPI 承担。
+# 本文件保留下面 4 个 shared_pool_* 函数只是为了兼容旧脚本，实际实现是 PoolAPI 的一行调用。
+# 内部代码请直接 import PoolAPI，不要新增对这些 shim 的依赖。
 # ---------------------------------------------------------------------------
 
-def _pool_index_path(pool_dir: Path) -> Path:
-    return pool_dir / "pool_index.jsonl"
+from eoh_rag.experiments.pool_api import PoolAPI
 
 
 def shared_pool_register(pool_dir: Path, problem: str, run_dir: str, objective: float) -> None:
-    """Register a completed run in the shared pool (file-lock safe)."""
-    pool_dir.mkdir(parents=True, exist_ok=True)
-    idx_path = _pool_index_path(pool_dir)
-    entry = json.dumps({"problem": problem, "run_dir": run_dir, "objective": objective, "ts": time.time()})
-    with open(idx_path, "a") as f:
-        fcntl.flock(f, fcntl.LOCK_EX)
-        f.write(entry + "\n")
-        fcntl.flock(f, fcntl.LOCK_UN)
+    """[DEPRECATED shim] 请改用 PoolAPI(pool_dir).register_run(...)。"""
+    PoolAPI(pool_dir).register_run(problem, run_dir, objective)
 
 
 def shared_pool_best(pool_dir: Path, problem: str) -> str:
-    """Get the best run_dir for a problem from the shared pool."""
-    idx_path = _pool_index_path(pool_dir)
-    if not idx_path.exists():
-        return ""
-    best_obj = float("inf")
-    best_dir = ""
-    for line in idx_path.read_text().strip().split("\n"):
-        if not line:
-            continue
-        entry = json.loads(line)
-        if entry["problem"] == problem and entry["objective"] < best_obj:
-            best_obj = entry["objective"]
-            best_dir = entry["run_dir"]
-    return best_dir
-
-
-# ---------------------------------------------------------------------------
-# Best-Code Pool: cross-process elite code sharing
-# ---------------------------------------------------------------------------
-
-def _best_codes_path(pool_dir: Path, problem: str) -> Path:
-    return pool_dir / f"best_codes_{problem}.jsonl"
+    """[DEPRECATED shim] 请改用 PoolAPI(pool_dir).best_run(problem)。"""
+    return PoolAPI(pool_dir).best_run(problem)
 
 
 def shared_pool_register_code(pool_dir: Path, problem: str, code: str, objective: float) -> None:
-    """Register a high-quality code in the shared best-code pool."""
-    pool_dir.mkdir(parents=True, exist_ok=True)
-    path = _best_codes_path(pool_dir, problem)
-    entry = json.dumps({"code": code, "objective": objective, "ts": time.time()}, ensure_ascii=False)
-    with open(path, "a") as f:
-        fcntl.flock(f, fcntl.LOCK_EX)
-        f.write(entry + "\n")
-        fcntl.flock(f, fcntl.LOCK_UN)
+    """[DEPRECATED shim] 请改用 PoolAPI(pool_dir).register_code(...)。"""
+    PoolAPI(pool_dir).register_code(problem, code, objective)
 
 
 def shared_pool_best_codes(pool_dir: Path, problem: str, top_k: int = 3) -> list[dict]:
-    """Get top-k best codes for seeding new runs."""
-    path = _best_codes_path(pool_dir, problem)
-    if not path.exists():
-        return []
-    entries = []
-    for line in path.read_text().strip().split("\n"):
-        if not line:
-            continue
-        entries.append(json.loads(line))
-    entries.sort(key=lambda x: x["objective"])
-    seen_objs: set[float] = set()
-    unique = []
-    for e in entries:
-        if e["objective"] not in seen_objs:
-            seen_objs.add(e["objective"])
-            unique.append(e)
-        if len(unique) >= top_k:
-            break
-    return unique
+    """[DEPRECATED shim] 请改用 PoolAPI(pool_dir).best_codes(problem, top_k)。"""
+    return PoolAPI(pool_dir).best_codes(problem, top_k=top_k)
 
 
 # ---------------------------------------------------------------------------
 # Online Outcome: append outcome records after each successful run
 # ---------------------------------------------------------------------------
 
-# Problem baselines for card synthesis threshold
-_PROBLEM_BASELINES = {
-    "tsp_construct": 6.560,
-    "cvrp_construct": 13.519,
-    "bp_online": 0.0398,
-}
+# Problem baselines for card synthesis threshold —— 统一走 baselines.py
+from eoh_rag.experiments.baselines import PROBLEM_BASELINES as _PROBLEM_BASELINES
 
 
 def _maybe_synthesize_card(pool_dir: str, problem: str, code: str, objective: float) -> None:
@@ -376,15 +326,15 @@ def main() -> None:
                             print(f"[RETRY] {run_tag} (previous run failed: {prev.get('failure_reason','unknown')})")
 
                     print(f"[RUN] {run_tag}  start={time.strftime('%H:%M:%S')}")
-                    # Island model: use shared pool best as prev_run_dir if better than local chain
+                    # Island model: 从共享池取更优 seed（PoolAPI 统一入口）
                     effective_prev = prev_run_dir
                     seed_codes_path = ""
                     if shared_pool_dir:
-                        pool_best = shared_pool_best(Path(shared_pool_dir), problem)
+                        pool = PoolAPI(shared_pool_dir)
+                        pool_best = pool.best_run(problem)
                         if pool_best and pool_best != prev_run_dir:
                             effective_prev = pool_best
-                        # Seed codes: write top codes to temp file for init seeding
-                        best_codes = shared_pool_best_codes(Path(shared_pool_dir), problem, top_k=3)
+                        best_codes = pool.best_codes(problem, top_k=3)
                         if best_codes:
                             seed_codes_path = str(Path(shared_pool_dir) / f"_seed_{problem}_{os.getpid()}.json")
                             Path(seed_codes_path).write_text(json.dumps(best_codes, ensure_ascii=False))
@@ -429,22 +379,22 @@ def main() -> None:
                                 obj = (sm.get("run_summary") or {}).get("best_objective")
                                 code = (sm.get("run_summary") or {}).get("best_code", "")
                                 if obj is not None:
+                                    pool = PoolAPI(shared_pool_dir)
                                     # Adaptive operator: compare BEFORE registering
-                                    pool_codes_before = shared_pool_best_codes(Path(shared_pool_dir), problem, top_k=1)
+                                    pool_codes_before = pool.best_codes(problem, top_k=1)
                                     prev_best = pool_codes_before[0]["objective"] if pool_codes_before else None
 
-                                    shared_pool_register(Path(shared_pool_dir), problem, run_out, obj)
+                                    pool.register_run(problem, run_out, obj)
                                     if code:
-                                        shared_pool_register_code(Path(shared_pool_dir), problem, code, obj)
+                                        pool.register_code(problem, code, obj)
                                         _maybe_synthesize_card(shared_pool_dir, problem, code, obj)
 
                                     # Register operator result with correct ordering
                                     if prev_best is not None:
-                                        from eoh_rag.experiments.adaptive_operators import register_operator_result
                                         improved = obj < prev_best
                                         delta = (prev_best - obj) / abs(prev_best) if prev_best else 0
                                         operators_str = manifest.get("operators", "e1,e2,m1,m2")
-                                        register_operator_result(Path(shared_pool_dir), problem, operators_str, improved, delta)
+                                        pool.register_operator_stat(problem, operators_str, improved, delta)
                             except Exception as e:
                                 print(f"[WARN] shared_pool_register failed: {e}")
                         # Online outcome update
@@ -457,13 +407,12 @@ def main() -> None:
                         # Failure pattern sharing
                         if shared_pool_dir and summary_path.exists():
                             try:
-                                from eoh_rag.experiments.shared_failures import register_failure
                                 sm = json.loads(summary_path.read_text(encoding="utf-8"))
                                 rs = sm.get("run_summary") or {}
                                 fail_reason = sm.get("failure_reason", "")
                                 code = rs.get("best_code", "")
                                 if fail_reason and code:
-                                    register_failure(Path(shared_pool_dir), problem, code, fail_reason)
+                                    PoolAPI(shared_pool_dir).register_failure(problem, code, fail_reason)
                             except Exception as e:
                                 print(f"[WARN] failure_sharing failed: {e}")
 

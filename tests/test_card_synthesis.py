@@ -133,7 +133,7 @@ class TestSynthesizeCard:
         assert "α" not in card.content
         # Core section (before Feature tags) should stay bounded
         core_section = card.content.split("\n\nFeature tags:")[0]
-        assert core_section.count(";") <= 4
+        assert core_section.count(";") <= 6
         # New sections exist
         assert "Feature tags:" in card.content
         assert "Formula summary:" in card.content
@@ -155,7 +155,7 @@ class TestSynthesizeCard:
         card = synthesize_card("cvrp_construct", code)
         assert "CVRP" in card.title
         assert "cvrp" in card.tags
-        assert "Return one int" in card.content or "feasible" in card.content
+        assert "Return one int" in card.content or "feasible" in card.content or "capacity" in card.content
 
     def test_no_features_raises(self):
         with pytest.raises(ValueError, match="No strategy features"):

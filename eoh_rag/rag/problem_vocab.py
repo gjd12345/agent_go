@@ -23,6 +23,11 @@ BP_FEATURE_DO: dict[str, str] = {
     "saturation": "bonus for bins approaching full capacity",
     "threshold": "items above/below a size threshold get different bin assignment logic",
     "balance": "keep bin utilizations roughly equal to maximize future flexibility",
+    "same_size_reservation": "reserve bins for same-size items to avoid fragmentation across mixed bins",
+    "item_scaled_residual": "scale residual penalty by item size to handle heterogeneous arrivals",
+    "reusable_slack": "prefer bins whose leftover can still fit common item sizes",
+    "dead_gap_avoidance": "strongly penalize residual too small for any likely future item",
+    "awkward_gap_penalty": "penalize bins left in a state where only rare item sizes can fill them",
 }
 
 BP_FEATURE_WHEN: dict[str, str] = {
@@ -40,6 +45,11 @@ BP_FEATURE_WHEN: dict[str, str] = {
     "saturation": "bins near capacity should be preferred to close them out",
     "threshold": "binary classification of items into size classes improves scoring",
     "balance": "many similar-sized items benefit from even distribution",
+    "same_size_reservation": "arrivals contain many items of the same size that pack perfectly together",
+    "item_scaled_residual": "item sizes vary widely and fixed residual scoring misweights large items",
+    "reusable_slack": "leftover capacity that can't fit any future item is wasted space",
+    "dead_gap_avoidance": "historical data shows small-gap bins never get filled",
+    "awkward_gap_penalty": "residual is large enough to count but too odd-shaped for common item sizes",
 }
 
 # TSP Construct — traveling salesman terminology
