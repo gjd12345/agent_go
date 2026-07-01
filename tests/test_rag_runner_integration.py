@@ -9,8 +9,15 @@ from unittest import mock
 
 from eoh_rag.eoh_runner.config import EOHConfig
 from eoh_rag.eoh_runner.runner import _automatic_rag_query, _build_retrieved_rag_context, _set_rag_context_env, run_v0_eoh
-from eoh_rag.rag.build_corpus import LITERATURE_IDS, build_api_constraints, filter_corpus_by_mode, load_all_corpora
-from eoh_rag.rag.schemas import CorpusItem
+from eoh_rag.rag.build_corpus import (
+    LITERATURE_IDS,
+    build_all_corpora,
+    build_api_constraints,
+    filter_corpus_by_mode,
+    load_all_corpora,
+    resolve_corpus_dir,
+)
+from eoh_rag.rag.schemas import CorpusItem, save_corpus
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -202,6 +209,27 @@ class RagRunnerIntegrationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._write_minimal_sources(root)
+            # insertships 的 code_example 历史卡来源已迁到 legacy/（build_code_examples 停用），
+            # 但 history 模式仍按 code_example kind 检索。先生成标准语料文件，再显式注入一张
+            # code_example 历史卡（此后 4 个语料文件都存在，load 不会触发会清空 code_examples 的重建），
+            # 以校验 auto/history 检索管线本身可用。
+            corpus_dir = resolve_corpus_dir(str(root), "")
+            build_all_corpora(str(root), corpus_dir)
+            save_corpus(
+                [
+                    CorpusItem(
+                        id="history_insertships_topk_delta",
+                        kind="code_example",
+                        title="Evolved top-k delta rollback insertion",
+                        tags=["insertships", "topk", "delta", "rollback"],
+                        source_path="history",
+                        summary="Evolved insertion ranking top-k candidates by route cost delta with rollback.",
+                        constraints=[],
+                        content="Rank top-k feasible insertion candidates by route cost delta; rollback on regression.",
+                    )
+                ],
+                Path(corpus_dir) / "code_examples.jsonl",
+            )
             manual_dir = root / "eoh_rag_workspace" / "rag" / "manual_contexts"
             manual_dir.mkdir(parents=True)
             (manual_dir / "manual.txt").write_text("manual context", encoding="utf-8")

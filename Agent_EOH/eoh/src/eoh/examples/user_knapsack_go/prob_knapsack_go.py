@@ -29,7 +29,7 @@ _SUBPROCESS_ENV_ALLOWLIST = {
 def _find_project_root(start_dir: str, max_depth: int = 12) -> str:
     cur = os.path.abspath(start_dir)
     for _ in range(max_depth):
-        if os.path.isdir(os.path.join(cur, "eoh_go_workspace")) and os.path.isdir(os.path.join(cur, "eoh_go")):
+        if os.path.isdir(os.path.join(cur, "eoh_rag_workspace")) and os.path.isdir(os.path.join(cur, "eoh_rag")):
             return cur
         parent = os.path.dirname(cur)
         if parent == cur:
@@ -96,10 +96,10 @@ class Evaluation:
         self._last_traceback = None
         base_dir = os.path.dirname(__file__)
         self.project_root = _find_project_root(base_dir)
-        self.solver_path = os.path.join(self.project_root, "eoh_go_workspace", "problems", "knapsack", "knapsack_solver.go")
+        self.solver_path = os.path.join(self.project_root, "eoh_rag_workspace", "problems", "knapsack", "knapsack_solver.go")
         self.instance_path = os.path.join(
             self.project_root,
-            "eoh_go_workspace",
+            "eoh_rag_workspace",
             "problems",
             "knapsack",
             "testdata",

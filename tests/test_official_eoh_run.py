@@ -121,7 +121,14 @@ class OfficialEohRunTests(unittest.TestCase):
         self.assertTrue(all(item_id.startswith("history_tsp_construct_") for item_id in selected_ids))
         self.assertEqual(trace["rag_strategy_pool_size"], len(trace["rag_all_scores"]))
         self.assertGreater(trace["rag_history_pool_size_before_gate"], 0)
-        self.assertEqual(trace["rag_history_pool_size_after_gate"], len(selected_ids))
+        # 语料库随 card 合成反馈持续增长，不再硬编码 after_gate 恰等于选中数（早期快照下的巧合）。
+        # 改为校验 gate 记账一致（after = before - blocked）且选择遵守 top_k。
+        self.assertEqual(
+            trace["rag_history_pool_size_after_gate"],
+            trace["rag_history_pool_size_before_gate"] - len(trace["rag_blocked_history_items"]),
+        )
+        self.assertTrue(selected_ids)
+        self.assertLessEqual(len(selected_ids), 2)
         self.assertTrue(trace["rag_blocked_history_items"])
         self.assertIn("API RULES", context)
 
@@ -190,7 +197,9 @@ class OfficialEohRunTests(unittest.TestCase):
         selected_ids = {item["id"] for item in trace["rag_selected_items"]}
 
         self.assertEqual(set(selected), selected_ids)
-        self.assertEqual(3, trace["rag_history_pool_size_after_gate"])
+        # 显式选择 3 张卡 → 有效策略池应恰为这 3 张。
+        # （after_gate 是全量 gated 历史池，会随语料库增长漂移，不适合硬编码）
+        self.assertEqual(3, trace["rag_strategy_pool_size"])
         self.assertIn("history_cvrp_far_destination_seed", context)
 
     def test_candidate_card_ids_filter_strategy_only_and_keep_api_constraints(self) -> None:
@@ -331,6 +340,7 @@ class OfficialEohRunTests(unittest.TestCase):
                     llm_timeout_s=1,
                     run_timeout_s=1,
                     use_official_seed=False,
+                    seed_codes="",
                     api_key_env="TEST_OFFICIAL_KEY",
                     api_endpoint_env="TEST_OFFICIAL_ENDPOINT",
                     model_env="TEST_OFFICIAL_MODEL",
@@ -382,6 +392,7 @@ class OfficialEohRunTests(unittest.TestCase):
                 llm_timeout_s=1,
                 run_timeout_s=1,
                 use_official_seed=False,
+                seed_codes="",
                 api_key_env="MISSING_TEST_KEY",
                 api_endpoint_env="MISSING_TEST_ENDPOINT",
                 model_env="MISSING_TEST_MODEL",
