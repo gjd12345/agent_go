@@ -4,11 +4,17 @@ import re
 import sys
 import os
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
 
 from eoh_rag.eoh_runner.registry import PROBLEM_SPECS, TARGET_SPECS, get_problem_spec, get_target_spec
+
+
+# Go evaluator 测试需要本机 go toolchain；缺失时（如纯 Python CI）自动跳过，
+# 不影响 registry/spec 等纯 Python 用例。
+_HAS_GO = shutil.which("go") is not None
 
 
 class TestEOHRunnerSpecs(unittest.TestCase):
@@ -76,6 +82,8 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
             self.assertIsNotNone(extracted)
             self.assertIn("func ScoreBin", extracted)
             self.assertIn("return scores", extracted)
+        except ImportError as exc:
+            self.skipTest(f"Agent_EOH EoH framework deps unavailable (official-eoh extra): {exc}")
         finally:
             try:
                 sys.path.remove(str(src_path))
@@ -103,6 +111,8 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
             self.assertEqual(1, summary["unique_objective_count"])
             self.assertEqual(1, summary["survivor_population_size"])
             self.assertEqual("objective_or_code_dedup", summary["survivor_drop_reason"])
+        except ImportError as exc:
+            self.skipTest(f"Agent_EOH EoH framework deps unavailable (official-eoh extra): {exc}")
         finally:
             try:
                 sys.path.remove(str(src_path))
@@ -129,6 +139,7 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
         self.assertEqual({"raw_offspring_count": 8}, audit)
         self.assertIsNotNone(path)
 
+    @unittest.skipUnless(_HAS_GO, "requires Go toolchain")
     def test_knapsack_seed_evaluator_runs(self) -> None:
         root = Path(__file__).resolve().parents[1]
         example_root = root / "Agent_EOH" / "eoh" / "src" / "eoh" / "examples" / "user_knapsack_go"
@@ -146,6 +157,7 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
             except ValueError:
                 pass
 
+    @unittest.skipUnless(_HAS_GO, "requires Go toolchain")
     def test_mixer_split_seed_evaluator_runs(self) -> None:
         root = Path(__file__).resolve().parents[1]
         example_root = root / "Agent_EOH" / "eoh" / "src" / "eoh" / "examples" / "user_mixer_split_go"
@@ -163,6 +175,7 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
             except ValueError:
                 pass
 
+    @unittest.skipUnless(_HAS_GO, "requires Go toolchain")
     def test_bin_packing_seed_evaluator_runs(self) -> None:
         root = Path(__file__).resolve().parents[1]
         example_root = root / "Agent_EOH" / "eoh" / "src" / "eoh" / "examples" / "user_bin_packing_go"
@@ -180,6 +193,7 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
             except ValueError:
                 pass
 
+    @unittest.skipUnless(_HAS_GO, "requires Go toolchain")
     def test_bin_packing_rejects_invalid_score_length(self) -> None:
         root = Path(__file__).resolve().parents[1]
         example_root = root / "Agent_EOH" / "eoh" / "src" / "eoh" / "examples" / "user_bin_packing_go"
@@ -198,6 +212,7 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
             except ValueError:
                 pass
 
+    @unittest.skipUnless(_HAS_GO, "requires Go toolchain")
     def test_knapsack_evaluator_scrubs_secret_env(self) -> None:
         root = Path(__file__).resolve().parents[1]
         example_root = root / "Agent_EOH" / "eoh" / "src" / "eoh" / "examples" / "user_knapsack_go"
@@ -224,6 +239,7 @@ func ScoreBin(item int, remaining []int, capacity int) []float64 {
             except ValueError:
                 pass
 
+    @unittest.skipUnless(_HAS_GO, "requires Go toolchain")
     def test_mixer_split_rejects_unknown_vehicle_capacity(self) -> None:
         root = Path(__file__).resolve().parents[1]
         example_root = root / "Agent_EOH" / "eoh" / "src" / "eoh" / "examples" / "user_mixer_split_go"

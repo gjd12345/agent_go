@@ -1,0 +1,30 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install package + test deps
+        run: pip install -e ".[dev]"
+
+      # Go evaluator tests (tests/test_eoh_runner_specs.py) auto-skip here via
+      # skipUnless(shutil.which("go")). This runner has no Go toolchain by design —
+      # the eoh_rag mainline is Python-only. Legacy runner tests under
+      # legacy/eoh_runner_v0/tests/ are not collected (only tests/ is).
+      - name: Run Python test suite
+        run: python -m pytest tests/ -q

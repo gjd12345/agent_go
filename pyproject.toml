@@ -22,4 +22,4 @@ official-eoh = ["requests", "torch", "numba", "python-docx"]
 eoh-batch = "eoh_rag.experiments.batch_runner:main"
 
 [tool.setuptools.packages.find]
-include = ["eoh_go*"]
+include = ["eoh_rag*"]
